@@ -1,7 +1,6 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
-
 #include "main.h"
 #include "streamout.h"
 
@@ -10,7 +9,7 @@ int main() {
 
     // Основной цикл
     while (true) {
-        // update
+        // Основной алгоритм
         
 
         #ifdef _WIN32
@@ -21,7 +20,7 @@ int main() {
 
         printField(field);
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(TICK_MS));
     }
 
     return 0;

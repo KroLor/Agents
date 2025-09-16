@@ -4,16 +4,18 @@
 
 using namespace std;
 
-typedef enum {
-    IS_FREE = 0,
-    IS_WALL
-} cell_state;
+enum CellType {
+    EMPTY,
+    FOOD,
+    WALL,
+    AGENT
+};
 
-#define SYMBOL_FREE ' '
+#define SYMBOL_EMPTY ' '
 #define SYMBOL_WALL '#'
 
 struct Cell {
-    cell_state state;
+    CellType type;
 };
 
 /**
