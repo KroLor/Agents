@@ -7,18 +7,14 @@
 int main() {
     auto field = createField(FIELD_HEIGHT, FIELD_WIDTH);
 
+    printField(field);
+
     // Основной цикл
     while (true) {
         // Основной алгоритм
         
 
-        #ifdef _WIN32
-            system("cls");
-        #else
-            system("clear");
-        #endif
-
-        printField(field);
+        updateField(field);
 
         std::this_thread::sleep_for(std::chrono::milliseconds(TICK_MS));
     }
