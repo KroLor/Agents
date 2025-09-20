@@ -53,7 +53,7 @@ private:
     /**
      * @brief Выполняет процесс эволюции агентов.
      */
-    void processReproduction();
+    void geneticAlgorithm();
 
     /**
      * @brief Генерирует новую еду на поле.
@@ -90,7 +90,7 @@ public:
      * @param genome Уникальный указатель на геном.
      * @return Указатель на созданного агента.
      */
-    Agent* introduceAgent(int x, int y, int energy = 100, unique_ptr<Gene> genome = nullptr);
+    Agent* addAgent(int x, int y, int energy = 100, unique_ptr<Gene> genome = nullptr);
     
     /**
      * @brief Добавляет еду в указанную позицию.

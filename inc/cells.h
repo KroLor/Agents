@@ -14,4 +14,5 @@ enum CellType {
 
 struct Cell {
     CellType type;
+    int foodValue;
 };

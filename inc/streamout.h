@@ -7,11 +7,11 @@ using namespace std;
 
 /**
  * @brief Создает поле, ограниченное стенами.
- * @param rows Количество строк поля.
  * @param cols Количество столбцов поля.
+ * @param rows Количество строк поля.
  * @return Двумерное поле.
  */
-vector<vector<Cell>> createField(int rows, int cols);
+vector<vector<Cell>> createField(int cols, int rows);
 
 /**
  * @brief Обновляет поле.

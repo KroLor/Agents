@@ -11,15 +11,19 @@ int main() {
     
     printField(sim.getGrid());
 
-    while (true) {
+    int i = 0;
+    while (i < ROUNDS) {
         if (!sim.isSimulationPaused()) {
             sim.simulateStep(1.0f / sim.getSimulationSpeed());
         }
         
         updateField(sim.getGrid());
         
+        i++;
         std::this_thread::sleep_for(std::chrono::milliseconds(TICK_MS));
     }
+
+    // 
 
     return 0;
 }
