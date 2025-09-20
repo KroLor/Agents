@@ -1,24 +1,9 @@
 #pragma once
 
 #include <vector>
+#include "cells.h"
 
 using namespace std;
-
-enum CellType {
-    EMPTY,
-    FOOD,
-    WALL,
-    AGENT
-};
-
-#define SYMBOL_EMPTY ' '
-#define SYMBOL_FOOD '*'
-#define SYMBOL_WALL '#'
-#define SYMBOL_AGENT '@'
-
-struct Cell {
-    CellType type;
-};
 
 /**
  * @brief Создает поле, ограниченное стенами.

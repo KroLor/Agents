@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include "streamout.h"
+#include "cells.h"
 
 using namespace std;
 
