@@ -1,5 +1,7 @@
 #include <iostream>
 #include <vector>
+#include <thread>
+#include <chrono>
 #include "streamout.h"
 #include "cells.h"
 
@@ -39,10 +41,12 @@ void updateField(const vector<vector<Cell>>& field) {
                     case AGENT: cout << SYMBOL_AGENT; break;
                     case FOOD: cout << SYMBOL_FOOD; break;
                 }
+
+                cout.flush(); // Принудительная отправка буфера в консоль
+                std::this_thread::sleep_for(std::chrono::milliseconds(TICK_MS));
             }
         }
     }
-    cout.flush(); // Принудительная отправка буфера в консоль
     previousField = field;
 }
 

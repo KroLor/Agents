@@ -20,7 +20,7 @@ private:
     bool paused;                          // Флаг паузы симуляции
     float simulationSpeed;                // Множитель скорости симуляции
     float mutationRate;                   // Коэффициент мутации
-    int simulationIteration;              // Текущая итерация симуляции
+    int generation;                       // Текущее поколение
     int totalDeaths;                      // Общее количество смертей
     int totalAlives;                      // Общее количество рождений
 
@@ -51,11 +51,6 @@ private:
     void updateAgents(float deltaTime);
 
     /**
-     * @brief Выполняет процесс эволюции агентов.
-     */
-    void geneticAlgorithm();
-
-    /**
      * @brief Генерирует новую еду на поле.
      */
     void spawnNewFood();
@@ -81,6 +76,11 @@ public:
      * @brief Обновляет состояние поля.
      */
     void updateState();
+
+    /**
+     * @brief Выполняет процесс эволюции агентов.
+     */
+    void geneticAlgorithm();
     
     /**
      * @brief Добавляет агента в указанную позицию.
@@ -108,6 +108,12 @@ public:
      * @return Ссылка на клетку.
      */
     const Cell& getCell(int x, int y) const;
+
+    /**
+     * @brief Возвращает номер поколения.
+     * @return Текущее поколение.
+     */
+    int getGeneration();
     
     /**
      * @brief Возвращает все клетки поля.
@@ -130,7 +136,7 @@ public:
         int averageEnergyLevel;  // Средний уровень энергии агентов
         int maxEnergyLevel;      // Максимальный уровень энергии
         int minEnergyLevel;      // Минимальный уровень энергии
-        int simulationIteration; // Текущая итерация симуляции
+        int generation;          // Текущая итерация симуляции
         int totalAlives;         // Общее количество рождений
         int totalDeaths;         // Общее количество смертей
         float mutationRate;      // Текущий коэффициент мутации

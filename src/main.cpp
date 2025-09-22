@@ -1,5 +1,3 @@
-#include <thread>
-#include <chrono>
 #include "main.h"
 #include "streamout.h"
 #include "simulation.h"
@@ -11,16 +9,33 @@ int main() {
     
     printField(sim.getGrid());
 
-    int i = 0;
-    while (i < ROUNDS) {
-        if (!sim.isSimulationPaused()) {
-            sim.simulateStep(1.0f / sim.getSimulationSpeed());
+    // Основной цикл
+    while (sim.getGeneration() < GENERATIONS) {
+        if (sim.isSimulationPaused()) {
+            
         }
         
-        updateField(sim.getGrid());
+        // Избавится от двойного вызова
         
-        i++;
-        std::this_thread::sleep_for(std::chrono::milliseconds(TICK_MS));
+        // Прогоняем шаги симуляции и выводим N-ный раунд
+        for (int step = 0; step < NUMBER_OF_STEPS; step++) {
+            sim.simulateStep(1.0f / sim.getSimulationSpeed());
+
+            // Выводим состояние поля
+            updateField(sim.getGrid());
+        }
+
+        sim.geneticAlgorithm(); // Естественный отбор
+
+        // Пропуск поколений
+        for (int gen = 0; gen < SKIP_GENERATIONS; gen++) {
+            // Прогоняем шаги симуляции
+            for (int step = 0; step < NUMBER_OF_STEPS; step++) {
+                sim.simulateStep(1.0f / sim.getSimulationSpeed());
+            }
+
+            sim.geneticAlgorithm(); // Естественный отбор
+        }
     }
 
     // 

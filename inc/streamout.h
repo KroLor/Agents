@@ -3,6 +3,8 @@
 #include <vector>
 #include "cells.h"
 
+#define TICK_MS 500
+
 using namespace std;
 
 /**

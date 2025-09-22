@@ -13,7 +13,7 @@ EvolutionSimulation::EvolutionSimulation(vector<vector<Cell>> grid,
                                        int initialPopulationSize, 
                                        int initialFoodCount)
     : grid(move(grid)), paused(false), simulationSpeed(1.0f), 
-      mutationRate(0.1f), simulationIteration(0), 
+      mutationRate(0.1f), generation(0), 
       totalDeaths(0), totalAlives(0)
 {
     initializePopulation(initialPopulationSize);
@@ -74,8 +74,6 @@ bool EvolutionSimulation::findRandomEmptyPosition(int& x, int& y) const
 void EvolutionSimulation::simulateStep(float deltaTime)
 {
     if (paused) return;
-    
-    simulationIteration++;
 
     updateAgents(deltaTime);
     spawnNewFood();
@@ -99,27 +97,28 @@ void EvolutionSimulation::updateAgents(float deltaTime)
             agent->decideAction();
             agent->move();
         }
-        // Ждать deltaTime                                                    ................................
     }
 }
 
 void EvolutionSimulation::geneticAlgorithm()
 {
-    vector<Agent*> potentialParents;
+    vector<Agent*> ffff;
     
     // Собираем агентов
     for (auto& agent : population) {
         if (agent->canReproduce()) {
-            potentialParents.push_back(agent.get());
+            ffff.push_back(agent.get());
         }
     }
     
-    if (potentialParents.size() < 2) return; // Недостаточно агентов
+    if (ffff.size() < 2) return; // Недостаточно агентов
     
     // Перемешиваем поколение
-    shuffle(potentialParents.begin(), potentialParents.end(), rng);
+    shuffle(ffff.begin(), ffff.end(), rng);
     
     // to do                                                          ................................        
+
+    generation++;
 }
 
 void EvolutionSimulation::spawnNewFood()
@@ -205,7 +204,7 @@ EvolutionSimulation::SimulationData EvolutionSimulation::getSimulationData() con
 {
     SimulationData data{};
     data.populationSize = population.size();
-    data.simulationIteration = simulationIteration;
+    data.generation = generation;
     data.mutationRate = mutationRate;
     data.totalAlives = totalAlives;
     data.totalDeaths = totalDeaths;
@@ -276,7 +275,7 @@ void EvolutionSimulation::resetSimulation(vector<vector<Cell>> newGrid)
     }
     
     population.clear();
-    simulationIteration = 0;
+    generation = 0;
     totalDeaths = 0;
     totalAlives = 0;
     

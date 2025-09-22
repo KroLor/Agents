@@ -2,5 +2,6 @@
 
 #define FIELD_WIDTH 25
 #define FIELD_HEIGHT 10
-#define TICK_MS 500
-#define ROUNDS 50
+#define NUMBER_OF_STEPS 30
+#define SKIP_GENERATIONS 2
+#define GENERATIONS 10
