@@ -96,7 +96,7 @@ public:
     void setEnergy(int newEnergy);
 
     /**
-     * @brief Возвращает количество шаги.
+     * @brief Возвращает количество шагов.
      * @return Количество шагов.
      */
     int getSteps() const;
