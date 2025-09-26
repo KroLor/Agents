@@ -1,12 +1,11 @@
 #include <algorithm>
 #include <random>
-// #include <fstream>
 #include <iostream>
 #include "simulation.h"
+#include "main.h"
 
 using namespace std;
 
-// Вспомогательная функция для генерации случайных чисел
 static mt19937 rng(random_device{}());
 
 EvolutionSimulation::EvolutionSimulation(vector<vector<Cell>> grid, 
@@ -14,7 +13,7 @@ EvolutionSimulation::EvolutionSimulation(vector<vector<Cell>> grid,
                                        int initialFoodCount)
     : grid(move(grid)), paused(false), simulationSpeed(1.0f), 
       mutationRate(0.1f), generation(0), 
-      totalDeaths(0), totalAlives(0)
+      totalDeaths(0), totalAlives(0), currentTick(0)
 {
     initializePopulation(initialPopulationSize);
     initializeFood(initialFoodCount);
@@ -75,14 +74,17 @@ void EvolutionSimulation::simulateStep(float deltaTime)
 {
     if (paused) return;
 
+    currentTick++;
     updateAgents(deltaTime);
-    spawnNewFood();
-    updateState();
+    
+    if (currentTick % FOOD_SPAWN_INTERVAL == 0) {
+        spawnNewFood();
+    }
+    
+    updateGrid();
 }
 
-void EvolutionSimulation::updateAgents(float deltaTime)
-{
-    // Перемешиваем агентов для случайного порядка обработки
+void EvolutionSimulation::updateAgents(float deltaTime) {
     shuffle(population.begin(), population.end(), rng);
     
     for (auto& agent : population) {
@@ -91,41 +93,57 @@ void EvolutionSimulation::updateAgents(float deltaTime)
             if (agent->getEnergy() <= 0) {
                 agent->die();
                 totalDeaths++;
+                continue;
             }
 
             agent->lookAround(&grid);
-            agent->decideAction();
-            agent->move();
+            agent->getDirectionToFood(&grid);
+            
+            // Сохраняем старую позицию
+            int oldX = agent->getX();
+            int oldY = agent->getY();
+            
+            grid[oldX][oldY].type = EMPTY;
+            
+            // Передаем grid в decideAction
+            agent->decideAction(grid);
+            
+            // Обновляем новую позицию
+            int newX = agent->getX();
+            int newY = agent->getY();
+            
+            // Если агент съел еду, обновляем клетку
+            if (grid[newX][newY].type == FOOD) {
+                // Еда съедается агентом, клетка становится пустой
+                grid[newX][newY].type = EMPTY;
+                grid[newX][newY].foodValue = 0;
+            }
+            
+            if (grid[newX][newY].type == EMPTY) {
+                grid[newX][newY].type = AGENT;
+            } else {
+                // Если клетка занята, возвращаем на старое место
+                agent->setX(oldX);
+                agent->setY(oldY);
+                grid[oldX][oldY].type = AGENT;
+            }
+            
+            agent->stepTick();
         }
     }
 }
 
 void EvolutionSimulation::geneticAlgorithm()
 {
-    vector<Agent*> ffff;
-    
-    // Собираем агентов
-    for (auto& agent : population) {
-        if (agent->canReproduce()) {
-            ffff.push_back(agent.get());
-        }
-    }
-    
-    if (ffff.size() < 2) return; // Недостаточно агентов
-    
-    // Перемешиваем поколение
-    shuffle(ffff.begin(), ffff.end(), rng);
-    
-    // to do                                                          ................................        
-
+    // Только увеличиваем счетчик поколений
     generation++;
 }
 
 void EvolutionSimulation::spawnNewFood()
 {
-    // С вероятностью 20% добавляем новую еду
+    // Добавляем новую еду с вероятностью 50% каждые FOOD_SPAWN_INTERVAL тиков
     uniform_real_distribution<float> chance(0.0f, 1.0f);
-    if (chance(rng) < 0.2f) {
+    if (chance(rng) < 0.5f) {
         int x, y;
         if (findRandomEmptyPosition(x, y)) {
             addFood(x, y);
@@ -133,7 +151,7 @@ void EvolutionSimulation::spawnNewFood()
     }
 }
 
-void EvolutionSimulation::updateState()
+void EvolutionSimulation::updateGrid()
 {
     // Обновляем тип клеток
     for (auto& row : grid) {
@@ -272,14 +290,22 @@ void EvolutionSimulation::resetSimulation(vector<vector<Cell>> newGrid)
 {
     if (!newGrid.empty()) {
         grid = move(newGrid);
+    } else {
+        for (auto& row : grid) {
+            for (auto& cell : row) {
+                if (cell.type != WALL) {
+                    cell.type = EMPTY;
+                    cell.foodValue = 0;
+                }
+            }
+        }
     }
     
     population.clear();
-    generation = 0;
     totalDeaths = 0;
     totalAlives = 0;
+    currentTick = 0;
     
-    // Переинициализируем начальное состояние
     initializePopulation(10);
     initializeFood(20);
 }

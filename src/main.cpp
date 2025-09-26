@@ -1,44 +1,74 @@
 #include "main.h"
 #include "streamout.h"
 #include "simulation.h"
+#include <iostream>
+#include <iomanip>
+
+#include <thread>
+#include <chrono>
+
+using namespace std;
+
+// Функция для вывода статистики под полем
+void printStatistics(const EvolutionSimulation& sim, int currentStep, int totalSteps) {
+    auto data = sim.getSimulationData();
+    
+    cout << "|--------------------------------------------------|" << endl;
+    cout << "| Generation: " << setw(3) << data.generation 
+         << "| Step: " << setw(3) << currentStep << "/" << setw(3) << totalSteps 
+         << "| Agents: " << setw(3) << data.populationSize << "|" << endl;
+    cout << "| Food: " << setw(3) << data.totalFood 
+         << "| Avg Energy: " << setw(3) << data.averageEnergyLevel 
+         << "| Min: " << setw(3) << data.minEnergyLevel 
+         << "| Max: " << setw(3) << data.maxEnergyLevel << "|" << endl;
+    cout << "| Deaths: " << setw(3) << data.totalDeaths 
+         << "| Mutation Rate: " << fixed << setprecision(2) << data.mutationRate << "|" << endl;
+    cout << "|--------------------------------------------------|" << endl;
+}
 
 int main() {
-    auto field = createField(FIELD_HEIGHT, FIELD_WIDTH);
-    
+    auto field = createField(FIELD_WIDTH, FIELD_HEIGHT);
     EvolutionSimulation sim(field);
     
-    printField(sim.getGrid());
+    cout << "Evolution Simulation MVP" << endl;
+    cout << "Field: " << FIELD_WIDTH << "x" << FIELD_HEIGHT 
+         << "| Steps: " << NUMBER_OF_STEPS 
+         << "| Skip: " << SKIP_GENERATIONS << endl;
+    cout << "--------------------------------------------------" << endl;
 
-    // Основной цикл
-    while (sim.getGeneration() < GENERATIONS) {
-        if (sim.isSimulationPaused()) {
-            
-        }
+    for (int gen = 0; gen < GENERATIONS; gen++) {
+        // Показ текущего поколения
+        cout << "\n=== Generation " << sim.getGeneration() << " ===" << endl;
         
-        // Избавится от двойного вызова
-        
-        // Прогоняем шаги симуляции и выводим N-ный раунд
         for (int step = 0; step < NUMBER_OF_STEPS; step++) {
-            sim.simulateStep(1.0f / sim.getSimulationSpeed());
-
-            // Выводим состояние поля
-            updateField(sim.getGrid());
+            // Очищаем только область поля, оставляя статистику
+            cout << "\033[2J\033[H"; // Очищаем консоль и перемещаем курсор в начало
+            
+            // Выводим поле
+            printField(sim.getGrid());
+            
+            // Выводим статистику ПОД полем
+            printStatistics(sim, step + 1, NUMBER_OF_STEPS);
+            
+            // Выполняем шаг симуляции
+            sim.simulateStep(1.0f);
+            
+            // Задержка для визуализации
+            std::this_thread::sleep_for(std::chrono::milliseconds(TICK_MS));
         }
-
-        sim.geneticAlgorithm(); // Естественный отбор
-
-        // Пропуск поколений
-        for (int gen = 0; gen < SKIP_GENERATIONS; gen++) {
-            // Прогоняем шаги симуляции
+        
+        // Пропуск поколений без визуализации
+        for (int skip = 0; skip < SKIP_GENERATIONS; skip++) {
             for (int step = 0; step < NUMBER_OF_STEPS; step++) {
-                sim.simulateStep(1.0f / sim.getSimulationSpeed());
+                sim.simulateStep(1.0f);
             }
-
-            sim.geneticAlgorithm(); // Естественный отбор
+            sim.geneticAlgorithm();
         }
+        
+        sim.resetSimulation(field);
+        sim.geneticAlgorithm();
     }
-
-    // 
-
+    
+    cout << "\nSimulation completed after " << GENERATIONS << " generations!" << endl;
     return 0;
 }

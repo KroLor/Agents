@@ -23,6 +23,7 @@ private:
     int generation;                       // Текущее поколение
     int totalDeaths;                      // Общее количество смертей
     int totalAlives;                      // Общее количество рождений
+    int currentTick;                      // Счетчик тиков для контроля появления еды
 
     /**
      * @brief Создает начальную популяцию агентов.
@@ -75,7 +76,7 @@ public:
     /**
      * @brief Обновляет состояние поля.
      */
-    void updateState();
+    void updateGrid();
 
     /**
      * @brief Выполняет процесс эволюции агентов.
@@ -110,10 +111,10 @@ public:
     const Cell& getCell(int x, int y) const;
 
     /**
-     * @brief Возвращает номер поколения.
+     * @brief Возвращает номер текущего поколения.
      * @return Текущее поколение.
      */
-    int getGeneration();
+    int getGeneration() const { return generation; }
     
     /**
      * @brief Возвращает все клетки поля.
@@ -199,7 +200,7 @@ public:
     float getMutationRate() const { return mutationRate; }
     
     /**
-     * @brief Сбрасывает симуляцию к начальному состоянию.
+     * @brief Сбрасывает симуляцию к начальному состоянию для нового раунда.
      * @param newGrid Новое поле для симуляции.
      */
     void resetSimulation(vector<vector<Cell>> newGrid = {});
