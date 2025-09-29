@@ -6,6 +6,7 @@
 
 using namespace std;
 
+// Вспомогательная функция для генерации случайных чисел
 static mt19937 rng(random_device{}());
 
 EvolutionSimulation::EvolutionSimulation(vector<vector<Cell>> grid, 
@@ -21,7 +22,7 @@ EvolutionSimulation::EvolutionSimulation(vector<vector<Cell>> grid,
 
 EvolutionSimulation::~EvolutionSimulation()
 {
-    // Умные указатели проведут автоматическую чистку памяти
+    // Умные указатели автоматически почистят память
 }
 
 void EvolutionSimulation::initializePopulation(int initialPopulationSize)
@@ -58,6 +59,7 @@ bool EvolutionSimulation::findRandomEmptyPosition(int& x, int& y) const
         }
     }
     
+    // Свободно ли
     if (emptyPos.empty()) {
         return false;
     }
@@ -67,25 +69,29 @@ bool EvolutionSimulation::findRandomEmptyPosition(int& x, int& y) const
     auto [posX, posY] = emptyPos[dist(rng)]; // Выбираем случайный индекс emptyPos из {0, 1, ..., emptyPos.size() - 1} и берём его координаты
     x = posX;
     y = posY;
+
     return true;
 }
 
-void EvolutionSimulation::simulateStep(float deltaTime)
+void EvolutionSimulation::simulateStep()
 {
     if (paused) return;
 
-    currentTick++;
-    updateAgents(deltaTime);
+    updateAgents();
     
+    currentTick++;
+    // Добавляем новую еду FOOD_ADD_TIMES раз каждые FOOD_SPAWN_INTERVAL тиков
     if (currentTick % FOOD_SPAWN_INTERVAL == 0) {
-        spawnNewFood();
+        for (int times = 0; times < FOOD_ADD_TIMES; times++) {
+            spawnNewFood();
+        }
     }
     
     updateGrid();
 }
 
-void EvolutionSimulation::updateAgents(float deltaTime) {
-    shuffle(population.begin(), population.end(), rng);
+void EvolutionSimulation::updateAgents() {
+    shuffle(population.begin(), population.end(), rng); // Перемешать популяцию
     
     for (auto& agent : population) {
         if (agent->getIsAlive()) {
@@ -96,6 +102,7 @@ void EvolutionSimulation::updateAgents(float deltaTime) {
                 continue;
             }
 
+            // Агент осматривается
             agent->lookAround(&grid);
             agent->getDirectionToFood(&grid);
             
@@ -105,7 +112,7 @@ void EvolutionSimulation::updateAgents(float deltaTime) {
             
             grid[oldX][oldY].type = EMPTY;
             
-            // Передаем grid в decideAction
+            // Агент думает и принимает решение
             agent->decideAction(grid);
             
             // Обновляем новую позицию
@@ -141,9 +148,9 @@ void EvolutionSimulation::geneticAlgorithm()
 
 void EvolutionSimulation::spawnNewFood()
 {
-    // Добавляем новую еду с вероятностью 50% каждые FOOD_SPAWN_INTERVAL тиков
+    // Добавляем новую еду с вероятностью CHANCE_OF_FOOD_APPEARANCE%
     uniform_real_distribution<float> chance(0.0f, 1.0f);
-    if (chance(rng) < 0.5f) {
+    if (chance(rng) < CHANCE_OF_FOOD_APPEARANCE) {
         int x, y;
         if (findRandomEmptyPosition(x, y)) {
             addFood(x, y);
@@ -226,6 +233,7 @@ EvolutionSimulation::SimulationData EvolutionSimulation::getSimulationData() con
     data.mutationRate = mutationRate;
     data.totalAlives = totalAlives;
     data.totalDeaths = totalDeaths;
+    int alive = 0;
     
     // Считаем статистику по еде
     data.totalFood = 0;
@@ -240,17 +248,19 @@ EvolutionSimulation::SimulationData EvolutionSimulation::getSimulationData() con
     // Считаем статистику по энергии агентов
     if (!population.empty()) {
         int totalEnergy = 0;
-        data.minEnergyLevel = numeric_limits<int>::max();
-        data.maxEnergyLevel = numeric_limits<int>::min();
+        data.minEnergyLevel = INT_MAX;
+        data.maxEnergyLevel = INT_MIN;
         
         for (const auto& agent : population) {
+            if (agent->getIsAlive()) { alive++; }
             int energy = agent->getEnergy();
             totalEnergy += energy;
             data.minEnergyLevel = min(data.minEnergyLevel, energy);
             data.maxEnergyLevel = max(data.maxEnergyLevel, energy);
         }
-        
-        data.averageEnergyLevel = totalEnergy / population.size();
+
+
+        if (alive != 0) { data.averageEnergyLevel = totalEnergy / alive; }
     } else {
         data.averageEnergyLevel = 0;
         data.minEnergyLevel = 0;
@@ -286,7 +296,7 @@ EvolutionSimulation::SimulationData EvolutionSimulation::getSimulationData() con
 //     return true;
 // }
 
-void EvolutionSimulation::resetSimulation(vector<vector<Cell>> newGrid)
+void EvolutionSimulation::resetGrid(vector<vector<Cell>> newGrid)
 {
     if (!newGrid.empty()) {
         grid = move(newGrid);
@@ -306,6 +316,6 @@ void EvolutionSimulation::resetSimulation(vector<vector<Cell>> newGrid)
     totalAlives = 0;
     currentTick = 0;
     
-    initializePopulation(10);
-    initializeFood(20);
+    initializePopulation(INIT_POP_SIZE);
+    initializeFood(INIT_FOOD_COUNT);
 }

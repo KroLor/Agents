@@ -5,6 +5,7 @@
 #include <string>
 #include "cells.h"
 #include "agent_logic.h"
+#include "main.h"
 
 using namespace std;
 
@@ -47,9 +48,8 @@ private:
 
     /**
      * @brief Обновляет состояние всех агентов.
-     * @param deltaTime Время, прошедшее с предыдущего обновления.
      */
-    void updateAgents(float deltaTime);
+    void updateAgents();
 
     /**
      * @brief Генерирует новую еду на поле.
@@ -63,15 +63,14 @@ public:
      * @param initialPopulationSize Начальный размер популяции.
      * @param initialFoodCount Начальное количество еды.
      */
-    EvolutionSimulation(vector<vector<Cell>> grid, int initialPopulationSize = 10, int initialFoodCount = 20);
+    EvolutionSimulation(vector<vector<Cell>> grid, int initialPopulationSize = INIT_POP_SIZE, int initialFoodCount = INIT_FOOD_COUNT);
     
     ~EvolutionSimulation();
     
     /**
      * @brief Выполняет один такт симуляции.
-     * @param deltaTime Время, прошедшее с предыдущего такта.
      */
-    void simulateStep(float deltaTime);
+    void simulateStep();
     
     /**
      * @brief Обновляет состояние поля.
@@ -91,7 +90,7 @@ public:
      * @param genome Уникальный указатель на геном.
      * @return Указатель на созданного агента.
      */
-    Agent* addAgent(int x, int y, int energy = 100, unique_ptr<Gene> genome = nullptr);
+    Agent* addAgent(int x, int y, int energy = INT_ENERGY_AGENT, unique_ptr<Gene> genome = nullptr);
     
     /**
      * @brief Добавляет еду в указанную позицию.
@@ -100,7 +99,7 @@ public:
      * @param energyValue Количество еды.
      * @return true если ресурс добавлен успешно, иначе false.
      */
-    bool addFood(int x, int y, int energyValue = 50);
+    bool addFood(int x, int y, int energyValue = ENERGY_FOOD_VALUE);
     
     /**
      * @brief Возвращает клетку в указанной позиции.
@@ -138,8 +137,8 @@ public:
         int maxEnergyLevel;      // Максимальный уровень энергии
         int minEnergyLevel;      // Минимальный уровень энергии
         int generation;          // Текущая итерация симуляции
-        int totalAlives;         // Общее количество рождений
-        int totalDeaths;         // Общее количество смертей
+        int totalAlives;         // Общее количество живых
+        int totalDeaths;         // Общее количество мертвых
         float mutationRate;      // Текущий коэффициент мутации
     };
 
@@ -200,8 +199,8 @@ public:
     float getMutationRate() const { return mutationRate; }
     
     /**
-     * @brief Сбрасывает симуляцию к начальному состоянию для нового раунда.
+     * @brief Сбрасывает поле в начальное состояние для нового раунда.
      * @param newGrid Новое поле для симуляции.
      */
-    void resetSimulation(vector<vector<Cell>> newGrid = {});
+    void resetGrid(vector<vector<Cell>> newGrid = {});
 };

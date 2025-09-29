@@ -2,13 +2,14 @@
 #include <iostream>
 #include "limits.h"
 #include "agent_logic.h"
+#include "main.h"
 
 using namespace std;
 
 // Вспомогательная функция для генерации случайных чисел
 static mt19937 rng(random_device{}());
 
-Agent::Agent() : x(0), y(0), energy(100), steps(0), isAlive(true), 
+Agent::Agent() : x(0), y(0), energy(INT_ENERGY_AGENT), steps(0), isAlive(true), 
                 directionToFood({0,0}) {}
 
 // В конструктор добавляем инициализацию "мозга"
@@ -117,7 +118,7 @@ void Agent::decideAction(const vector<vector<Cell>>& grid) {
 
 bool Agent::move(int dx, int dy, const vector<vector<Cell>>& grid) {
     if (dx == 0 && dy == 0) {
-        consumeEnergy(1); // Все равно тратим энергию, даже если стоим на месте
+        consumeEnergy(LOSS_OF_ENERGY); // Все равно тратим энергию, даже если стоим на месте
         return true;
     }
     
@@ -145,7 +146,7 @@ bool Agent::move(int dx, int dy, const vector<vector<Cell>>& grid) {
     }
     
     // Тратим энергию на движение
-    consumeEnergy(1);
+    consumeEnergy(LOSS_OF_ENERGY);
     
     return true;
 }

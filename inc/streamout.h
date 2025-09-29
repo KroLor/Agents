@@ -2,10 +2,29 @@
 
 #include <vector>
 #include "cells.h"
-
-#define TICK_MS 500
+#include "simulation.h"
+#include "main.h"
 
 using namespace std;
 
+/**
+ * @brief Создает поле, ограниченное стенами.
+ * @param width Ширина.
+ * @param height Высота.
+ * @return Двумерное поле.
+ */
 vector<vector<Cell>> createField(int width, int height);
-void printField(const vector<vector<Cell>>& field);
+
+/**
+ * @brief Обновляет поле.
+ * @param field Двумерное поле.
+ */
+void updateField(const vector<vector<Cell>>& field);
+
+/**
+ * @brief Выводит статистику в консоль.
+ * @param sim Класс симуляции.
+ * @param currentStep Текущий шаг.
+ * @param totalSteps Всего шагов в раундах.
+ */
+void printStatistics(const EvolutionSimulation& sim, int currentStep, int totalSteps);
