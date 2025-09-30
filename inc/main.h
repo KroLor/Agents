@@ -9,7 +9,8 @@
 #define SKIP_GENERATIONS 10 // Кол-во пропусков раундов/поколений
 #define NUMBER_OF_STEPS 30 // Кол-во шагов в раунде
 #define INT_ENERGY_AGENT 100 // Кол-во энергии у агента
-#define LOSS_OF_ENERGY 10 // Потеря энергии за шаг/без действие //
+#define ENERGY_LOSS_PER_STEP 10 // Потеря энергии за шаг //
+#define ENERGY_LOSS_DUE_TO_INACTION 5 // Потеря энергии за бездействие //
 
 #define INIT_FOOD_COUNT 50 // Кол-во еды, появляющейся в начале раунда
 #define FOOD_SPAWN_INTERVAL 2 // Каждый N-й тик появляется еда
@@ -17,4 +18,4 @@
 #define CHANCE_OF_FOOD_APPEARANCE 0.5f // Шанс появления еды в клетке
 #define ENERGY_FOOD_VALUE 30 // Энергетическая ценность еды //
 
-#define TICK_MS 250 // Интервал между тиками (мс)
+#define TICK_MS 50 // Интервал между тиками (мс)

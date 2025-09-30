@@ -9,9 +9,7 @@ using namespace std;
 // Вспомогательная функция для генерации случайных чисел
 static mt19937 rng(random_device{}());
 
-EvolutionSimulation::EvolutionSimulation(vector<vector<Cell>> grid, 
-                                       int initialPopulationSize, 
-                                       int initialFoodCount)
+EvolutionSimulation::EvolutionSimulation(vector<vector<Cell>> grid, int initialPopulationSize, int initialFoodCount)
     : grid(move(grid)), paused(false), simulationSpeed(1.0f), 
       mutationRate(0.1f), generation(0), 
       totalDeaths(0), totalAlives(0), currentTick(0)
@@ -112,7 +110,7 @@ void EvolutionSimulation::updateAgents() {
             
             grid[oldX][oldY].type = EMPTY;
             
-            // Агент думает и принимает решение
+            // Агент думает и делает совй ход
             agent->decideAction(grid);
             
             // Обновляем новую позицию
@@ -121,15 +119,14 @@ void EvolutionSimulation::updateAgents() {
             
             // Если агент съел еду, обновляем клетку
             if (grid[newX][newY].type == FOOD) {
-                // Еда съедается агентом, клетка становится пустой
-                grid[newX][newY].type = EMPTY;
-                grid[newX][newY].foodValue = 0;
+                grid[newX][newY].type = AGENT;
+                grid[newX][newY].foodValue = (int)NULL;
             }
             
             if (grid[newX][newY].type == EMPTY) {
                 grid[newX][newY].type = AGENT;
             } else {
-                // Если клетка занята, возвращаем на старое место
+                // Если клетка занята, возвращаемся на старое место
                 agent->setX(oldX);
                 agent->setY(oldY);
                 grid[oldX][oldY].type = AGENT;

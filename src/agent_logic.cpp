@@ -9,15 +9,12 @@ using namespace std;
 // Вспомогательная функция для генерации случайных чисел
 static mt19937 rng(random_device{}());
 
-Agent::Agent() : x(0), y(0), energy(INT_ENERGY_AGENT), steps(0), isAlive(true), 
-                directionToFood({0,0}) {}
+Agent::Agent() : x(0), y(0), energy(INT_ENERGY_AGENT), steps(0), isAlive(true), directionToFood({0,0}) {}
 
-// В конструктор добавляем инициализацию "мозга"
 Agent::Agent(int x, int y, int energy, unique_ptr<Gene> gene)
-    : x(x), y(y), energy(energy), steps(0), isAlive(true), 
-      directionToFood({0,0}), gene(std::move(gene)) 
+    : x(x), y(y), energy(energy), steps(0), isAlive(true), directionToFood({0,0}), gene(std::move(gene)) 
 {
-    initializeBrain();  // Инициализация нейросети (заглушка)
+    // initializeBrain()
 }
 
 Agent::~Agent() {}
@@ -38,7 +35,7 @@ void Agent::stepTick() {
 void Agent::lookAround(vector<vector<Cell>>* grid) {
     surroundings.clear();
     
-    // 8 направлений вокруг агента
+    // 8 клеток вокруг агента
     vector<pair<int, int>> directions = {
         {-1, -1}, {-1, 0}, {-1, 1},
         {0, -1},           {0, 1},
@@ -48,15 +45,8 @@ void Agent::lookAround(vector<vector<Cell>>* grid) {
     for (const auto& [dx, dy] : directions) {
         int newX = x + dx;
         int newY = y + dy;
-        
-        // Проверка границ
-        if (newX >= 0 && newX < grid->size() && 
-            newY >= 0 && newY < (*grid)[0].size()) {
-            surroundings.push_back((*grid)[newX][newY]);
-        } else {
-            // За пределами - стена
-            surroundings.push_back(Cell{WALL});
-        }
+
+        surroundings.push_back((*grid)[newX][newY]);
     }
 }
 
@@ -64,14 +54,14 @@ const pair<int, int>& Agent::getDirectionToFood(vector<vector<Cell>>* grid) {
     int minDistance = INT_MAX;
     directionToFood = {0, 0};
     
-    // Ищем ближайшую еду
     for (int i = 0; i < grid->size(); ++i) {
         for (int j = 0; j < (*grid)[i].size(); ++j) {
             if ((*grid)[i][j].type == FOOD) {
                 int distance = abs(i - x) + abs(j - y);
+
                 if (distance < minDistance) {
                     minDistance = distance;
-                    directionToFood = {i - x, j - y};
+                    directionToFood = {i - x, j - y}; // Если агент на {5; 5}, а еда на {4; 4}, то {5; 5} - {4; 4} = {-1; -1}, что соответсвует напрвлению влево вверх
                 }
             }
         }
@@ -80,86 +70,63 @@ const pair<int, int>& Agent::getDirectionToFood(vector<vector<Cell>>* grid) {
     return directionToFood;
 }
 
-void Agent::decideAction(const vector<vector<Cell>>& grid) {
-    // Временное решение: случайное движение с учетом окружения
-    
-    vector<pair<int, int>> directions = {
-        {-1, 0}, {1, 0}, {0, -1}, {0, 1}  // Вверх, вниз, влево, вправо
-    };
-    
-    // Фильтруем доступные направления
-    vector<pair<int, int>> availableDirs;
+bool Agent::decideAction(const vector<vector<Cell>>& grid) {
+    vector<pair<int, int>> directions = {{0, 1}, {0, -1}, {-1, 0}, {1, 0} }; // Вверх, вниз, влево, вправо
+    vector<pair<int, int>> availableDirections;
+
     for (const auto& [dx, dy] : directions) {
         int newX = x + dx;
         int newY = y + dy;
-        
-        // Проверяем границы и тип клетки
-        if (newX >= 0 && newX < grid.size() && 
-            newY >= 0 && newY < grid[0].size()) {
-            
-            const Cell& targetCell = grid[newX][newY];
-            if (targetCell.type == EMPTY || targetCell.type == FOOD) {
-                availableDirs.push_back({dx, dy});
-            }
+
+        if (grid[newX][newY].type == EMPTY || grid[newX][newY].type == FOOD) {
+            availableDirections.push_back({dx, dy});
         }
     }
     
-    // Если нет доступных направлений, остаемся на месте
-    if (availableDirs.empty()) {
-        move(0, 0, grid);
-        return;
+    if (availableDirections.empty()) {
+        return move(0, 0, grid);
     }
     
-    // Выбираем случайное направление из доступных
-    uniform_int_distribution<int> dist(0, availableDirs.size() - 1);
-    auto [dx, dy] = availableDirs[dist(rng)];
-    move(dx, dy, grid);
+    uniform_int_distribution<int> dist(0, availableDirections.size() - 1); ////////////////////////////////////////////////////////////////////////
+    auto [dx, dy] = availableDirections[dist(rng)];                        ////////////////////////////////////////////////////////////////////////
+
+    return move(dx, dy, grid);
 }
 
 bool Agent::move(int dx, int dy, const vector<vector<Cell>>& grid) {
     if (dx == 0 && dy == 0) {
-        consumeEnergy(LOSS_OF_ENERGY); // Все равно тратим энергию, даже если стоим на месте
+        consumeEnergy(ENERGY_LOSS_DUE_TO_INACTION);
         return true;
     }
     
     int newX = x + dx;
     int newY = y + dy;
     
-    // Проверка границ
-    if (newX < 0 || newX >= grid.size() || newY < 0 || newY >= grid[0].size()) {
+    if (grid[newX][newY].type == WALL || grid[newX][newY].type == AGENT) {
         return false;
     }
     
-    // Проверка типа клетки
-    const Cell& targetCell = grid[newX][newY];
-    if (targetCell.type == WALL || targetCell.type == AGENT) {
-        return false;
-    }
-    
-    // Перемещаем агента
     x = newX;
     y = newY;
     
-    // Если клетка с едой - едим
-    if (targetCell.type == FOOD) {
-        gainEnergy(targetCell.foodValue);
+    consumeEnergy(ENERGY_LOSS_PER_STEP);
+
+    if (grid[newX][newY].type == FOOD) {
+        gainEnergy(grid[newX][newY].foodValue);
     }
-    
-    // Тратим энергию на движение
-    consumeEnergy(LOSS_OF_ENERGY);
     
     return true;
 }
 
-bool Agent::canReproduce() {
-    // Временное условие для размножения
-    return energy > 150 && steps > 10;
-}
+// bool Agent::canReproduce() {
+//     // Временное условие для размножения
+//     return energy > 150 && steps > 10;
+// }
 
 void Agent::die() {
     isAlive = false;
 }
 
-void Agent::initializeBrain() {
+// void Agent::initializeBrain() {
     
-}
+// }
