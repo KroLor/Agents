@@ -9,7 +9,7 @@ using namespace std;
 
 static vector<vector<Cell>> previousField; // Буфер поля
 
-vector<vector<Cell>> createField(int width, int height) {
+vector<vector<Cell>> createField(int height, int width) {
     previousField = vector<vector<Cell>>(width + 2, vector<Cell>(height + 2, {EMPTY}));
     auto field = vector<vector<Cell>>(width + 2, vector<Cell>(height + 2, {EMPTY}));
 

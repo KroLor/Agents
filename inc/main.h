@@ -1,6 +1,6 @@
 #pragma once
 
-#define FIELD_WIDTH 51 // Ширина поля
+#define FIELD_WIDTH 50 // Ширина поля
 #define FIELD_HEIGHT 20 // Высота поля
 
 #define GENERATIONS 100 // Всего поколений
