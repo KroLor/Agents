@@ -2,8 +2,6 @@
 #include "streamout.h"
 #include "simulation.h"
 
-using namespace std;
-
 int main() {
     auto field = createField(FIELD_WIDTH, FIELD_HEIGHT);
     EvolutionSimulation sim(field);
@@ -12,7 +10,7 @@ int main() {
         // Визуализация раунда/поколения
         for (int step = 1; step <= NUMBER_OF_STEPS; step++) {
             updateField(sim.getGrid());
-            printStatistics(sim, step, NUMBER_OF_STEPS);
+            // printStatistics(sim, step, NUMBER_OF_STEPS);
 
             sim.simulateStep();
         }

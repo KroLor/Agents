@@ -10,6 +10,7 @@ using namespace std;
 static vector<vector<Cell>> previousField; // Буфер поля
 
 vector<vector<Cell>> createField(int width, int height) {
+    previousField = vector<vector<Cell>>(width + 2, vector<Cell>(height + 2, {EMPTY}));
     auto field = vector<vector<Cell>>(width + 2, vector<Cell>(height + 2, {EMPTY}));
 
     // Задаем стены на границах
@@ -23,12 +24,18 @@ vector<vector<Cell>> createField(int width, int height) {
         field[j][height + 1].type = WALL; // Нижняя граница
     }
 
+    #ifdef _WIN32
+        system("cls");
+    #else
+        system("clear");
+    #endif
+
     return field;
 }
 
 void updateField(const vector<vector<Cell>>& field) {
-    for (int x = 0; x < field.size(); x++) {
-        for (int y = 0; y < field[x].size(); y++) {
+    for (int y = 0; y < field.size(); y++) {
+        for (int x = 0; x < field[x].size(); x++) {
             if (field[x][y].type != previousField[x][y].type) {
                 cout << "\033[" << x + 1 << ";" << y + 1 << "H"; // Перенос каретки и дальнейшая замена
 
@@ -40,13 +47,12 @@ void updateField(const vector<vector<Cell>>& field) {
                 }
 
                 cout.flush();
-
-                this_thread::sleep_for(chrono::milliseconds(TICK_MS)); // FPS
             }
         }
     }
-    
     previousField = field;
+
+    this_thread::sleep_for(chrono::milliseconds(TICK_MS)); // FPS
 }
 
 void printStatistics(const EvolutionSimulation& sim, int currentStep, int totalSteps) {
