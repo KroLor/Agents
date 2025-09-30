@@ -55,7 +55,9 @@ void updateField(const vector<vector<Cell>>& field) {
     this_thread::sleep_for(chrono::milliseconds(TICK_MS)); // FPS
 }
 
-void printStatistics(const SimulationData data, int currentStep, int totalSteps) {
+void printStatistics(const EvolutionSimulation& sim, int currentStep, int totalSteps) {
+    auto data = sim.getSimulationData();
+    
     cout << "|---------------------------------------------------|" << endl;
     cout << "| Generation: " << setw(4) << data.generation
          << "| Food: " << setw(9) << data.totalFood

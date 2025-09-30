@@ -8,7 +8,7 @@
 using namespace std;
 
 /**
- * @brief Cоздает поле и очищает консоль, ограниченное стенами.
+ * @brief Создает поле, ограниченное стенами.
  * @param width Ширина.
  * @param height Высота.
  * @return Двумерное поле.
@@ -23,8 +23,8 @@ void updateField(const vector<vector<Cell>>& field);
 
 /**
  * @brief Выводит статистику в консоль.
- * @param SimulationData Структура данных.
+ * @param sim Класс симуляции.
  * @param currentStep Текущий шаг.
  * @param totalSteps Всего шагов в раундах.
  */
-void printStatistics(const SimulationData data, int currentStep, int totalSteps);
+void printStatistics(const EvolutionSimulation& sim, int currentStep, int totalSteps);
