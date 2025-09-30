@@ -1,6 +1,6 @@
 #pragma once
 
-#define FIELD_WIDTH 51 // Ширина поля
+#define FIELD_WIDTH 50 // Ширина поля
 #define FIELD_HEIGHT 20 // Высота поля
 
 #define GENERATIONS 100 // Всего поколений
@@ -18,4 +18,4 @@
 #define CHANCE_OF_FOOD_APPEARANCE 0.5f // Шанс появления еды в клетке
 #define ENERGY_FOOD_VALUE 30 // Энергетическая ценность еды //
 
-#define TICK_MS 50 // Интервал между тиками (мс)
+#define TICK_MS 100 // Интервал между тиками (мс)

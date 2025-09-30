@@ -1,11 +1,6 @@
-#include <iostream>
-#include <thread>
-#include <chrono>
 #include "main.h"
 #include "streamout.h"
 #include "simulation.h"
-
-using namespace std;
 
 int main() {
     auto field = createField(FIELD_WIDTH, FIELD_HEIGHT);
@@ -15,11 +10,9 @@ int main() {
         // Визуализация раунда/поколения
         for (int step = 1; step <= NUMBER_OF_STEPS; step++) {
             updateField(sim.getGrid());
-            printStatistics(sim, step, NUMBER_OF_STEPS);
+            printStatistics(sim.getSimulationData(), step, NUMBER_OF_STEPS);
 
             sim.simulateStep();
-            
-            this_thread::sleep_for(chrono::milliseconds(TICK_MS)); // FPS
         }
 
         sim.geneticAlgorithm();

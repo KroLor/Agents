@@ -1,11 +1,16 @@
 #include <iostream>
+#include <thread>
+#include <chrono>
 #include <vector>
 #include <iomanip>
 #include "streamout.h"
 
 using namespace std;
 
-vector<vector<Cell>> createField(int width, int height) {
+static vector<vector<Cell>> previousField; // Буфер поля
+
+vector<vector<Cell>> createField(int height, int width) {
+    previousField = vector<vector<Cell>>(width + 2, vector<Cell>(height + 2, {EMPTY}));
     auto field = vector<vector<Cell>>(width + 2, vector<Cell>(height + 2, {EMPTY}));
 
     // Задаем стены на границах
@@ -19,29 +24,38 @@ vector<vector<Cell>> createField(int width, int height) {
         field[j][height + 1].type = WALL; // Нижняя граница
     }
 
+    #ifdef _WIN32
+        system("cls");
+    #else
+        system("clear");
+    #endif
+
     return field;
 }
 
 void updateField(const vector<vector<Cell>>& field) {
-    cout << "\033[2J\033[1;1H"; // Очищаем консоль и перемещаем курсор в начало
+    for (int y = 0; y < field.size(); y++) {
+        for (int x = 0; x < field[y].size(); x++) {
+            if (field[y][x].type != previousField[y][x].type) {
+                cout << "\033[" << y + 1 << ";" << x + 1 << "H"; // Перенос каретки и дальнейшая замена
 
-    for (int j = 0; j < field[0].size(); j++) {
-        for (int i = 0; i < field.size(); i++) {
-            switch (field[i][j].type) {
-                case EMPTY: cout << SYMBOL_EMPTY; break;
-                case WALL: cout << SYMBOL_WALL; break;
-                case AGENT: cout << SYMBOL_AGENT; break;
-                case FOOD: cout << SYMBOL_FOOD; break;
+                switch (field[y][x].type) {
+                    case EMPTY: cout << SYMBOL_EMPTY; break;
+                    case WALL: cout << SYMBOL_WALL; break;
+                    case AGENT: cout << SYMBOL_AGENT; break;
+                    case FOOD: cout << SYMBOL_FOOD; break;
+                }
+
+                cout.flush();
             }
         }
-        cout << '\n';
     }
-    cout.flush();
+    previousField = field;
+
+    this_thread::sleep_for(chrono::milliseconds(TICK_MS)); // FPS
 }
 
-void printStatistics(const EvolutionSimulation& sim, int currentStep, int totalSteps) {
-    auto data = sim.getSimulationData();
-    
+void printStatistics(const SimulationData data, int currentStep, int totalSteps) {
     cout << "|---------------------------------------------------|" << endl;
     cout << "| Generation: " << setw(4) << data.generation
          << "| Food: " << setw(9) << data.totalFood
