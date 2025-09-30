@@ -10,7 +10,7 @@ int main() {
         // Визуализация раунда/поколения
         for (int step = 1; step <= NUMBER_OF_STEPS; step++) {
             updateField(sim.getGrid());
-            printStatistics(sim.getSimulationData(), step, NUMBER_OF_STEPS);
+            printStatistics(sim, step, NUMBER_OF_STEPS);
 
             sim.simulateStep();
         }
@@ -28,7 +28,7 @@ int main() {
 
         sim.resetGrid(field);
     }
-    // printStatistics(sim.getSimulationData(), 1, NUMBER_OF_STEPS);
+    // printStatistics(sim, 1, NUMBER_OF_STEPS);
     
     return 0;
 }
