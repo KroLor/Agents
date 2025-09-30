@@ -23,8 +23,8 @@ void updateField(const vector<vector<Cell>>& field);
 
 /**
  * @brief Выводит статистику в консоль.
- * @param sim Класс симуляции.
+ * @param SimulationData Структура данных.
  * @param currentStep Текущий шаг.
  * @param totalSteps Всего шагов в раундах.
  */
-void printStatistics(const EvolutionSimulation& sim, int currentStep, int totalSteps);
+void printStatistics(const SimulationData data, int currentStep, int totalSteps);
