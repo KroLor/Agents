@@ -126,7 +126,7 @@ public:
      * @return Константная ссылка на вектор агентов.
      */
     const vector<unique_ptr<Agent>>& getPopulation() const { return population; }
-    
+
     /**
      * @brief Структура для хранения данных о симуляции.
      */
