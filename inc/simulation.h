@@ -10,6 +10,21 @@
 using namespace std;
 
 /**
+ * @brief Структура для хранения данных о симуляции.
+ */
+struct SimulationData {
+    int populationSize;      // Текущий размер популяции
+    int totalFood;           // Общее количество еды на поле
+    int averageEnergyLevel;  // Средний уровень энергии агентов
+    int maxEnergyLevel;      // Максимальный уровень энергии
+    int minEnergyLevel;      // Минимальный уровень энергии
+    int generation;          // Текущая итерация симуляции
+    int totalAlives;         // Общее количество живых
+    int totalDeaths;         // Общее количество мертвых
+    float mutationRate;      // Текущий коэффициент мутации
+};
+
+/**
  * @brief Класс, отвечающий за сеанс симуляции эволюции.
  * 
  * Предоставляет методы для контролируемого процесса эволюции.
@@ -126,21 +141,6 @@ public:
      * @return Константная ссылка на вектор агентов.
      */
     const vector<unique_ptr<Agent>>& getPopulation() const { return population; }
-    
-    /**
-     * @brief Структура для хранения данных о симуляции.
-     */
-    struct SimulationData {
-        int populationSize;      // Текущий размер популяции
-        int totalFood;           // Общее количество еды на поле
-        int averageEnergyLevel;  // Средний уровень энергии агентов
-        int maxEnergyLevel;      // Максимальный уровень энергии
-        int minEnergyLevel;      // Минимальный уровень энергии
-        int generation;          // Текущая итерация симуляции
-        int totalAlives;         // Общее количество живых
-        int totalDeaths;         // Общее количество мертвых
-        float mutationRate;      // Текущий коэффициент мутации
-    };
 
     /**
      * @brief Возвращает статистику по текущему состоянию симуляции.
