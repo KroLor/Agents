@@ -35,11 +35,11 @@ vector<vector<Cell>> createField(int width, int height) {
 
 void updateField(const vector<vector<Cell>>& field) {
     for (int y = 0; y < field.size(); y++) {
-        for (int x = 0; x < field[x].size(); x++) {
-            if (field[x][y].type != previousField[x][y].type) {
-                cout << "\033[" << x + 1 << ";" << y + 1 << "H"; // Перенос каретки и дальнейшая замена
+        for (int x = 0; x < field[y].size(); x++) {
+            if (field[y][x].type != previousField[y][x].type) {
+                cout << "\033[" << y + 1 << ";" << x + 1 << "H"; // Перенос каретки и дальнейшая замена
 
-                switch (field[x][y].type) {
+                switch (field[y][x].type) {
                     case EMPTY: cout << SYMBOL_EMPTY; break;
                     case WALL: cout << SYMBOL_WALL; break;
                     case AGENT: cout << SYMBOL_AGENT; break;
