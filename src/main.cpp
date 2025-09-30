@@ -35,7 +35,7 @@ int main() {
 
         sim.resetGrid(field);
     }
-    // printStatistics(sim, 1, NUMBER_OF_STEPS);
+    // printStatistics(sim.getSimulationData(), 1, NUMBER_OF_STEPS);
     
     return 0;
 }
