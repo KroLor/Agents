@@ -1,6 +1,3 @@
-#include <iostream>
-#include <thread>
-#include <chrono>
 #include "main.h"
 #include "streamout.h"
 #include "simulation.h"
@@ -18,8 +15,6 @@ int main() {
             printStatistics(sim, step, NUMBER_OF_STEPS);
 
             sim.simulateStep();
-            
-            this_thread::sleep_for(chrono::milliseconds(TICK_MS)); // FPS
         }
 
         sim.geneticAlgorithm();
