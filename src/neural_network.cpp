@@ -91,6 +91,7 @@ pair<int, int> NeuralGene::decideDirection(const vector<Cell>& surroundings, int
     inputs[8] = directionToFood.first / 10.0; // dx
     inputs[9] = directionToFood.second / 10.0; // dy
     
+    // Нормируем кол-во энергии
     inputs[10] = (double)energy / (double)INIT_ENERGY_AGENT;
     
     vector<double> outputs = neuralNet->predict(inputs); // 0 - Вниз, 1 - Вверх, 2 - Влево, 3 - Вправо
