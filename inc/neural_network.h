@@ -14,7 +14,6 @@ using namespace std;
 class GeneLayer {
 private:
     vector<vector<double>> weights; // [input_size][output_size]
-    // vector<double> biases;          // [output_size]
     string activation;              // "sigmoid" или "relu"
 
 public:
