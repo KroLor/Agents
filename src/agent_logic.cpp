@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <iostream>
-#include "limits.h"
+#include <limits>
+#include "neural_network.h"
 #include "agent_logic.h"
 #include "main.h"
 
@@ -9,12 +10,14 @@ using namespace std;
 // Вспомогательная функция для генерации случайных чисел
 static mt19937 rng(random_device{}());
 
-Agent::Agent() : x(0), y(0), energy(INT_ENERGY_AGENT), steps(0), isAlive(true), directionToFood({0,0}) {}
+Agent::Agent() : x(0), y(0), energy(INIT_ENERGY_AGENT), steps(0), isAlive(true), directionToFood({0,0}) {}
 
 Agent::Agent(int x, int y, int energy, unique_ptr<Gene> gene)
     : x(x), y(y), energy(energy), steps(0), isAlive(true), directionToFood({0,0}), gene(std::move(gene)) 
 {
-    // initializeBrain()
+    if (gene == nullptr) {
+        initializeBrain();
+    }
 }
 
 Agent::~Agent() {}
@@ -61,7 +64,7 @@ const pair<int, int>& Agent::getDirectionToFood(vector<vector<Cell>>* grid) {
 
                 if (distance < minDistance) {
                     minDistance = distance;
-                    directionToFood = {i - x, j - y}; // Если агент на {5; 5}, а еда на {4; 4}, то {5; 5} - {4; 4} = {-1; -1}, что соответсвует напрвлению влево вверх
+                    directionToFood = {i - x, j - y}; // Если агент на {5; 5}, а еда на {4; 4}, то {4; 4} - {5; 5} = {-1; -1}, что соответсвует напрвлению влево вверх
                 }
             }
         }
@@ -71,26 +74,32 @@ const pair<int, int>& Agent::getDirectionToFood(vector<vector<Cell>>* grid) {
 }
 
 bool Agent::decideAction(const vector<vector<Cell>>& grid) {
-    vector<pair<int, int>> directions = {{0, 1}, {0, -1}, {-1, 0}, {1, 0} }; // Вверх, вниз, влево, вправо
-    vector<pair<int, int>> availableDirections;
+    // Используем ген для принятия решения
+    if (gene) {
+        auto direction = gene->decideDirection(surroundings, energy, directionToFood);
+        return move(direction.first, direction.second, grid);
+    } else {
+        // Запасной вариант - случайное движение                        &&&&&&&&&&&&&&&&&&&&&&&&&&??????????????????????????????????
+        vector<pair<int, int>> directions = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}}; // Вверх, вниз, влево, вправо
+        vector<pair<int, int>> availableDirections;
 
-    for (const auto& [dx, dy] : directions) {
-        int newX = x + dx;
-        int newY = y + dy;
+        for (const auto& [dx, dy] : directions) {
+            int newX = x + dx;
+            int newY = y + dy;
 
-        if (grid[newX][newY].type == EMPTY || grid[newX][newY].type == FOOD) {
-            availableDirections.push_back({dx, dy});
+            if (grid[newX][newY].type == EMPTY || grid[newX][newY].type == FOOD) {
+                availableDirections.push_back({dx, dy});
+            }
         }
+        
+        if (availableDirections.empty()) {
+            return move(0, 0, grid);
+        }
+        
+        uniform_int_distribution<int> dist(0, availableDirections.size() - 1);
+        auto [dx, dy] = availableDirections[dist(rng)];
+        return move(dx, dy, grid);
     }
-    
-    if (availableDirections.empty()) {
-        return move(0, 0, grid);
-    }
-    
-    uniform_int_distribution<int> dist(0, availableDirections.size() - 1); ////////////////////////////////////////////////////////////////////////
-    auto [dx, dy] = availableDirections[dist(rng)];                        ////////////////////////////////////////////////////////////////////////
-
-    return move(dx, dy, grid);
 }
 
 bool Agent::move(int dx, int dy, const vector<vector<Cell>>& grid) {
@@ -127,6 +136,6 @@ void Agent::die() {
     isAlive = false;
 }
 
-// void Agent::initializeBrain() {
-    
-// }
+void Agent::initializeBrain() {
+    gene = make_unique<NeuralGene>();
+}

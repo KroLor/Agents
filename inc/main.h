@@ -8,7 +8,7 @@
 #define INIT_POP_SIZE 30 // Размер популяции
 #define SKIP_GENERATIONS 10 // Кол-во пропусков раундов/поколений
 #define NUMBER_OF_STEPS 30 // Кол-во шагов в раунде
-#define INT_ENERGY_AGENT 100 // Кол-во энергии у агента
+#define INIT_ENERGY_AGENT 100 // Кол-во энергии у агента
 #define ENERGY_LOSS_PER_STEP 10 // Потеря энергии за шаг //
 #define ENERGY_LOSS_DUE_TO_INACTION 5 // Потеря энергии за бездействие //
 
@@ -19,3 +19,8 @@
 #define ENERGY_FOOD_VALUE 30 // Энергетическая ценность еды //
 
 #define TICK_MS 250 // Интервал между тиками (мс)
+
+#define INPUT_VALUES 11 // Входные значения
+// #define HIDDEN_LAYERS 1 // Скрытых слоев
+#define NEURONS_IN_HIDDEN_LAYER 13 // Кол-во нейронов в скрытых(ом) слоях(е) // (одинаково)
+#define OUTPUT_VALUES 4 // Выходные значения

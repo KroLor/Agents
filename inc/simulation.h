@@ -90,7 +90,7 @@ public:
      * @param genome Уникальный указатель на геном.
      * @return Указатель на созданного агента.
      */
-    Agent* addAgent(int x, int y, int energy = INT_ENERGY_AGENT, unique_ptr<Gene> genome = nullptr);
+    Agent* addAgent(int x, int y, int energy = INIT_ENERGY_AGENT, unique_ptr<Gene> genome = nullptr);
     
     /**
      * @brief Добавляет еду в указанную позицию.

@@ -249,13 +249,15 @@ EvolutionSimulation::SimulationData EvolutionSimulation::getSimulationData() con
         data.maxEnergyLevel = INT_MIN;
         
         for (const auto& agent : population) {
-            if (agent->getIsAlive()) { alive++; }
-            int energy = agent->getEnergy();
-            totalEnergy += energy;
-            data.minEnergyLevel = min(data.minEnergyLevel, energy);
-            data.maxEnergyLevel = max(data.maxEnergyLevel, energy);
-        }
+            if (agent->getIsAlive()) {
+                int energy = agent->getEnergy();
 
+                totalEnergy += energy;
+                data.minEnergyLevel = min(data.minEnergyLevel, energy);
+                data.maxEnergyLevel = max(data.maxEnergyLevel, energy);
+                alive++;
+            }
+        }
 
         if (alive != 0) { data.averageEnergyLevel = totalEnergy / alive; }
     } else {
