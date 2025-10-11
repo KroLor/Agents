@@ -120,7 +120,7 @@ void EvolutionSimulation::updateAgents() {
             // Если агент съел еду, обновляем клетку
             if (grid[newX][newY].type == FOOD) {
                 grid[newX][newY].type = AGENT;
-                grid[newX][newY].foodValue = (int)NULL;
+                grid[newX][newY].foodValue = 0;
             }
             
             if (grid[newX][newY].type == EMPTY) {
