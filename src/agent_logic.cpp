@@ -75,7 +75,7 @@ const pair<int, int>& Agent::getDirectionToFood(vector<vector<Cell>>* grid) {
 
 bool Agent::decideAction(const vector<vector<Cell>>& grid) {
     #ifdef USE_A_NEURAL_NETWORK
-        // Используем ген для принятия решения
+        // Использование гена для принятия решения
         auto direction = gene->decideDirection(surroundings, energy, directionToFood);
         return move(direction.first, direction.second, grid);
     #else
