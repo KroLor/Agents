@@ -36,7 +36,7 @@ vector<double> GeneLayer::forward(const vector<double>& inputs) const {
     int outputSize = weights[0].size();
     vector<double> outputs(outputSize, 0.0);
     
-    // Матричное умножение: outputs = inputs * weights
+    // Матричное умножение
     for (int j = 0; j < outputSize; j++) {
         for (int i = 0; i < inputs.size(); i++) {
             outputs[j] += inputs[i] * weights[i][j];
