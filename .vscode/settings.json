@@ -58,6 +58,7 @@
         "stop_token": "cpp",
         "text_encoding": "cpp",
         "variant": "cpp",
-        "agent_logic.h": "c"
+        "agent_logic.h": "c",
+        "ranges": "cpp"
     }
 }

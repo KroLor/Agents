@@ -127,10 +127,17 @@ bool Agent::move(int dx, int dy, const vector<vector<Cell>>& grid) {
     return true;
 }
 
-// bool Agent::canReproduce() {
-//     // Временное условие для размножения
-//     return energy > 150 && steps > 10;
-// }
+unique_ptr<Agent> Agent::clone() {
+    unique_ptr<Gene> clonedGene = gene->clone();
+
+    auto newAgent = make_unique<Agent>(x, y, energy, std::move(clonedGene));
+    
+    return newAgent;
+}
+
+void Agent::mutateGene(float mutationPower) {
+    gene = gene->mutation(mutationPower);
+}
 
 void Agent::die() {
     isAlive = false;

@@ -20,7 +20,7 @@ private:
     vector<unique_ptr<Agent>> population; // Популяция агентов
     bool paused;                          // Флаг паузы симуляции
     float simulationSpeed;                // Множитель скорости симуляции
-    float mutationRate;                   // Коэффициент мутации
+    float mutationPower;                  // Коэффициент мутации
     int generation;                       // Текущее поколение
     int totalDeaths;                      // Общее количество смертей
     int totalAlives;                      // Общее количество рождений
@@ -139,7 +139,7 @@ public:
         int generation;          // Текущая итерация симуляции
         int totalAlives;         // Общее количество живых
         int totalDeaths;         // Общее количество мертвых
-        float mutationRate;      // Текущий коэффициент мутации
+        float mutationPower;     // Текущий коэффициент мутации
     };
 
     /**
@@ -188,19 +188,24 @@ public:
     
     /**
      * @brief Устанавливает коэффициент мутации для новых агентов.
-     * @param mutationRate Новый коэффициент мутации (0.0 - 1.0).
+     * @param mutationPower Новый коэффициент мутации (0.0 - 1.0).
      */
-    void setMutationRate(float mutationRate) { this->mutationRate = mutationRate; }
+    void setmutationPower(float mutationPower) { this->mutationPower = mutationPower; }
     
     /**
      * @brief Возвращает текущий коэффициент мутации.
      * @return Текущий коэффициент мутации.
      */
-    float getMutationRate() const { return mutationRate; }
+    float getmutationPower() const { return mutationPower; }
+
+    /**
+     * @brief Очищает поле для нового раунда.
+     */
+    void reloadGrid();
     
     /**
-     * @brief Сбрасывает поле в начальное состояние для нового раунда.
+     * @brief Сбрасывает поле в начальное состояние.
      * @param newGrid Новое поле для симуляции.
      */
-    void resetGrid(vector<vector<Cell>> newGrid = {});
+    void resetSim(vector<vector<Cell>> newGrid = {});
 };

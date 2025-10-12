@@ -11,7 +11,7 @@ static mt19937 rng(random_device{}());
 
 EvolutionSimulation::EvolutionSimulation(vector<vector<Cell>> grid, int initialPopulationSize, int initialFoodCount)
     : grid(move(grid)), paused(false), simulationSpeed(1.0f), 
-      mutationRate(0.1f), generation(0), 
+      mutationPower(0.1f), generation(0), 
       totalDeaths(0), totalAlives(0), currentTick(0)
 {
     initializePopulation(initialPopulationSize);
@@ -139,7 +139,34 @@ void EvolutionSimulation::updateAgents() {
 
 void EvolutionSimulation::geneticAlgorithm()
 {
-    // Только увеличиваем счетчик поколений
+    // Сортируем по количеству шагов (по убыванию)
+    sort(population.begin(), population.end(), /* Лямбда функция для принцыпа сравнения */
+                    [](const unique_ptr<Agent>& a, const unique_ptr<Agent>& b) { return a->getSteps() > b->getSteps(); });
+    
+    int bestCount = population.size() / 2; // Берем первую лучшую половину
+    vector<unique_ptr<Agent>> newPopulation;
+    
+    uniform_real_distribution<float> chance(0.0f, 1.0f);
+    // Создаем новое поколение на основе лучших агентов
+    for (int i = 0; i < bestCount; i++) {
+        // Клонируем лучших агентов
+        newPopulation.push_back(population[i]->clone());
+
+        // Случайная мутация для лучших
+        // if (chance(rng) < AGENT_MUTATION_CHANCE) {
+        //     newPopulation[i]->mutateGene(AGENT_MUTATION_POWER);
+        // }
+    }
+    
+    // Худших агентов пересоздаем
+    for (int i = bestCount; i < population.size(); i++) {
+        // Клонируем худшего агента с его текущим геном
+        newPopulation.push_back(population[i]->clone());
+    }
+    
+    // Заменяем старую популяцию новой
+    population = move(newPopulation);
+    
     generation++;
 }
 
@@ -227,7 +254,7 @@ EvolutionSimulation::SimulationData EvolutionSimulation::getSimulationData() con
     SimulationData data{};
     data.populationSize = population.size();
     data.generation = generation;
-    data.mutationRate = mutationRate;
+    data.mutationPower = mutationPower;
     data.totalAlives = totalAlives;
     data.totalDeaths = totalDeaths;
     int alive = 0;
@@ -259,7 +286,13 @@ EvolutionSimulation::SimulationData EvolutionSimulation::getSimulationData() con
             }
         }
 
-        if (alive != 0) { data.averageEnergyLevel = totalEnergy / alive; }
+        if (alive != 0) {
+            data.averageEnergyLevel = totalEnergy / alive;
+        } else {
+            data.averageEnergyLevel = 0;
+            data.minEnergyLevel = 0;
+            data.maxEnergyLevel = 0;
+        }
     } else {
         data.averageEnergyLevel = 0;
         data.minEnergyLevel = 0;
@@ -295,7 +328,36 @@ EvolutionSimulation::SimulationData EvolutionSimulation::getSimulationData() con
 //     return true;
 // }
 
-void EvolutionSimulation::resetGrid(vector<vector<Cell>> newGrid)
+void EvolutionSimulation::reloadGrid() {
+    for (auto& row : grid) {
+        for (auto& cell : row) {
+            if (cell.type != WALL) {
+                cell.type = EMPTY;
+                cell.foodValue = 0;
+            }
+        }
+    }
+
+    for (auto& agent : population) {
+        int x, y;
+        agent->setEnergy(INIT_ENERGY_AGENT);
+        agent->setIsAlive(true);
+        agent->setSteps(0);
+        findRandomEmptyPosition(x, y);
+        agent->setX(x);
+        agent->setX(y);
+    }
+    updateGrid();
+
+    totalDeaths = 0;
+    totalAlives = 0;
+    currentTick = 0;
+
+    initializeFood(INIT_FOOD_COUNT);
+    updateGrid();
+}
+
+void EvolutionSimulation::resetSim(vector<vector<Cell>> newGrid)
 {
     if (!newGrid.empty()) {
         grid = move(newGrid);

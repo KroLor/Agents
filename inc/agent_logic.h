@@ -36,7 +36,9 @@ private:
      */
     void gainEnergy(int amount);
 
-
+    /**
+     * 
+     */
     void initializeBrain();
 
 public:
@@ -57,12 +59,6 @@ public:
     bool decideAction(const vector<vector<Cell>>& grid);
 
     /**
-     * @brief 
-     * @return 
-     */
-    bool canReproduce();
-
-    /**
      * @brief Агенту капут.
      */
     void die();
@@ -77,6 +73,18 @@ public:
      * @brief Увеличивает возраст агента на 1 такт.
      */
     void stepTick();
+
+    /**
+     * @brief Мутация гена.
+     * @param mutationPower Сила мутации.
+     */
+    void mutateGene(float mutationPower);
+
+    /**
+     * @brief Клонирует агента.
+     * @return Указатель на нового агента.
+     */
+    unique_ptr<Agent> clone();
 
     /**
      * @brief Возвращает текущее положение по x.
@@ -110,7 +118,7 @@ public:
 
     /**
      * @brief Задает кол-во энергии.
-     * @param Кол-во задаваемой энергии.
+     * @param newEnergy Кол-во задаваемой энергии.
      */
     void setEnergy(int newEnergy) { energy = newEnergy; }
 
@@ -119,12 +127,16 @@ public:
      * @return Кол-во шагов.
      */
     int getSteps() const { return steps; }
+    
+    void setSteps(int _steps) { steps = _steps; }
 
     /**
      * @brief Возвращает состояние агента.
      * @return true жив, иначе false.
      */
     bool getIsAlive() const { return isAlive; }
+
+    void setIsAlive(bool alive) { isAlive = alive; }
 
     /**
      * @brief Возвращает массив окружающих клеток.

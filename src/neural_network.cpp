@@ -53,6 +53,20 @@ vector<double> GeneLayer::forward(const vector<double>& inputs) const {
     return outputs;
 }
 
+// vector<vector<double>> GeneLayer::getWeightsCopy() const {
+//     vector<vector<double>> newWeights;
+//     newWeights.resize(weights.size());
+    
+//     for (int i = 0; i < weights.size(); i++) {
+//         newWeights[i].resize(weights[i].size());
+//         for (int j = 0; j < weights[i].size(); j++) {
+//             newWeights[i][j] = weights[i][j];
+//         }
+//     }
+    
+//     return newWeights;
+// }
+
 void NeuralNetwork::addLayer(unique_ptr<GeneLayer> layer) {
     layers.push_back(move(layer));
 }
@@ -67,12 +81,35 @@ vector<double> NeuralNetwork::predict(const vector<double>& inputs) const {
     return outputs;
 }
 
+unique_ptr<NeuralNetwork> NeuralNetwork::clone() const {
+    auto newNet = make_unique<NeuralNetwork>();
+    
+    // Копируем послойно
+    for (const auto& layer : layers) {
+        const auto& weights = layer->getWeights();
+        string activation = layer->getActivation();
+        
+        auto newLayer = make_unique<GeneLayer>(weights.size(), weights[0].size(), activation);
+        
+        newLayer->setWeights(weights);
+        newNet->addLayer(move(newLayer));
+    }
+    
+    return newNet;
+}
+
+// void NeuralNetwork::mutate(float mutationPower) {
+
+// }
+
 NeuralGene::NeuralGene() {
     neuralNet = make_unique<NeuralNetwork>();
 
     neuralNet->addLayer(make_unique<GeneLayer>(INPUT_VALUES, NEURONS_IN_HIDDEN_LAYER, "relu")); // Скрытый слой
     neuralNet->addLayer(make_unique<GeneLayer>(NEURONS_IN_HIDDEN_LAYER, OUTPUT_VALUES, "sigmoid")); // Выходной слой
 }
+
+NeuralGene::NeuralGene(unique_ptr<NeuralNetwork> network) : neuralNet(move(network)) {}
 
 pair<int, int> NeuralGene::decideDirection(const vector<Cell>& surroundings, int energy, pair<int, int> directionToFood) {
     vector<double> inputs(11);
@@ -92,7 +129,7 @@ pair<int, int> NeuralGene::decideDirection(const vector<Cell>& surroundings, int
     inputs[9] = directionToFood.second / 10.0; // dy
     
     // Нормируем кол-во энергии
-    inputs[10] = (double)energy / (double)INIT_ENERGY_AGENT;
+    inputs[10] = min((double)energy / (double)INIT_ENERGY_AGENT, 1.0);
     
     vector<double> outputs = neuralNet->predict(inputs); // 0 - Вниз, 1 - Вверх, 2 - Влево, 3 - Вправо
     
@@ -123,4 +160,15 @@ pair<int, int> NeuralGene::decideDirection(const vector<Cell>& surroundings, int
      * (-1, 0)   @   (1, 0)
      *        (0, -1)
      */
+}
+
+unique_ptr<Gene> NeuralGene::clone() const {
+    auto newNeuralNet = neuralNet->clone();
+    return make_unique<NeuralGene>(move(newNeuralNet));
+}
+
+unique_ptr<Gene> NeuralGene::mutation(float mutationPower) const {
+    auto mutatedNet = neuralNet->clone();
+    // mutatedNet->mutate(mutationPower);
+    return make_unique<NeuralGene>(move(mutatedNet));
 }

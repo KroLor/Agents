@@ -28,22 +28,17 @@ public:
     virtual pair<int, int> decideDirection(const vector<Cell>& surroundings, int energy, pair<int, int> directionToFood) = 0;
 
     /**
-     * @brief Решить, пора ли размножаться.
-     * @return Решение true или false.
-     */
-    // virtual bool decideReproduction(const Agent& agent) = 0;
-
-    /**
      * @brief Создать мутированную копию гена.
-     * @return Мутированный ген.
+     * @param mutationPower Сила мутации.
+     * @return Указатель на мутированный ген.
      */
-    // virtual unique_ptr<Gene> mutate() const = 0;
+    virtual unique_ptr<Gene> mutation(float mutationPower) const = 0;
 
     /**
      * @brief Создать копию гена.
      * @return Копия гена.
      */
-    // virtual unique_ptr<Gene> clone() const = 0;
+    virtual unique_ptr<Gene> clone() const = 0;
     
     // Методы для сохранения/загрузки гена
 

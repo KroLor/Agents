@@ -19,6 +19,7 @@ int main() {
             this_thread::sleep_for(chrono::milliseconds(TICK_MS)); // FPS
         }
 
+        sim.reloadGrid();
         sim.geneticAlgorithm();
         
         // Пропуск раундов/поколений без визуализации
@@ -27,10 +28,9 @@ int main() {
                 sim.simulateStep();
             }
             
+            sim.reloadGrid();
             sim.geneticAlgorithm();
         }
-
-        sim.resetGrid(field);
     }
     // printStatistics(sim, 1, NUMBER_OF_STEPS);
     

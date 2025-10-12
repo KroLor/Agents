@@ -50,7 +50,7 @@ void printStatistics(const EvolutionSimulation& sim, int currentStep, int totalS
          << "| Deaths: " << setw(7) << data.totalDeaths
          << "| Max Energy: " << setw(3) << data.maxEnergyLevel << "|" << endl;
     cout << "| Agents: " << setw(8) << data.populationSize
-         << "| Mut. Rate: " << fixed << setprecision(2) << data.mutationRate
+         << "| Mut. Rate: " << fixed << setprecision(2) << data.mutationPower
          << "| Min Energy: " << setw(3) << data.minEnergyLevel << "|" << endl;
     cout << "|---------------------------------------------------|" << endl;
 }

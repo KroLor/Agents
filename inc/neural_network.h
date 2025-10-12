@@ -17,29 +17,34 @@ private:
     string activation;              // "sigmoid" или "relu"
 
 public:
-    /**
-     * @brief Конструктор слоя
-     * @param inputSize Кол-во нейронов входного слоя.
-     * @param outputSize Кло-во нейронов выходного слоя (связей с выходным слоем).
-     * @param activation Функция активации (relu или sigmoid)
-     */
     GeneLayer(int inputSize, int outputSize, const string& activation);
     
-    /**
-     * @brief Распространяет входные данные через слой.
-     * @param inputs Входные значения для слоя.
-     * @return Выходные значения слоя после вычисления.
-     */
     vector<double> forward(const vector<double>& inputs) const;
     
     /**
-     * @brief Возвращает веса слоя.
-     * @return Ссылка на матрицу весов.
+     * @brief Устанавливает веса слоя.
+     */
+    void setWeights(const vector<vector<double>>& newWeights) { weights = newWeights; }
+    
+    /**
+     * @brief Возвращает копию весов слоя.
+     */
+    vector<vector<double>> getWeightsCopy() const { return weights; }
+    
+    /**
+     * @brief Возвращает тип активации.
+     */
+    string getActivation() const { return activation; }
+    
+    /**
+     * @brief Возвращает веса слоя (константная ссылка).
      */
     const vector<vector<double>>& getWeights() const { return weights; }
-
-
-    // unique_ptr<GeneLayer> clone() const;
+    
+    /**
+     * @brief Мутирует веса слоя.
+     */
+    void mutate(float mutationPower);
 };
 
 /**
@@ -73,15 +78,15 @@ public:
     
     /**
      * @brief Применяет мутации к весам нейронной сети.
-     * @param mutationRate Интенсивность мутаций (вероятность изменения веса).
+     * @param mutationPower Интенсивность мутаций.
      */
-    // void mutate(double mutationRate);
+    void mutate(float mutationPower);
     
     /**
      * @brief Создает полную копию нейронной сети.
      * @return Умный указатель на копию сети.
      */
-    // unique_ptr<NeuralNetwork> clone() const;
+    unique_ptr<NeuralNetwork> clone() const;
 };
 
 /**
@@ -93,7 +98,7 @@ private:
 
 public:
     NeuralGene();
-    // NeuralGene(unique_ptr<NeuralNetwork> network);
+    NeuralGene(unique_ptr<NeuralNetwork> network);
     
     /**
      * @brief Определяет направление движения на основе окружения, энергии и направления к еде.
@@ -106,13 +111,19 @@ public:
     
     /**
      * @brief Создает мутированную копию гена.
+     * @param mutationPower Сила мутации.
      * @return Умный указатель на мутировавший ген.
      */
-    // unique_ptr<Gene> mutate() const override;
+    unique_ptr<Gene> mutation(float mutationPower) const override;
     
     /**
      * @brief Создает точную копию гена.
      * @return Умный указатель на копию гена.
      */
-    // unique_ptr<Gene> clone() const override;
+    unique_ptr<Gene> clone() const override;
+
+    /**
+     * 
+     */
+    void setNewNeuralNet(unique_ptr<NeuralNetwork>& newNeuralNet) { neuralNet = move(newNeuralNet); };
 };
