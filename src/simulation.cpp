@@ -11,7 +11,7 @@ static mt19937 rng(random_device{}());
 
 EvolutionSimulation::EvolutionSimulation(vector<vector<Cell>> grid, int initialPopulationSize, int initialFoodCount)
     : grid(move(grid)), paused(false), simulationSpeed(1.0f), 
-      mutationPower(0.1f), generation(0), 
+      mutationPower(AGENT_MUTATION_POWER), generation(0), 
       totalDeaths(0), totalAlives(0), currentTick(0)
 {
     initializePopulation(initialPopulationSize);
@@ -90,8 +90,6 @@ void EvolutionSimulation::simulateStep()
 
 void EvolutionSimulation::updateAgents() {
     shuffle(population.begin(), population.end(), rng); // Перемешать популяцию
-    totalAlives = 0;
-    totalDeaths = 0;
     
     for (auto& agent : population) {
         if (agent->getIsAlive()) {
@@ -172,12 +170,12 @@ void EvolutionSimulation::geneticAlgorithm()
         newPopulation.push_back(population[i]->clone());
 
         // Случайная мутация для лучших
-        // if (chance(rng) < AGENT_MUTATION_CHANCE) {
-        //     newPopulation[i]->mutateGene(AGENT_MUTATION_POWER);
-        // }
+        if (chance(rng) < AGENT_MUTATION_CHANCE) {
+            newPopulation[i]->mutateGene(mutationPower);
+        }
     }
     
-    // Худших агентов пересоздаем
+    // Худших агентов клонируем
     for (int i = bestCount; i < population.size(); i++) {
         // Клонируем худшего агента с его текущим геном
         newPopulation.push_back(population[i]->clone());
@@ -276,6 +274,7 @@ EvolutionSimulation::SimulationData EvolutionSimulation::getSimulationData() con
     data.mutationPower = mutationPower;
     data.totalAlives = totalAlives;
     data.totalDeaths = totalDeaths;
+    int alive = 0;
     
     // Считаем статистику по еде
     data.totalFood = 0;
@@ -296,6 +295,7 @@ EvolutionSimulation::SimulationData EvolutionSimulation::getSimulationData() con
         for (const auto& agent : population) {
             if (agent->getIsAlive()) {
                 int energy = agent->getEnergy();
+                alive++;
 
                 totalEnergy += energy;
                 data.minEnergyLevel = min(data.minEnergyLevel, energy);
@@ -303,8 +303,8 @@ EvolutionSimulation::SimulationData EvolutionSimulation::getSimulationData() con
             }
         }
 
-        if (totalAlives != 0) {
-            data.averageEnergyLevel = totalEnergy / totalAlives;
+        if (alive != 0) {
+            data.averageEnergyLevel = totalEnergy / alive;
         } else {
             data.averageEnergyLevel = 0;
             data.minEnergyLevel = 0;

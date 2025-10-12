@@ -53,19 +53,14 @@ vector<double> GeneLayer::forward(const vector<double>& inputs) const {
     return outputs;
 }
 
-// vector<vector<double>> GeneLayer::getWeightsCopy() const {
-//     vector<vector<double>> newWeights;
-//     newWeights.resize(weights.size());
-    
-//     for (int i = 0; i < weights.size(); i++) {
-//         newWeights[i].resize(weights[i].size());
-//         for (int j = 0; j < weights[i].size(); j++) {
-//             newWeights[i][j] = weights[i][j];
-//         }
-//     }
-    
-//     return newWeights;
-// }
+void GeneLayer::mutate(float mutationPower) {
+    uniform_real_distribution<double> dist(-mutationPower, mutationPower);
+    for (auto& row : weights) {
+        for (auto& weight : row) {
+            weight += dist(rng);
+        }
+    }
+}
 
 void NeuralNetwork::addLayer(unique_ptr<GeneLayer> layer) {
     layers.push_back(move(layer));
@@ -98,9 +93,11 @@ unique_ptr<NeuralNetwork> NeuralNetwork::clone() const {
     return newNet;
 }
 
-// void NeuralNetwork::mutate(float mutationPower) {
-
-// }
+void NeuralNetwork::mutate(float mutationPower) {
+    for (auto& layer : layers) {
+        layer->mutate(mutationPower);
+    }
+}
 
 NeuralGene::NeuralGene() {
     neuralNet = make_unique<NeuralNetwork>();
@@ -125,8 +122,8 @@ pair<int, int> NeuralGene::decideDirection(const vector<Cell>& surroundings, int
     }
     
     // Сдвинем крайние значения ({-1, 1} => {-0.1, 0.1}), чтобы уменьшить влияние этого параметра
-    inputs[8] = directionToFood.first / 10.0; // dx
-    inputs[9] = directionToFood.second / 10.0; // dy
+    inputs[8] = directionToFood.first; // dx
+    inputs[9] = directionToFood.second; // dy
     
     // Нормируем кол-во энергии
     inputs[10] = min((double)energy / (double)INIT_ENERGY_AGENT, 1.0);
@@ -169,6 +166,6 @@ unique_ptr<Gene> NeuralGene::clone() const {
 
 unique_ptr<Gene> NeuralGene::mutation(float mutationPower) const {
     auto mutatedNet = neuralNet->clone();
-    // mutatedNet->mutate(mutationPower);
+    mutatedNet->mutate(mutationPower);
     return make_unique<NeuralGene>(move(mutatedNet));
 }

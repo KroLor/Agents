@@ -188,7 +188,7 @@ public:
     
     /**
      * @brief Устанавливает коэффициент мутации для новых агентов.
-     * @param mutationPower Новый коэффициент мутации (0.0 - 1.0).
+     * @param mutationPower Новый коэффициент мутации (-1.0 - 1.0).
      */
     void setmutationPower(float mutationPower) { this->mutationPower = mutationPower; }
     

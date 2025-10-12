@@ -105,13 +105,14 @@ bool Agent::decideAction(const vector<vector<Cell>>& grid) {
 bool Agent::move(int dx, int dy, const vector<vector<Cell>>& grid) {
     if (dx == 0 && dy == 0) {
         consumeEnergy(ENERGY_LOSS_DUE_TO_INACTION);
-        return true;
+        return false;
     }
     
     int newX = x + dx;
     int newY = y + dy;
 
     if (grid[newX][newY].type == WALL || grid[newX][newY].type == AGENT) {
+        consumeEnergy(ENERGY_LOSS_DUE_TO_INACTION);
         return false;
     }
     
