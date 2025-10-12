@@ -31,10 +31,10 @@ private:
     void consumeEnergy(int amount);
 
     /**
-     * @brief Увеличивает энергию агента на указанное количество.
-     * @param amount Количество энергии.
+     * @brief Агент делает свой ход.
+     * @return true если перемещение или бездействие успешно, иначе false.
      */
-    void gainEnergy(int amount);
+    bool move(int dx, int dy, const vector<vector<Cell>>& grid);
 
     /**
      * 
@@ -64,12 +64,6 @@ public:
     void die();
 
     /**
-     * @brief Агент делает свой ход.
-     * @return true если перемещение или бездействие успешно, иначе false.
-     */
-    bool move(int dx, int dy, const vector<vector<Cell>>& grid);
-
-    /**
      * @brief Увеличивает возраст агента на 1 такт.
      */
     void stepTick();
@@ -79,6 +73,12 @@ public:
      * @param mutationPower Сила мутации.
      */
     void mutateGene(float mutationPower);
+
+    /**
+     * @brief Увеличивает энергию агента на указанное количество.
+     * @param amount Количество энергии.
+     */
+    void gainEnergy(int amount);
 
     /**
      * @brief Клонирует агента.

@@ -91,10 +91,10 @@ void EvolutionSimulation::simulateStep()
 void EvolutionSimulation::updateAgents() {
     shuffle(population.begin(), population.end(), rng); // Перемешать популяцию
     totalAlives = 0;
+    totalDeaths = 0;
     
     for (auto& agent : population) {
         if (agent->getIsAlive()) {
-            totalAlives++;
             // Проверяем смерть от голода
             if (agent->getEnergy() <= 0) {
                 agent->die();
@@ -105,6 +105,7 @@ void EvolutionSimulation::updateAgents() {
                 grid[x][y].type = EMPTY;
                 continue;
             }
+            totalAlives++;
 
             // Агент осматривается
             agent->lookAround(&grid);
@@ -114,14 +115,26 @@ void EvolutionSimulation::updateAgents() {
             int oldX = agent->getX();
             int oldY = agent->getY();
             
-            grid[oldX][oldY].type = EMPTY;
-            
             // Агент думает и делает совй ход
             agent->decideAction(grid);
             
             // Обновляем новую позицию
             int newX = agent->getX();
             int newY = agent->getY();
+
+            Cell tCell = grid[newX][newY];
+            if (tCell.type == EMPTY || tCell.type == FOOD) {
+                grid[oldX][oldY].type = EMPTY;
+                
+                if (tCell.type == FOOD) {
+                    agent->gainEnergy(tCell.foodValue);
+                    tCell.foodValue = 0;
+                }
+                tCell.type = AGENT;
+            } else {
+                agent->setX(oldX);
+                agent->setY(oldY);
+            }
             
             // Если агент съел еду, обновляем клетку
             if (grid[newX][newY].type == FOOD) {
