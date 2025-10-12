@@ -90,13 +90,19 @@ void EvolutionSimulation::simulateStep()
 
 void EvolutionSimulation::updateAgents() {
     shuffle(population.begin(), population.end(), rng); // Перемешать популяцию
+    totalAlives = 0;
     
     for (auto& agent : population) {
         if (agent->getIsAlive()) {
+            totalAlives++;
             // Проверяем смерть от голода
             if (agent->getEnergy() <= 0) {
                 agent->die();
                 totalDeaths++;
+
+                int x = agent->getX();
+                int y = agent->getY();
+                grid[x][y].type = EMPTY;
                 continue;
             }
 
@@ -257,7 +263,6 @@ EvolutionSimulation::SimulationData EvolutionSimulation::getSimulationData() con
     data.mutationPower = mutationPower;
     data.totalAlives = totalAlives;
     data.totalDeaths = totalDeaths;
-    int alive = 0;
     
     // Считаем статистику по еде
     data.totalFood = 0;
@@ -282,12 +287,11 @@ EvolutionSimulation::SimulationData EvolutionSimulation::getSimulationData() con
                 totalEnergy += energy;
                 data.minEnergyLevel = min(data.minEnergyLevel, energy);
                 data.maxEnergyLevel = max(data.maxEnergyLevel, energy);
-                alive++;
             }
         }
 
-        if (alive != 0) {
-            data.averageEnergyLevel = totalEnergy / alive;
+        if (totalAlives != 0) {
+            data.averageEnergyLevel = totalEnergy / totalAlives;
         } else {
             data.averageEnergyLevel = 0;
             data.minEnergyLevel = 0;
@@ -345,9 +349,8 @@ void EvolutionSimulation::reloadGrid() {
         agent->setSteps(0);
         findRandomEmptyPosition(x, y);
         agent->setX(x);
-        agent->setX(y);
+        agent->setY(y);
     }
-    updateGrid();
 
     totalDeaths = 0;
     totalAlives = 0;

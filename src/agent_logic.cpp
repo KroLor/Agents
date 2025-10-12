@@ -110,7 +110,7 @@ bool Agent::move(int dx, int dy, const vector<vector<Cell>>& grid) {
     
     int newX = x + dx;
     int newY = y + dy;
-    
+
     if (grid[newX][newY].type == WALL || grid[newX][newY].type == AGENT) {
         return false;
     }
