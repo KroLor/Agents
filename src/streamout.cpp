@@ -5,38 +5,50 @@
 
 using namespace std;
 
+static vector<vector<Cell>> previousField; // Буфер состояния поля
+
 vector<vector<Cell>> createField(int width, int height) {
-    auto field = vector<vector<Cell>>(width + 2, vector<Cell>(height + 2, {EMPTY}));
+    previousField = vector<vector<Cell>>(height + 2, vector<Cell>(width + 2, {EMPTY}));
+    auto field = vector<vector<Cell>>(height + 2, vector<Cell>(width + 2, {EMPTY}));
 
     // Задаем стены на границах
-    for (int i = 0; i < height + 2; i++) {
-        field[0][i].type = WALL;         // Левая граница
-        field[width + 1][i].type = WALL; // Правая граница
+    for (int i = 0; i < width + 2; i++) {
+        field[0][i].type = WALL;          // Верхняя граница
+        field[height + 1][i].type = WALL; // Нижняя граница
     }
 
-    for (int j = 0; j < width + 2; j++) {
-        field[j][0].type = WALL;          // Верхняя граница
-        field[j][height + 1].type = WALL; // Нижняя граница
+    for (int j = 0; j < height + 2; j++) {
+        field[j][0].type = WALL;          // Левая граница
+        field[j][width + 1].type = WALL;  // Правая граница
     }
+
+    #ifdef _WIN32
+        system("cls");
+    #else
+        system("clear");
+    #endif
 
     return field;
 }
 
 void updateField(const vector<vector<Cell>>& field) {
-    cout << "\033[2J\033[1;1H"; // Очищаем консоль и перемещаем курсор в начало
+    for (int y = 0; y < field.size(); y++) {
+        for (int x = 0; x < field[y].size(); x++) {
+            if (field[y][x].type != previousField[y][x].type) {
+                cout << "\033[" << y + 1 << ";" << x + 1 << "H"; // Перенос каретки и дальнейшая замена
 
-    for (int j = 0; j < field[0].size(); j++) {
-        for (int i = 0; i < field.size(); i++) {
-            switch (field[i][j].type) {
-                case EMPTY: cout << SYMBOL_EMPTY; break;
-                case WALL: cout << SYMBOL_WALL; break;
-                case AGENT: cout << SYMBOL_AGENT; break;
-                case FOOD: cout << SYMBOL_FOOD; break;
+                switch (field[y][x].type) {
+                    case EMPTY: cout << SYMBOL_EMPTY; break;
+                    case WALL: cout << SYMBOL_WALL; break;
+                    case AGENT: cout << SYMBOL_AGENT; break;
+                    case FOOD: cout << SYMBOL_FOOD; break;
+                }
+
+                cout.flush();
             }
         }
-        cout << '\n';
     }
-    cout.flush();
+    previousField = field;
 }
 
 void printStatistics(const EvolutionSimulation& sim, int currentStep, int totalSteps) {
