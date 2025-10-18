@@ -14,13 +14,10 @@ int main() {
     auto field = createField(FIELD_WIDTH, FIELD_HEIGHT);
     EvolutionSimulation sim(field);
 
-    updateField(sim.getGrid());
-
     while (sim.getGeneration() <= GENERATIONS) {
         // Визуализация раунда/поколения
         for (int step = 1; step <= NUMBER_OF_STEPS; step++) {
-            updateField(sim.getGrid());
-            // printStatistics(sim, step, NUMBER_OF_STEPS);
+            updateField(sim.getGrid(), sim, GENERATIONS, SKIP_GENERATIONS, step, NUMBER_OF_STEPS);
 
             sim.simulateStep();
 
@@ -40,7 +37,6 @@ int main() {
             sim.geneticAlgorithm();
         }
     }
-    // printStatistics(sim, 1, NUMBER_OF_STEPS);
     
     return 0;
 }
