@@ -148,13 +148,14 @@ void EvolutionSimulation::geneticAlgorithm()
     // Сортируем по количеству шагов (по убыванию)
     sort(population.begin(), population.end(), /* Лямбда функция для принцыпа сравнения */
                     [](const unique_ptr<Agent>& a, const unique_ptr<Agent>& b) { 
-                        return a->getEnergy() > b->getEnergy(); 
+                        return a->getSteps() > b->getSteps(); 
                     });
-                                            /*a->getSteps() > b->getSteps();    (a->getSteps() + a->getEnergy()) > (b->getSteps() + b->getEnergy());*/
+                                            /*a->getEnergy() > b->getEnergy();    (a->getSteps() + a->getEnergy()) > (b->getSteps() + b->getEnergy());*/
     int bestCount = population.size() / 2; // Берем первую лучшую половину
     vector<unique_ptr<Agent>> newPopulation;
     
     uniform_real_distribution<float> chance(0.0f, 1.0f);
+
     // Создаем новое поколение на основе лучших агентов
     for (int i = 0; i < bestCount; i++) {
         // Клонируем лучших агентов

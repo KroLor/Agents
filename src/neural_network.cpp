@@ -153,11 +153,11 @@ pair<int, int> NeuralGene::decideDirection(const vector<Cell>& surroundings, int
     }
     
     // Сдвинем крайние значения ({-1, 1} => {-0.1, 0.1}), чтобы уменьшить влияние этого параметра
-    inputs[8] = directionToFood.first; // dx
-    inputs[9] = directionToFood.second; // dy
+    inputs[8] = directionToFood.first / 10;  // dx
+    inputs[9] = directionToFood.second / 10; // dy
     
     // Нормируем кол-во энергии
-    inputs[10] = min((double)energy / (double)INIT_ENERGY_AGENT, 1.0);
+    inputs[10] = min((double)energy / ((double)INIT_ENERGY_AGENT * 2), 1.0);
     
     vector<double> outputs = neuralNet->predict(inputs); // 0 - Вниз, 1 - Вверх, 2 - Влево, 3 - Вправо
     
@@ -175,7 +175,7 @@ pair<int, int> NeuralGene::decideDirection(const vector<Cell>& surroundings, int
         case 1: return {0, 1};  // Вверх
         case 2: return {-1, 0}; // Влево
         case 3: return {1, 0};  // Вправо
-        default: return {0, 0};
+        default: return {0, 0}; // На месте
     }
     /** 
      * Всего по dx и dy вариантов:
