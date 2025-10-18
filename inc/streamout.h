@@ -16,15 +16,22 @@ using namespace std;
 vector<vector<Cell>> createField(int width, int height);
 
 /**
- * @brief Обновляет поле.
+ * @brief Обновляет поле и таблицу статистики.
  * @param field Двумерное поле.
+ * @param sim Ссылка на симуляцию.
+ * @param generation Всего поколений.
+ * @param skipGen Пропусков поколений.
+ * @param currentStep Текущий шаг.
+ * @param totalSteps Всего шагов.
  */
-void updateField(const vector<vector<Cell>>& field);
+void updateField(const vector<vector<Cell>>& field, const EvolutionSimulation& sim, int generation, int skipGen, int currentStep, int totalSteps);
 
 /**
- * @brief Выводит статистику в консоль.
- * @param sim Класс симуляции.
+ * @brief Обновляет таблицу статистики.
+ * @param sim Ссылка на симуляцию.
+ * @param generation Всего поколений.
+ * @param skipGen Пропусков поколений.
  * @param currentStep Текущий шаг.
- * @param totalSteps Всего шагов в раундах.
+ * @param totalSteps Всего шагов.
  */
-void printStatistics(const EvolutionSimulation& sim, int currentStep, int totalSteps);
+void updateTable(const EvolutionSimulation& sim, int generation, int skipGen, int currentStep, int totalSteps);
