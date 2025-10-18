@@ -154,8 +154,10 @@ void EvolutionSimulation::geneticAlgorithm()
 {
     // Сортируем по количеству шагов (по убыванию)
     sort(population.begin(), population.end(), /* Лямбда функция для принцыпа сравнения */
-                    [](const unique_ptr<Agent>& a, const unique_ptr<Agent>& b) { return a->getSteps() > b->getSteps(); });
-    
+                    [](const unique_ptr<Agent>& a, const unique_ptr<Agent>& b) { 
+                        return (a->getSteps() * a->getEnergy()) > (b->getSteps() * b->getEnergy());
+                    });
+                                                                               /*return a->getSteps() > b->getSteps();*/
     int bestCount = population.size() / 2; // Берем первую лучшую половину
     vector<unique_ptr<Agent>> newPopulation;
     
@@ -164,10 +166,11 @@ void EvolutionSimulation::geneticAlgorithm()
     for (int i = 0; i < bestCount; i++) {
         // Клонируем лучших агентов
         newPopulation.push_back(population[i]->clone());
-
-        // Случайная мутация для лучших
-        if (chance(rng) < AGENT_MUTATION_CHANCE) {
-            newPopulation[i]->mutateGene(mutationPower);
+    }
+    for (int i = 0; i < bestCount - 1; i++) {
+        // С некоторым шансом скрещиваем первую половину
+        if (chance(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
+            newPopulation[i]->crossing(*newPopulation[i+1]);
         }
     }
     
@@ -175,11 +178,10 @@ void EvolutionSimulation::geneticAlgorithm()
     for (int i = bestCount; i < population.size(); i++) {
         // Клонируем худшего агента с его текущим геном
         newPopulation.push_back(population[i]->clone());
-    }
-    for (int i = bestCount; i < population.size() - 1; i++) {
-        // С некоторым шансом скрещиваем вторую половину
-        if (chance(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
-            newPopulation[i]->crossing(*newPopulation[i+1]);
+
+        // Случайная мутация для худших
+        if (chance(rng) < AGENT_MUTATION_CHANCE) {
+            newPopulation[i]->mutateGene(mutationPower);
         }
     }
     
