@@ -18,9 +18,7 @@ class EvolutionSimulation {
 private:
     vector<vector<Cell>> grid;            // Двумерное поле клеток
     vector<unique_ptr<Agent>> population; // Популяция агентов
-    bool paused;                          // Флаг паузы симуляции
-    float simulationSpeed;                // Множитель скорости симуляции
-    float mutationRate;                   // Коэффициент мутации
+    float mutationPower;                  // Коэффициент мутации
     int generation;                       // Текущее поколение
     int totalDeaths;                      // Общее количество смертей
     int totalAlives;                      // Общее количество рождений
@@ -90,7 +88,7 @@ public:
      * @param genome Уникальный указатель на геном.
      * @return Указатель на созданного агента.
      */
-    Agent* addAgent(int x, int y, int energy = INT_ENERGY_AGENT, unique_ptr<Gene> genome = nullptr);
+    Agent* addAgent(int x, int y, int energy = INIT_ENERGY_AGENT, unique_ptr<Gene> genome = nullptr);
     
     /**
      * @brief Добавляет еду в указанную позицию.
@@ -139,7 +137,7 @@ public:
         int generation;          // Текущая итерация симуляции
         int totalAlives;         // Общее количество живых
         int totalDeaths;         // Общее количество мертвых
-        float mutationRate;      // Текущий коэффициент мутации
+        float mutationPower;     // Текущий коэффициент мутации
     };
 
     /**
@@ -163,44 +161,24 @@ public:
     bool loadSimulationState(const string& filename);
     
     /**
-     * @brief Приостанавливает или возобновляет симуляцию.
-     * @param paused true для паузы, false для продолжения.
-     */
-    void setSimulationPaused(bool paused) { this->paused = paused; }
-    
-    /**
-     * @brief Проверяет, находится ли симуляция на паузе.
-     * @return true если симуляция на паузе, иначе false.
-     */
-    bool isSimulationPaused() const { return paused; }
-    
-    /**
-     * @brief Устанавливает скорость симуляции.
-     * @param speed Множитель скорости (1.0 = нормальная скорость).
-     */
-    void setSimulationSpeed(float speed) { simulationSpeed = speed; }
-    
-    /**
-     * @brief Возвращает текущую скорость симуляции.
-     * @return Текущий множитель скорости.
-     */
-    float getSimulationSpeed() const { return simulationSpeed; }
-    
-    /**
      * @brief Устанавливает коэффициент мутации для новых агентов.
-     * @param mutationRate Новый коэффициент мутации (0.0 - 1.0).
+     * @param mutationPower Новый коэффициент мутации (-1.0 - 1.0).
      */
-    void setMutationRate(float mutationRate) { this->mutationRate = mutationRate; }
+    void setmutationPower(float mutationPower) { this->mutationPower = mutationPower; }
     
     /**
      * @brief Возвращает текущий коэффициент мутации.
      * @return Текущий коэффициент мутации.
      */
-    float getMutationRate() const { return mutationRate; }
+    float getmutationPower() const { return mutationPower; }
+
+    /**
+     * @brief Очищает поле для нового раунда.
+     */
+    void reloadGrid();
     
     /**
-     * @brief Сбрасывает поле в начальное состояние для нового раунда.
-     * @param newGrid Новое поле для симуляции.
+     * @brief Сбрасывает поле в начальное состояние.
      */
-    void resetGrid(vector<vector<Cell>> newGrid = {});
+    void resetSim();
 };

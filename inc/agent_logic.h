@@ -12,7 +12,7 @@ using namespace std;
  * @brief Класс - агент.
  * 
  * Содержит методы для управления агентом.
- * Агент знает свою координату (вне поля), энергию, ген, количество шагов, состояние и собственное окружение. (Вектор направления к еде промежуточный параметр)
+ * Агент знает свои координаты (вне поля), энергию, ген, количество шагов, состояние и собственное окружение. (Вектор направления к еде промежуточный параметр)
  */
 class Agent {
 private:
@@ -31,10 +31,15 @@ private:
     void consumeEnergy(int amount);
 
     /**
-     * @brief Увеличивает энергию агента на указанное количество.
-     * @param amount Количество энергии.
+     * @brief Агент делает свой ход.
+     * @return true если перемещение или бездействие успешно, иначе false.
      */
-    void gainEnergy(int amount);
+    bool move(int dx, int dy, const vector<vector<Cell>>& grid);
+
+    /**
+     * 
+     */
+    void initializeBrain();
 
 public:
     Agent();
@@ -54,26 +59,38 @@ public:
     bool decideAction(const vector<vector<Cell>>& grid);
 
     /**
-     * @brief 
-     * @return 
-     */
-    bool canReproduce();
-
-    /**
      * @brief Агенту капут.
      */
     void die();
 
     /**
-     * @brief Агент делает свой ход.
-     * @return true если перемещение или бездействие успешно, иначе false.
-     */
-    bool move(int dx, int dy, const vector<vector<Cell>>& grid);
-
-    /**
-     * @brief Увеличивает возраст агента на 1 такт.
+     * @brief Увеличивает кол-во шагов.
      */
     void stepTick();
+
+    /**
+     * @brief Мутация гена.
+     * @param mutationPower Сила мутации.
+     */
+    void mutateGene(float mutationPower);
+
+    /**
+     * @brief Скрещивает гены агента со вторым.
+     * @param pair Пара для скрещивания.
+     */
+    void crossing(const Agent& pair);
+
+    /**
+     * @brief Увеличивает энергию агента на указанное количество.
+     * @param amount Количество энергии.
+     */
+    void gainEnergy(int amount);
+
+    /**
+     * @brief Клонирует агента.
+     * @return Указатель на нового агента.
+     */
+    unique_ptr<Agent> clone();
 
     /**
      * @brief Возвращает текущее положение по x.
@@ -107,7 +124,7 @@ public:
 
     /**
      * @brief Задает кол-во энергии.
-     * @param Кол-во задаваемой энергии.
+     * @param newEnergy Кол-во задаваемой энергии.
      */
     void setEnergy(int newEnergy) { energy = newEnergy; }
 
@@ -116,12 +133,21 @@ public:
      * @return Кол-во шагов.
      */
     int getSteps() const { return steps; }
+    
+    void setSteps(int _steps) { steps = _steps; }
 
     /**
      * @brief Возвращает состояние агента.
      * @return true жив, иначе false.
      */
     bool getIsAlive() const { return isAlive; }
+
+    /**
+     * @brief Возвращает ссылку на ген агента.
+     */
+    const Gene& getGene() const { return *gene; }
+
+    void setIsAlive(bool alive) { isAlive = alive; }
 
     /**
      * @brief Возвращает массив окружающих клеток.
@@ -134,6 +160,4 @@ public:
      * @return Вектор направления.
      */
     const pair<int, int>& getDirectionToFood(vector<vector<Cell>>* grid);
-
-    // void initializeBrain();
 };

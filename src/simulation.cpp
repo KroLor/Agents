@@ -10,9 +10,7 @@ using namespace std;
 static mt19937 rng(random_device{}());
 
 EvolutionSimulation::EvolutionSimulation(vector<vector<Cell>> grid, int initialPopulationSize, int initialFoodCount)
-    : grid(move(grid)), paused(false), simulationSpeed(1.0f), 
-      mutationRate(0.1f), generation(0), 
-      totalDeaths(0), totalAlives(0), currentTick(0)
+    : grid(move(grid)), mutationPower(AGENT_MUTATION_POWER), generation(0), totalDeaths(0), totalAlives(0), currentTick(0)
 {
     initializePopulation(initialPopulationSize);
     initializeFood(initialFoodCount);
@@ -73,8 +71,6 @@ bool EvolutionSimulation::findRandomEmptyPosition(int& x, int& y) const
 
 void EvolutionSimulation::simulateStep()
 {
-    if (paused) return;
-
     updateAgents();
     
     currentTick++;
@@ -97,8 +93,13 @@ void EvolutionSimulation::updateAgents() {
             if (agent->getEnergy() <= 0) {
                 agent->die();
                 totalDeaths++;
+
+                int x = agent->getX();
+                int y = agent->getY();
+                grid[x][y].type = EMPTY;
                 continue;
             }
+            totalAlives++;
 
             // Агент осматривается
             agent->lookAround(&grid);
@@ -108,19 +109,31 @@ void EvolutionSimulation::updateAgents() {
             int oldX = agent->getX();
             int oldY = agent->getY();
             
-            grid[oldX][oldY].type = EMPTY;
-            
             // Агент думает и делает совй ход
             agent->decideAction(grid);
             
             // Обновляем новую позицию
             int newX = agent->getX();
             int newY = agent->getY();
+
+            Cell tCell = grid[newX][newY];
+            if (tCell.type == EMPTY || tCell.type == FOOD) {
+                grid[oldX][oldY].type = EMPTY;
+                
+                if (tCell.type == FOOD) {
+                    agent->gainEnergy(tCell.foodValue);
+                    tCell.foodValue = 0;
+                }
+                tCell.type = AGENT;
+            } else {
+                agent->setX(oldX);
+                agent->setY(oldY);
+            }
             
             // Если агент съел еду, обновляем клетку
             if (grid[newX][newY].type == FOOD) {
                 grid[newX][newY].type = AGENT;
-                grid[newX][newY].foodValue = (int)NULL;
+                grid[newX][newY].foodValue = 0;
             }
             
             if (grid[newX][newY].type == EMPTY) {
@@ -139,7 +152,40 @@ void EvolutionSimulation::updateAgents() {
 
 void EvolutionSimulation::geneticAlgorithm()
 {
-    // Только увеличиваем счетчик поколений
+    // Сортируем по количеству шагов (по убыванию)
+    sort(population.begin(), population.end(), /* Лямбда функция для принцыпа сравнения */
+                    [](const unique_ptr<Agent>& a, const unique_ptr<Agent>& b) { return a->getSteps() > b->getSteps(); });
+    
+    int bestCount = population.size() / 2; // Берем первую лучшую половину
+    vector<unique_ptr<Agent>> newPopulation;
+    
+    uniform_real_distribution<float> chance(0.0f, 1.0f);
+    // Создаем новое поколение на основе лучших агентов
+    for (int i = 0; i < bestCount; i++) {
+        // Клонируем лучших агентов
+        newPopulation.push_back(population[i]->clone());
+
+        // Случайная мутация для лучших
+        if (chance(rng) < AGENT_MUTATION_CHANCE) {
+            newPopulation[i]->mutateGene(mutationPower);
+        }
+    }
+    
+    // Худших агентов клонируем
+    for (int i = bestCount; i < population.size(); i++) {
+        // Клонируем худшего агента с его текущим геном
+        newPopulation.push_back(population[i]->clone());
+    }
+    for (int i = bestCount; i < population.size() - 1; i++) {
+        // С некоторым шансом скрещиваем вторую половину
+        if (chance(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
+            newPopulation[i]->crossing(*newPopulation[i+1]);
+        }
+    }
+    
+    // Заменяем старую популяцию новой
+    population = move(newPopulation);
+    
     generation++;
 }
 
@@ -227,7 +273,7 @@ EvolutionSimulation::SimulationData EvolutionSimulation::getSimulationData() con
     SimulationData data{};
     data.populationSize = population.size();
     data.generation = generation;
-    data.mutationRate = mutationRate;
+    data.mutationPower = mutationPower;
     data.totalAlives = totalAlives;
     data.totalDeaths = totalDeaths;
     int alive = 0;
@@ -249,15 +295,23 @@ EvolutionSimulation::SimulationData EvolutionSimulation::getSimulationData() con
         data.maxEnergyLevel = INT_MIN;
         
         for (const auto& agent : population) {
-            if (agent->getIsAlive()) { alive++; }
-            int energy = agent->getEnergy();
-            totalEnergy += energy;
-            data.minEnergyLevel = min(data.minEnergyLevel, energy);
-            data.maxEnergyLevel = max(data.maxEnergyLevel, energy);
+            if (agent->getIsAlive()) {
+                int energy = agent->getEnergy();
+                alive++;
+
+                totalEnergy += energy;
+                data.minEnergyLevel = min(data.minEnergyLevel, energy);
+                data.maxEnergyLevel = max(data.maxEnergyLevel, energy);
+            }
         }
 
-
-        if (alive != 0) { data.averageEnergyLevel = totalEnergy / alive; }
+        if (alive != 0) {
+            data.averageEnergyLevel = totalEnergy / alive;
+        } else {
+            data.averageEnergyLevel = 0;
+            data.minEnergyLevel = 0;
+            data.maxEnergyLevel = 0;
+        }
     } else {
         data.averageEnergyLevel = 0;
         data.minEnergyLevel = 0;
@@ -267,43 +321,41 @@ EvolutionSimulation::SimulationData EvolutionSimulation::getSimulationData() con
     return data;
 }
 
-// bool EvolutionSimulation::saveSimulationState(const string& filename) const
-// {
-//     ofstream file(filename, ios::binary);
-//     if (!file.is_open()) {
-//         return false;
-//     }
-    
-//     // TODO: Реализовать сериализацию состояния
-//     // Это сложная задача, требующая сериализации всех агентов и их геномов
-    
-//     return true;
-// }
+void EvolutionSimulation::reloadGrid() {
+    for (auto& row : grid) {
+        for (auto& cell : row) {
+            if (cell.type != WALL) {
+                cell.type = EMPTY;
+                cell.foodValue = 0;
+            }
+        }
+    }
 
-// bool EvolutionSimulation::loadSimulationState(const string& filename)
-// {
-//     ifstream file(filename, ios::binary);
-//     if (!file.is_open()) {
-//         return false;
-//     }
-    
-//     // TODO: Реализовать десериализацию состояния
-//     // Это сложная задача, требующая восстановления всех агентов и их геномов
-    
-//     return true;
-// }
+    for (auto& agent : population) {
+        int x, y;
+        agent->setEnergy(INIT_ENERGY_AGENT);
+        agent->setIsAlive(true);
+        agent->setSteps(0);
+        findRandomEmptyPosition(x, y);
+        agent->setX(x);
+        agent->setY(y);
+    }
 
-void EvolutionSimulation::resetGrid(vector<vector<Cell>> newGrid)
+    totalDeaths = 0;
+    totalAlives = 0;
+    currentTick = 0;
+
+    initializeFood(INIT_FOOD_COUNT);
+    updateGrid();
+}
+
+void EvolutionSimulation::resetSim()
 {
-    if (!newGrid.empty()) {
-        grid = move(newGrid);
-    } else {
-        for (auto& row : grid) {
-            for (auto& cell : row) {
-                if (cell.type != WALL) {
-                    cell.type = EMPTY;
-                    cell.foodValue = 0;
-                }
+    for (auto& row : grid) {
+        for (auto& cell : row) {
+            if (cell.type != WALL) {
+                cell.type = EMPTY;
+                cell.foodValue = 0;
             }
         }
     }
