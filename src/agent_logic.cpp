@@ -140,6 +140,11 @@ void Agent::mutateGene(float mutationPower) {
     gene = gene->mutation(mutationPower);
 }
 
+void Agent::crossing(const Agent& pair) {
+    unique_ptr<Gene> newGene = gene->crossing(pair.getGene());
+    gene = std::move(newGene);
+}
+
 void Agent::die() {
     isAlive = false;
 }

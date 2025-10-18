@@ -64,7 +64,7 @@ public:
     void die();
 
     /**
-     * @brief Увеличивает возраст агента на 1 такт.
+     * @brief Увеличивает кол-во шагов.
      */
     void stepTick();
 
@@ -73,6 +73,12 @@ public:
      * @param mutationPower Сила мутации.
      */
     void mutateGene(float mutationPower);
+
+    /**
+     * @brief Скрещивает гены агента со вторым.
+     * @param pair Пара для скрещивания.
+     */
+    void crossing(const Agent& pair);
 
     /**
      * @brief Увеличивает энергию агента на указанное количество.
@@ -135,6 +141,11 @@ public:
      * @return true жив, иначе false.
      */
     bool getIsAlive() const { return isAlive; }
+
+    /**
+     * @brief Возвращает ссылку на ген агента.
+     */
+    const Gene& getGene() const { return *gene; }
 
     void setIsAlive(bool alive) { isAlive = alive; }
 

@@ -13,7 +13,7 @@ using namespace std;
  */
 class GeneLayer {
 private:
-    vector<vector<double>> weights; // [input_size][output_size]
+    vector<vector<double>> weights; // [input] [output]
     string activation;              // "sigmoid" или "relu"
 
 public:
@@ -81,6 +81,9 @@ public:
      * @param mutationPower Интенсивность мутаций.
      */
     void mutate(float mutationPower);
+
+
+    unique_ptr<NeuralNetwork> crossing(const NeuralNetwork& otherNet) const;
     
     /**
      * @brief Создает полную копию нейронной сети.
@@ -121,6 +124,13 @@ public:
      * @return Умный указатель на копию гена.
      */
     unique_ptr<Gene> clone() const override;
+
+    /**
+     * @brief Скрещивает нейросети.
+     */
+    unique_ptr<Gene> crossing(const Gene& pairGene) const;
+
+    const NeuralNetwork& getNeuralNet() const { return *neuralNet; }
 
     /**
      * 

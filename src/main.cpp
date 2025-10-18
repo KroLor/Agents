@@ -4,7 +4,13 @@
 #include "streamout.h"
 #include "simulation.h"
 
+// void assignConstants() {
+
+// }
+
 int main() {
+    // assignConstants();
+
     auto field = createField(FIELD_WIDTH, FIELD_HEIGHT);
     EvolutionSimulation sim(field);
 

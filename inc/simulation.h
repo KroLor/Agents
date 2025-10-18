@@ -18,8 +18,6 @@ class EvolutionSimulation {
 private:
     vector<vector<Cell>> grid;            // Двумерное поле клеток
     vector<unique_ptr<Agent>> population; // Популяция агентов
-    bool paused;                          // Флаг паузы симуляции
-    float simulationSpeed;                // Множитель скорости симуляции
     float mutationPower;                  // Коэффициент мутации
     int generation;                       // Текущее поколение
     int totalDeaths;                      // Общее количество смертей
@@ -163,30 +161,6 @@ public:
     bool loadSimulationState(const string& filename);
     
     /**
-     * @brief Приостанавливает или возобновляет симуляцию.
-     * @param paused true для паузы, false для продолжения.
-     */
-    void setSimulationPaused(bool paused) { this->paused = paused; }
-    
-    /**
-     * @brief Проверяет, находится ли симуляция на паузе.
-     * @return true если симуляция на паузе, иначе false.
-     */
-    bool isSimulationPaused() const { return paused; }
-    
-    /**
-     * @brief Устанавливает скорость симуляции.
-     * @param speed Множитель скорости (1.0 = нормальная скорость).
-     */
-    void setSimulationSpeed(float speed) { simulationSpeed = speed; }
-    
-    /**
-     * @brief Возвращает текущую скорость симуляции.
-     * @return Текущий множитель скорости.
-     */
-    float getSimulationSpeed() const { return simulationSpeed; }
-    
-    /**
      * @brief Устанавливает коэффициент мутации для новых агентов.
      * @param mutationPower Новый коэффициент мутации (-1.0 - 1.0).
      */
@@ -205,7 +179,6 @@ public:
     
     /**
      * @brief Сбрасывает поле в начальное состояние.
-     * @param newGrid Новое поле для симуляции.
      */
-    void resetSim(vector<vector<Cell>> newGrid = {});
+    void resetSim();
 };

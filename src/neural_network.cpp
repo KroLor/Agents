@@ -99,6 +99,37 @@ void NeuralNetwork::mutate(float mutationPower) {
     }
 }
 
+unique_ptr<NeuralNetwork> NeuralNetwork::crossing(const NeuralNetwork& otherNet) const {
+    auto newNet = make_unique<NeuralNetwork>();
+    const auto& otherlayers = otherNet.getLayers();
+
+    uniform_real_distribution<float> dist(0.0, 1.0);
+
+    for (int i = 0; i < layers.size() && i < otherlayers.size(); i++) {
+        const auto& weights1 = layers[i]->getWeights();
+        const auto& weights2 = otherlayers[i]->getWeights();
+
+        auto newLayer = make_unique<GeneLayer>(weights1.size(), weights1[0].size(), layers[i]->getActivation());
+
+        vector<vector<double>> newWeights = weights1;
+
+        // Скрещивание
+        for (int j = 0; j < weights1.size() && j < weights2.size(); j++) {
+            for (int i = 0; i < weights1[j].size() && i < weights2[j].size(); i++) {
+                // С шансом 50% прошлый вес в слое нынешней нейросети заменится на новый тот же вес из того же слоя другой нейросети
+                if (dist(rng) < 0.5f) {
+                    newWeights[j][i] = weights2[j][i];
+                }
+            }
+        }
+
+        newLayer->setWeights(newWeights);
+        newNet->addLayer(move(newLayer));
+    }
+
+    return newNet;
+}
+
 NeuralGene::NeuralGene() {
     neuralNet = make_unique<NeuralNetwork>();
 
@@ -161,11 +192,22 @@ pair<int, int> NeuralGene::decideDirection(const vector<Cell>& surroundings, int
 
 unique_ptr<Gene> NeuralGene::clone() const {
     auto newNeuralNet = neuralNet->clone();
-    return make_unique<NeuralGene>(move(newNeuralNet));
+    return make_unique<NeuralGene>(move(newNeuralNet)); // NeuralGene === Gene
 }
 
 unique_ptr<Gene> NeuralGene::mutation(float mutationPower) const {
     auto mutatedNet = neuralNet->clone();
     mutatedNet->mutate(mutationPower);
     return make_unique<NeuralGene>(move(mutatedNet));
+}
+
+unique_ptr<Gene> NeuralGene::crossing(const Gene& pairGene) const {
+    const NeuralGene* otherNeuralGene = dynamic_cast<const NeuralGene*>(&pairGene);
+    if (!otherNeuralGene) {
+        // Если типы не совпадают, возвращаем клон текущего гена
+        return clone();
+    }
+    
+    auto newNeuralNet = neuralNet->crossing(otherNeuralGene->getNeuralNet());
+    return make_unique<NeuralGene>(move(newNeuralNet));
 }

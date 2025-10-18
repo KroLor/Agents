@@ -10,9 +10,7 @@ using namespace std;
 static mt19937 rng(random_device{}());
 
 EvolutionSimulation::EvolutionSimulation(vector<vector<Cell>> grid, int initialPopulationSize, int initialFoodCount)
-    : grid(move(grid)), paused(false), simulationSpeed(1.0f), 
-      mutationPower(AGENT_MUTATION_POWER), generation(0), 
-      totalDeaths(0), totalAlives(0), currentTick(0)
+    : grid(move(grid)), mutationPower(AGENT_MUTATION_POWER), generation(0), totalDeaths(0), totalAlives(0), currentTick(0)
 {
     initializePopulation(initialPopulationSize);
     initializeFood(initialFoodCount);
@@ -73,8 +71,6 @@ bool EvolutionSimulation::findRandomEmptyPosition(int& x, int& y) const
 
 void EvolutionSimulation::simulateStep()
 {
-    if (paused) return;
-
     updateAgents();
     
     currentTick++;
@@ -179,6 +175,12 @@ void EvolutionSimulation::geneticAlgorithm()
     for (int i = bestCount; i < population.size(); i++) {
         // Клонируем худшего агента с его текущим геном
         newPopulation.push_back(population[i]->clone());
+    }
+    for (int i = bestCount; i < population.size() - 1; i++) {
+        // С некоторым шансом скрещиваем вторую половину
+        if (chance(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
+            newPopulation[i]->crossing(*newPopulation[i+1]);
+        }
     }
     
     // Заменяем старую популяцию новой
@@ -319,32 +321,6 @@ EvolutionSimulation::SimulationData EvolutionSimulation::getSimulationData() con
     return data;
 }
 
-// bool EvolutionSimulation::saveSimulationState(const string& filename) const
-// {
-//     ofstream file(filename, ios::binary);
-//     if (!file.is_open()) {
-//         return false;
-//     }
-    
-//     // TODO: Реализовать сериализацию состояния
-//     // Это сложная задача, требующая сериализации всех агентов и их геномов
-    
-//     return true;
-// }
-
-// bool EvolutionSimulation::loadSimulationState(const string& filename)
-// {
-//     ifstream file(filename, ios::binary);
-//     if (!file.is_open()) {
-//         return false;
-//     }
-    
-//     // TODO: Реализовать десериализацию состояния
-//     // Это сложная задача, требующая восстановления всех агентов и их геномов
-    
-//     return true;
-// }
-
 void EvolutionSimulation::reloadGrid() {
     for (auto& row : grid) {
         for (auto& cell : row) {
@@ -373,17 +349,13 @@ void EvolutionSimulation::reloadGrid() {
     updateGrid();
 }
 
-void EvolutionSimulation::resetSim(vector<vector<Cell>> newGrid)
+void EvolutionSimulation::resetSim()
 {
-    if (!newGrid.empty()) {
-        grid = move(newGrid);
-    } else {
-        for (auto& row : grid) {
-            for (auto& cell : row) {
-                if (cell.type != WALL) {
-                    cell.type = EMPTY;
-                    cell.foodValue = 0;
-                }
+    for (auto& row : grid) {
+        for (auto& cell : row) {
+            if (cell.type != WALL) {
+                cell.type = EMPTY;
+                cell.foodValue = 0;
             }
         }
     }
