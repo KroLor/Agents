@@ -21,7 +21,7 @@ private:
     float mutationPower;                  // Коэффициент мутации
     int generation;                       // Текущее поколение
     int totalDeaths;                      // Общее количество смертей
-    int totalAlives;                      // Общее количество рождений
+    int totalAlives;                      // Общее количество живых
     int currentTick;                      // Счетчик тиков для контроля появления еды
 
     /**
@@ -46,8 +46,9 @@ private:
 
     /**
      * @brief Обновляет состояние всех агентов.
+     * @return Удачно или нет.
      */
-    void updateAgents();
+    bool updateAgents();
 
     /**
      * @brief Генерирует новую еду на поле.
@@ -67,8 +68,9 @@ public:
     
     /**
      * @brief Выполняет один такт симуляции.
+     * @return Удачно или нет.
      */
-    void simulateStep();
+    bool simulateStep();
     
     /**
      * @brief Обновляет состояние поля.

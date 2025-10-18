@@ -10,7 +10,7 @@ using namespace std;
 static mt19937 rng(random_device{}());
 
 EvolutionSimulation::EvolutionSimulation(vector<vector<Cell>> grid, int initialPopulationSize, int initialFoodCount)
-    : grid(move(grid)), mutationPower(AGENT_MUTATION_POWER), generation(0), totalDeaths(0), totalAlives(0), currentTick(0)
+    : grid(move(grid)), mutationPower(AGENT_MUTATION_POWER), generation(0), totalDeaths(0), totalAlives(INIT_POP_SIZE), currentTick(0)
 {
     initializePopulation(initialPopulationSize);
     initializeFood(initialFoodCount);
@@ -69,9 +69,11 @@ bool EvolutionSimulation::findRandomEmptyPosition(int& x, int& y) const
     return true;
 }
 
-void EvolutionSimulation::simulateStep()
+bool EvolutionSimulation::simulateStep()
 {
-    updateAgents();
+    if (!updateAgents()) {
+        return false;
+    }
     
     currentTick++;
     // Добавляем новую еду FOOD_ADD_TIMES раз каждые FOOD_SPAWN_INTERVAL тиков
@@ -82,10 +84,14 @@ void EvolutionSimulation::simulateStep()
     }
     
     updateGrid();
+
+    return true;
 }
 
-void EvolutionSimulation::updateAgents() {
+bool EvolutionSimulation::updateAgents() {
     shuffle(population.begin(), population.end(), rng); // Перемешать популяцию
+
+    if (totalAlives == 0) { return false; }
     
     for (auto& agent : population) {
         if (agent->getIsAlive()) {
@@ -93,13 +99,13 @@ void EvolutionSimulation::updateAgents() {
             if (agent->getEnergy() <= 0) {
                 agent->die();
                 totalDeaths++;
+                totalAlives--;
 
                 int x = agent->getX();
                 int y = agent->getY();
                 grid[x][y].type = EMPTY;
                 continue;
             }
-            totalAlives++;
 
             // Агент осматривается
             agent->lookAround(&grid);
@@ -109,34 +115,19 @@ void EvolutionSimulation::updateAgents() {
             int oldX = agent->getX();
             int oldY = agent->getY();
             
-            // Агент думает и делает совй ход
+            // Агент думает и делает свой ход
             agent->decideAction(grid);
             
             // Обновляем новую позицию
             int newX = agent->getX();
             int newY = agent->getY();
-
-            Cell tCell = grid[newX][newY];
-            if (tCell.type == EMPTY || tCell.type == FOOD) {
-                grid[oldX][oldY].type = EMPTY;
-                
-                if (tCell.type == FOOD) {
-                    agent->gainEnergy(tCell.foodValue);
-                    tCell.foodValue = 0;
-                }
-                tCell.type = AGENT;
-            } else {
-                agent->setX(oldX);
-                agent->setY(oldY);
-            }
             
             // Если агент съел еду, обновляем клетку
             if (grid[newX][newY].type == FOOD) {
                 grid[newX][newY].type = AGENT;
                 grid[newX][newY].foodValue = 0;
             }
-            
-            if (grid[newX][newY].type == EMPTY) {
+            else if (grid[newX][newY].type == EMPTY) {
                 grid[newX][newY].type = AGENT;
             } else {
                 // Если клетка занята, возвращаемся на старое место
@@ -148,6 +139,8 @@ void EvolutionSimulation::updateAgents() {
             agent->stepTick();
         }
     }
+
+    return true;
 }
 
 void EvolutionSimulation::geneticAlgorithm()
@@ -155,9 +148,9 @@ void EvolutionSimulation::geneticAlgorithm()
     // Сортируем по количеству шагов (по убыванию)
     sort(population.begin(), population.end(), /* Лямбда функция для принцыпа сравнения */
                     [](const unique_ptr<Agent>& a, const unique_ptr<Agent>& b) { 
-                        return (a->getSteps() * a->getEnergy()) > (b->getSteps() * b->getEnergy());
+                        return a->getEnergy() > b->getEnergy(); 
                     });
-                                                                               /*return a->getSteps() > b->getSteps();*/
+                                            /*a->getSteps() > b->getSteps();    (a->getSteps() + a->getEnergy()) > (b->getSteps() + b->getEnergy());*/
     int bestCount = population.size() / 2; // Берем первую лучшую половину
     vector<unique_ptr<Agent>> newPopulation;
     
@@ -344,7 +337,7 @@ void EvolutionSimulation::reloadGrid() {
     }
 
     totalDeaths = 0;
-    totalAlives = 0;
+    totalAlives = INIT_POP_SIZE;
     currentTick = 0;
 
     initializeFood(INIT_FOOD_COUNT);
@@ -366,6 +359,7 @@ void EvolutionSimulation::resetSim()
     totalDeaths = 0;
     totalAlives = 0;
     currentTick = 0;
+    generation = 0;
     
     initializePopulation(INIT_POP_SIZE);
     initializeFood(INIT_FOOD_COUNT);

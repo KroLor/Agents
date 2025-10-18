@@ -22,13 +22,9 @@ Agent::Agent(int x, int y, int energy, unique_ptr<Gene> gene)
 
 Agent::~Agent() {}
 
-void Agent::consumeEnergy(int amount) {
-    energy -= amount;
-    if (energy < 0) energy = 0;
-}
-
-void Agent::gainEnergy(int amount) {
+void Agent::dEnergy(int amount) {
     energy += amount;
+    if (energy < 0) energy = 0;
 }
 
 void Agent::stepTick() {
@@ -104,7 +100,7 @@ bool Agent::decideAction(const vector<vector<Cell>>& grid) {
 
 bool Agent::move(int dx, int dy, const vector<vector<Cell>>& grid) {
     if (dx == 0 && dy == 0) {
-        consumeEnergy(ENERGY_LOSS_DUE_TO_INACTION);
+        dEnergy(-ENERGY_LOSS_DUE_TO_INACTION);
         return false;
     }
     
@@ -112,17 +108,17 @@ bool Agent::move(int dx, int dy, const vector<vector<Cell>>& grid) {
     int newY = y + dy;
 
     if (grid[newX][newY].type == WALL || grid[newX][newY].type == AGENT) {
-        consumeEnergy(ENERGY_LOSS_DUE_TO_INACTION);
+        dEnergy(-ENERGY_LOSS_DUE_TO_INACTION);
         return false;
     }
     
     x = newX;
     y = newY;
     
-    consumeEnergy(ENERGY_LOSS_PER_STEP);
+    dEnergy(-ENERGY_LOSS_PER_STEP);
 
     if (grid[newX][newY].type == FOOD) {
-        gainEnergy(grid[newX][newY].foodValue);
+        dEnergy(grid[newX][newY].foodValue);
     }
     
     return true;

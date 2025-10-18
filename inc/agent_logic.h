@@ -25,10 +25,10 @@ private:
     bool isAlive;                    // Состояние агента
 
     /**
-     * @brief Уменьшает энергию агента на указанное количество.
+     * @brief Изменяет энергию агента на указанное количество.
      * @param amount Количество энергии.
      */
-    void consumeEnergy(int amount);
+    void dEnergy(int amount);
 
     /**
      * @brief Агент делает свой ход.
@@ -79,12 +79,6 @@ public:
      * @param pair Пара для скрещивания.
      */
     void crossing(const Agent& pair);
-
-    /**
-     * @brief Увеличивает энергию агента на указанное количество.
-     * @param amount Количество энергии.
-     */
-    void gainEnergy(int amount);
 
     /**
      * @brief Клонирует агента.
