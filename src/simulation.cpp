@@ -155,34 +155,44 @@ void EvolutionSimulation::geneticAlgorithm() {
     
     uniform_real_distribution<float> chance(0.0f, 1.0f);
 
-    // Создаем новое поколение на основе лучших агентов
-    for (int i = 0; i < bestCount; i++) {
-        // Клонируем лучших агентов
+    // Лучшие агенты
+    for (int i = 0; i < 3; i++) {
         newPopulation.push_back(population[i]->clone());
     }
-    // Несколько первых - лучшие из лучших, их оставляем без изменения
-    for (int i = 3; i < bestCount - 1; i++) {
-        // С некоторым шансом скрещиваем первую половину
-        if (chance(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
-            newPopulation[i]->crossing(*newPopulation[i+1]);
-        }
-    }
-    
-    // Худших агентов клонируем
-    for (int i = bestCount; i < population.size(); i++) {
-        // Клонируем худшего агента с его текущим геном
-        newPopulation.push_back(population[i]->clone());
 
-        // Случайная мутация для худших
-        if (chance(rng) < AGENT_MUTATION_CHANCE) {
-            newPopulation[i]->mutateGene(mutationPower);
-        }
-    }
-    for (int i = bestCount; i < population.size() - 1; i++) {
-        // С некоторым шансом скрещиваем вторую половину
+    // Клонируем первую половину
+    for (int i = 3; i < bestCount; i++) {
+        auto agent = population[i]->clone();
+        
+        // Скрещивание с случайным агентом из первой половины
         if (chance(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
-            newPopulation[i]->crossing(*newPopulation[i+1]);
+            uniform_int_distribution<int> dist(0, bestCount - 1);
+            int index = dist(rng);
+
+            agent->crossing(*population[index]);
         }
+        
+        newPopulation.push_back(move(agent));
+    }
+
+    // Вторая половина
+    for (int i = bestCount; i < population.size(); i++) {
+        auto agent = population[i]->clone();
+        
+        // Скрещивание с случайным агентом из всей популяции
+        if (chance(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
+            uniform_int_distribution<int> dist(0, population.size() - 1);
+            int index = dist(rng);
+
+            agent->crossing(*population[index]);
+        }
+        
+        // Мутация для второй половины
+        if (chance(rng) < AGENT_MUTATION_CHANCE) {
+            agent->mutateGene(mutationPower);
+        }
+        
+        newPopulation.push_back(move(agent));
     }
     
     // Заменяем старую популяцию новой

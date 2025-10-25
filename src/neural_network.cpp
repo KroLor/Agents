@@ -57,7 +57,7 @@ void GeneLayer::mutate(float mutationPower) {
     uniform_real_distribution<double> dist(-mutationPower, mutationPower);
     for (auto& row : weights) {
         for (auto& weight : row) {
-            weight *= dist(rng);
+            weight += dist(rng);
         }
     }
 }
@@ -203,6 +203,7 @@ unique_ptr<Gene> NeuralGene::mutation(float mutationPower) const {
 
 unique_ptr<Gene> NeuralGene::crossing(const Gene& pairGene) const {
     const NeuralGene* otherNeuralGene = dynamic_cast<const NeuralGene*>(&pairGene);
+    // Подходит ли ген
     if (!otherNeuralGene) {
         // Если типы не совпадают, возвращаем клон текущего гена
         return clone();
