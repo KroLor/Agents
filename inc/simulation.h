@@ -183,4 +183,9 @@ public:
      * @brief Сбрасывает поле в начальное состояние.
      */
     void resetSim();
+
+    /**
+     * 
+     */
+    int getAliveCount() const { return totalAlives; }
 };
