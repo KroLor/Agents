@@ -24,8 +24,8 @@ int main() {
             this_thread::sleep_for(chrono::milliseconds(TICK_MS)); // FPS
         }
 
-        sim.reloadGrid();
         sim.geneticAlgorithm();
+        sim.reloadGrid();
         
         // Пропуск раундов/поколений без визуализации
         for (int gen_skip = 1; gen_skip <= SKIP_GENERATIONS - 1; gen_skip++) {
@@ -33,8 +33,8 @@ int main() {
                 if (!sim.simulateStep()) { break; }
             }
             
-            sim.reloadGrid();
             sim.geneticAlgorithm();
+            sim.reloadGrid();
         }
     }
     

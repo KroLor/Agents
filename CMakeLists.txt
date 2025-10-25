@@ -21,8 +21,6 @@ add_executable(${PROJECT_NAME} ${SOURCES})
 set_target_properties(${PROJECT_NAME} PROPERTIES
     DEBUG_POSTFIX "_d"
     RELEASE_POSTFIX ""
-    RELWITHDEBINFO_POSTFIX "_rd"
-    MINSIZEREL_POSTFIX "_ms"
 )
 
 # Установка выходного каталога

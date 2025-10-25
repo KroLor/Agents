@@ -126,31 +126,30 @@ bool EvolutionSimulation::updateAgents() {
             if (grid[newX][newY].type == FOOD) {
                 grid[newX][newY].type = AGENT;
                 grid[newX][newY].foodValue = 0;
+                agent->stepTick();
             }
             else if (grid[newX][newY].type == EMPTY) {
                 grid[newX][newY].type = AGENT;
+                agent->stepTick();
             } else {
                 // Если клетка занята, возвращаемся на старое место
                 agent->setX(oldX);
                 agent->setY(oldY);
                 grid[oldX][oldY].type = AGENT;
             }
-            
-            agent->stepTick();
         }
     }
 
     return true;
 }
 
-void EvolutionSimulation::geneticAlgorithm()
-{
+void EvolutionSimulation::geneticAlgorithm() {
     // Сортируем по количеству шагов (по убыванию)
     sort(population.begin(), population.end(), /* Лямбда функция для принцыпа сравнения */
                     [](const unique_ptr<Agent>& a, const unique_ptr<Agent>& b) { 
-                        return a->getSteps() > b->getSteps(); 
+                        return (a->getSteps() + a->getEnergy()) > (b->getSteps() + b->getEnergy());
                     });
-                                            /*a->getEnergy() > b->getEnergy();    (a->getSteps() + a->getEnergy()) > (b->getSteps() + b->getEnergy());*/
+                                            /*a->getEnergy() > b->getEnergy();    a->getSteps() > b->getSteps();*/
     int bestCount = population.size() / 2; // Берем первую лучшую половину
     vector<unique_ptr<Agent>> newPopulation;
     
@@ -161,7 +160,8 @@ void EvolutionSimulation::geneticAlgorithm()
         // Клонируем лучших агентов
         newPopulation.push_back(population[i]->clone());
     }
-    for (int i = 0; i < bestCount - 1; i++) {
+    // Несколько первых - лучшие из лучших, их оставляем без изменения
+    for (int i = 3; i < bestCount - 1; i++) {
         // С некоторым шансом скрещиваем первую половину
         if (chance(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
             newPopulation[i]->crossing(*newPopulation[i+1]);
@@ -178,6 +178,12 @@ void EvolutionSimulation::geneticAlgorithm()
             newPopulation[i]->mutateGene(mutationPower);
         }
     }
+    for (int i = bestCount; i < population.size() - 1; i++) {
+        // С некоторым шансом скрещиваем вторую половину
+        if (chance(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
+            newPopulation[i]->crossing(*newPopulation[i+1]);
+        }
+    }
     
     // Заменяем старую популяцию новой
     population = move(newPopulation);
@@ -185,8 +191,7 @@ void EvolutionSimulation::geneticAlgorithm()
     generation++;
 }
 
-void EvolutionSimulation::spawnNewFood()
-{
+void EvolutionSimulation::spawnNewFood() {
     // Добавляем новую еду с вероятностью CHANCE_OF_FOOD_APPEARANCE%
     uniform_real_distribution<float> chance(0.0f, 1.0f);
     if (chance(rng) < CHANCE_OF_FOOD_APPEARANCE) {
@@ -197,8 +202,7 @@ void EvolutionSimulation::spawnNewFood()
     }
 }
 
-void EvolutionSimulation::updateGrid()
-{
+void EvolutionSimulation::updateGrid() {
     // Обновляем тип клеток
     for (auto& row : grid) {
         for (auto& cell : row) {
@@ -216,8 +220,7 @@ void EvolutionSimulation::updateGrid()
     }
 }
 
-Agent* EvolutionSimulation::addAgent(int x, int y, int energy, unique_ptr<Gene> genome)
-{
+Agent* EvolutionSimulation::addAgent(int x, int y, int energy, unique_ptr<Gene> genome) {
     if ((x < 0 || x >= grid.size()) || (y < 0 || y >= grid[0].size())) {
         return nullptr;
     }
@@ -237,8 +240,7 @@ Agent* EvolutionSimulation::addAgent(int x, int y, int energy, unique_ptr<Gene> 
     return agent_ptr;
 }
 
-bool EvolutionSimulation::addFood(int x, int y, int energyValue)
-{
+bool EvolutionSimulation::addFood(int x, int y, int energyValue) {
     if ((x < 0 || x >= grid.size()) || (y < 0 || y >= grid[0].size())) {
         return false;
     }
@@ -264,8 +266,7 @@ const Cell& EvolutionSimulation::getCell(int x, int y) const
     return invalidCell;
 }
 
-EvolutionSimulation::SimulationData EvolutionSimulation::getSimulationData() const
-{
+EvolutionSimulation::SimulationData EvolutionSimulation::getSimulationData() const {
     SimulationData data{};
     data.populationSize = population.size();
     data.generation = generation;
@@ -345,8 +346,7 @@ void EvolutionSimulation::reloadGrid() {
     updateGrid();
 }
 
-void EvolutionSimulation::resetSim()
-{
+void EvolutionSimulation::resetSim() {
     for (auto& row : grid) {
         for (auto& cell : row) {
             if (cell.type != WALL) {

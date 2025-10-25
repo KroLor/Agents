@@ -57,7 +57,7 @@ void GeneLayer::mutate(float mutationPower) {
     uniform_real_distribution<double> dist(-mutationPower, mutationPower);
     for (auto& row : weights) {
         for (auto& weight : row) {
-            weight += dist(rng);
+            weight *= dist(rng);
         }
     }
 }
@@ -116,8 +116,8 @@ unique_ptr<NeuralNetwork> NeuralNetwork::crossing(const NeuralNetwork& otherNet)
         // Скрещивание
         for (int j = 0; j < weights1.size() && j < weights2.size(); j++) {
             for (int i = 0; i < weights1[j].size() && i < weights2[j].size(); i++) {
-                // С шансом 50% прошлый вес в слое нынешней нейросети заменится на новый тот же вес из того же слоя другой нейросети
-                if (dist(rng) < 0.5f) {
+                // С шансом 33.3% прошлый вес в слое нынешней нейросети заменится на новый, тот же вес из того же слоя, но другой нейросети
+                if (dist(rng) < 0.333f) {
                     newWeights[j][i] = weights2[j][i];
                 }
             }
@@ -152,9 +152,9 @@ pair<int, int> NeuralGene::decideDirection(const vector<Cell>& surroundings, int
         }
     }
     
-    // Сдвинем крайние значения ({-1, 1} => {-0.1, 0.1}), чтобы уменьшить влияние этого параметра
-    inputs[8] = directionToFood.first / 10;  // dx
-    inputs[9] = directionToFood.second / 10; // dy
+    // // Сдвинем крайние значения ({-1, 1} => {-0.1, 0.1}), чтобы уменьшить влияние этого параметра
+    inputs[8] = directionToFood.first/* / 10*/;  // dx
+    inputs[9] = directionToFood.second/* / 10*/; // dy
     
     // Нормируем кол-во энергии
     inputs[10] = min((double)energy / ((double)INIT_ENERGY_AGENT * 2), 1.0);
