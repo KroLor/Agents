@@ -9,9 +9,16 @@
 
 // }
 
-void saveStatistic(std::ofstream& statsFile, EvolutionSimulation& sim) {
-    statsFile << sim.getGeneration() << ";" << sim.getSimulationData().averageEnergyLevel << std::endl;
-    statsFile.flush();
+void saveStatistic(std::ofstream& statsFile, EvolutionSimulation& sim, char debugF) {
+    if (debugF == 0) {
+        statsFile << sim.getGeneration() << ";" << sim.getSimulationData().averageEnergyLevel << std::endl;
+        statsFile.flush();
+    }
+    else if (debugF == 1) {
+        statsFile << sim.getGeneration() << ";" << sim.getSimulationData().averageEnergyLevel << std::endl;
+        statsFile << sim.getPopulation()[0]->getGene()->getWe
+        statsFile.flush();
+    }
 }
 
 int main() {
@@ -33,7 +40,7 @@ int main() {
             this_thread::sleep_for(chrono::milliseconds(TICK_MS)); // FPS
         }
 
-        saveStatistic(statsFile, sim);
+        saveStatistic(statsFile, sim, 0);
         sim.geneticAlgorithm();
         sim.reloadGrid();
         
@@ -42,8 +49,22 @@ int main() {
             for (int step = 0; step < NUMBER_OF_STEPS; step++) {
                 if (!sim.simulateStep()) { break; }
             }
+
+            // Проверяем удачные ли гены
+            if (sim.getSimulationData().averageEnergyLevel >= 1000) {
+                saveStatistic(statsFile, sim, 1);
+                sim.reloadGrid();
+
+                for (int step = 1; step <= NUMBER_OF_STEPS; step++) {
+                    updateField(sim.getGrid(), sim, GENERATIONS, SKIP_GENERATIONS, step, NUMBER_OF_STEPS);
+
+                    if (!sim.simulateStep()) { break; }
+
+                    this_thread::sleep_for(chrono::milliseconds(TICK_MS)); // FPS
+                }
+            }
             
-            saveStatistic(statsFile, sim);
+            saveStatistic(statsFile, sim, 0);
             sim.geneticAlgorithm();
             sim.reloadGrid();
         }

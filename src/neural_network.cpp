@@ -130,6 +130,14 @@ unique_ptr<NeuralNetwork> NeuralNetwork::crossing(const NeuralNetwork& otherNet)
     return newNet;
 }
 
+vector<double> NeuralNetwork::getWeights() const {
+    vector<double> weights;
+
+    for (auto& layer : layers) {
+        layer->;
+    }
+}
+
 NeuralGene::NeuralGene() {
     neuralNet = make_unique<NeuralNetwork>();
 
@@ -210,4 +218,8 @@ unique_ptr<Gene> NeuralGene::crossing(const Gene& pairGene) const {
     
     auto newNeuralNet = neuralNet->crossing(otherNeuralGene->getNeuralNet());
     return make_unique<NeuralGene>(move(newNeuralNet));
+}
+
+vector<double> NeuralGene::getWeights() const {
+    return neuralNet->getWeights();
 }

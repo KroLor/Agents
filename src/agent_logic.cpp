@@ -73,29 +73,6 @@ bool Agent::decideAction(const vector<vector<Cell>>& grid) {
     #ifdef USE_A_NEURAL_NETWORK
         // Использование гена для принятия решения
         auto direction = gene->decideDirection(surroundings, energy, directionToFood);
-        
-        if (grid[x + direction.first][y + direction.second].type == WALL || grid[x + direction.first][y + direction.second].type == AGENT) {
-            // Случайное движение
-            vector<pair<int, int>> directions = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}}; // Вверх, вниз, влево, вправо
-            vector<pair<int, int>> availableDirections;
-
-            for (const auto& [dx, dy] : directions) {
-                int newX = x + dx;
-                int newY = y + dy;
-
-                if (grid[newX][newY].type == EMPTY || grid[newX][newY].type == FOOD) {
-                    availableDirections.push_back({dx, dy});
-                }
-            }
-            
-            if (availableDirections.empty()) {
-                return move(0, 0, grid);
-            }
-            
-            uniform_int_distribution<int> dist(0, availableDirections.size() - 1);
-            auto [dx, dy] = availableDirections[dist(rng)];
-            return move(dx, dy, grid);
-        }
         return move(direction.first, direction.second, grid);
     #else
         // Случайное движение

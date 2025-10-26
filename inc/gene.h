@@ -48,6 +48,6 @@ public:
     
     // Методы для сохранения/загрузки гена
 
-    // virtual void serialize() const = 0;
+    virtual vector<double> getWeights() const = 0;
     // virtual void deserialize() = 0;
 };

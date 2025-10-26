@@ -90,6 +90,8 @@ public:
      * @return Умный указатель на копию сети.
      */
     unique_ptr<NeuralNetwork> clone() const;
+
+    vector<double> getWeights() const;
 };
 
 /**
@@ -136,4 +138,7 @@ public:
      * 
      */
     void setNewNeuralNet(unique_ptr<NeuralNetwork>& newNeuralNet) { neuralNet = move(newNeuralNet); };
+
+
+    vector<double> getWeights() const override;
 };

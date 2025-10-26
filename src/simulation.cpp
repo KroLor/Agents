@@ -161,12 +161,12 @@ void EvolutionSimulation::geneticAlgorithm() {
     
     uniform_real_distribution<float> chance(0.0f, 1.0f);
 
-    // Создаем новое поколение на основе лучших агентов
+    // Создаем новое поколение на основе старого
     for (int i = 0; i < bestCount; i++) {
-        // Клонируем лучших агентов
-        newPopulation.push_back(population[i]->clone());
+        // Клонируем лучшего агента
+        newPopulation.push_back(population[i]->clone()); // population[0]
     }
-    // Несколько первых - лучшие из лучших, их оставляем без изменения
+    // Несколько первых оставляем без изменения
     for (int i = 3; i < bestCount - 1; i++) {
         // С некоторым шансом скрещиваем первую половину
         if (chance(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
@@ -193,10 +193,8 @@ void EvolutionSimulation::geneticAlgorithm() {
         }
     }
     
-    
     // Заменяем старую популяцию новой
     population = move(newPopulation);
-    
     generation++;
 }
 
