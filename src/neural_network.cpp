@@ -140,24 +140,23 @@ NeuralGene::NeuralGene() {
 NeuralGene::NeuralGene(unique_ptr<NeuralNetwork> network) : neuralNet(move(network)) {}
 
 pair<int, int> NeuralGene::decideDirection(const vector<Cell>& surroundings, int energy, pair<int, int> directionToFood) {
-    vector<double> inputs(11);
+    vector<double> inputs(INPUT_VALUES);
     
-    for (int i = 0; i < 8; i++) {
-        // Представляем клетки в виде чисел: EMPTY = 0; FOOD = 1; WALL = -1; AGENT = -1
+    for (int i = 0; i < 4; i++) {
+        // Представляем клетки в виде чисел: EMPTY = -1; FOOD = 1; WALL = 0; AGENT = 0
         switch (surroundings[i].type) {
-            case EMPTY: inputs[i] = 0.0; break;
+            case EMPTY: inputs[i] = -1.0; break;
             case FOOD: inputs[i] = 1.0; break;
-            case WALL: inputs[i] = -1.0; break;
-            case AGENT: inputs[i] = -1.0; break;
+            case WALL: inputs[i] = 0.0; break;
+            case AGENT: inputs[i] = 0.0; break;
         }
     }
     
-    // // Сдвинем крайние значения ({-1, 1} => {-0.1, 0.1}), чтобы уменьшить влияние этого параметра
-    inputs[8] = directionToFood.first / 10;  // dx
-    inputs[9] = directionToFood.second / 10; // dy
+    inputs[4] = directionToFood.first;  // dx
+    inputs[5] = directionToFood.second; // dy
     
     // Нормируем кол-во энергии
-    inputs[10] = min((double)energy / ((double)INIT_ENERGY_AGENT * 2), 1.0);
+    // inputs[6] = min((double)energy / ((double)INIT_ENERGY_AGENT * 2), 1.0);
     
     vector<double> outputs = neuralNet->predict(inputs); // 0 - Вниз, 1 - Вверх, 2 - Влево, 3 - Вправо
     

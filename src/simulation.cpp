@@ -147,12 +147,15 @@ void EvolutionSimulation::geneticAlgorithm() {
     // Сортируем по количеству шагов (по убыванию)
     sort(population.begin(), population.end(), /* Лямбда функция для принцыпа сравнения */
                     [](const unique_ptr<Agent>& a, const unique_ptr<Agent>& b) { 
-                        int A = a->getSteps() * 0.1 + a->getEnergy() * 0.9;
-                        int B = b->getSteps() * 0.1 + b->getEnergy() * 0.9;
-                        return A > B;
+                        return a->getSteps() > b->getSteps();
                     });
-                                            /*a->getEnergy() > b->getEnergy();    a->getSteps() > b->getSteps();
-                                            return (a->getSteps() + a->getEnergy()) > (b->getSteps() + b->getEnergy());*/
+                                            /*
+                                            return (a->getSteps() + a->getEnergy()) > (b->getSteps() + b->getEnergy());
+
+                                            int A = a->getSteps() * 0.1 + a->getEnergy() * 0.9;
+                                            int B = b->getSteps() * 0.1 + b->getEnergy() * 0.9;
+                                            return A > B;
+                                            */
     int bestCount = population.size() / 2; // Берем первую лучшую половину
     vector<unique_ptr<Agent>> newPopulation;
     
@@ -171,22 +174,25 @@ void EvolutionSimulation::geneticAlgorithm() {
         }
     }
     
-    // Худших агентов клонируем
     for (int i = bestCount; i < population.size(); i++) {
         // Клонируем худшего агента с его текущим геном
         newPopulation.push_back(population[i]->clone());
-
-        // Случайная мутация для худших
-        if (chance(rng) < AGENT_MUTATION_CHANCE) {
-            newPopulation[i]->mutateGene(mutationPower);
-        }
     }
+    // Скрещиваем низших
     for (int i = bestCount; i < population.size() - 1; i++) {
         // С некоторым шансом скрещиваем вторую половину
         if (chance(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
             newPopulation[i]->crossing(*newPopulation[i+1]);
         }
     }
+    // Мутируем вторую половину
+    for (int i = bestCount; i < population.size(); i++) {
+        // Случайная мутация для худших
+        if (chance(rng) < AGENT_MUTATION_CHANCE) {
+            newPopulation[i]->mutateGene(mutationPower);
+        }
+    }
+    
     
     // Заменяем старую популяцию новой
     population = move(newPopulation);

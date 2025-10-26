@@ -17,7 +17,7 @@ using namespace std;
 class Agent {
 private:
     unique_ptr<Gene> gene;           // Уникальный указатель на ген (нейросеть)
-    vector<Cell> surroundings;       // 8 окружающих клеток
+    vector<Cell> surroundings;       // 4 окружающих клеток
     int energy;                      // Количество энергии
     int steps;                       // Количество шагов
     pair<int, int> directionToFood;  // Вектор направления к ближайшей еде
