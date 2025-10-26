@@ -138,7 +138,4 @@ public:
      * 
      */
     void setNewNeuralNet(unique_ptr<NeuralNetwork>& newNeuralNet) { neuralNet = move(newNeuralNet); };
-
-
-    vector<double> getWeights() const override;
 };

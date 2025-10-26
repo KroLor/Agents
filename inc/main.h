@@ -21,9 +21,9 @@
 #define TICK_MS 50 //150 Интервал между тиками (мс)
 
 #define USE_A_NEURAL_NETWORK 1 // Отвечает за использование нейросети в агентах
-#define INPUT_VALUES 6 // Входные значения
+#define INPUT_VALUES 7 // Входные значения
 // #define HIDDEN_LAYERS 1 // Скрытых слоев
-#define NEURONS_IN_HIDDEN_LAYER 2 // Кол-во нейронов в скрытых(ом) слоях(е) // (одинаково)
+#define NEURONS_IN_HIDDEN_LAYER 5 // Кол-во нейронов в скрытых(ом) слоях(е) // (одинаково)
 #define OUTPUT_VALUES 4 // Выходные значения
 
 #define AGENT_MUTATION_CHANCE 0.2f // Шанс мутации гена

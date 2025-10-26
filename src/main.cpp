@@ -9,28 +9,8 @@
 
 // }
 
-void saveStatistic(std::ofstream& statsFile, EvolutionSimulation& sim, char debugF) {
-    if (debugF == 0) {
-        statsFile << sim.getGeneration() << ";" << sim.getSimulationData().averageEnergyLevel << std::endl;
-        statsFile.flush();
-    }
-    else if (debugF == 1) {
-        statsFile << sim.getGeneration() << ";" << sim.getSimulationData().averageEnergyLevel << std::endl;
-        statsFile << sim.getPopulation()[0]->getGene()->getWe
-        statsFile.flush();
-    }
-}
-
-int main() {
-    // assignConstants();
-
-    std::ofstream statsFile("simulation_stats.csv", std::ios::app);
-    statsFile << "Generation;AliveAgents" << std::endl;
-
-    auto field = createField(FIELD_WIDTH, FIELD_HEIGHT);
-    EvolutionSimulation sim(field);
-
-    while (sim.getGeneration() < GENERATIONS) {
+void runARound(EvolutionSimulation& sim, bool visualize) {
+    if (visualize) {
         // Визуализация раунда/поколения
         for (int step = 1; step <= NUMBER_OF_STEPS; step++) {
             updateField(sim.getGrid(), sim, GENERATIONS, SKIP_GENERATIONS, step, NUMBER_OF_STEPS);
@@ -39,38 +19,70 @@ int main() {
 
             this_thread::sleep_for(chrono::milliseconds(TICK_MS)); // FPS
         }
+    } else {
+        for (int step = 1; step <= NUMBER_OF_STEPS; step++) {
+            if (!sim.simulateStep()) { break; }
+        }
+    }
+}
 
-        saveStatistic(statsFile, sim, 0);
+void saveStatistic(std::ofstream& file, EvolutionSimulation& sim, char typeSave) {
+    // Краткая информация
+    if (typeSave == 's') {
+        file << sim.getGeneration() << ";" << sim.getSimulationData().averageEnergyLevel << std::endl;
+        file.flush();
+    }
+    // Сохранение конфигурации и весов лучшей нейросети
+    // else if (typeSave == 'd') {
+    //     sim.getPopulation()[0]->getGene()
+
+    //     file << "Layers;";
+    //     for (->)
+
+    //     file.flush();
+    // }
+}
+
+int main() {
+    // assignConstants();
+
+    std::ofstream statsFile("simulation_stats.csv", std::ios::app);
+    std::ofstream dataFile("simulation_data.csv", std::ios::app);
+    statsFile << "Generation;AliveAgents" << std::endl;
+
+    auto field = createField(FIELD_WIDTH, FIELD_HEIGHT);
+    EvolutionSimulation sim(field);
+
+    while (sim.getGeneration() < GENERATIONS) {
+        runARound(sim, true);
+
+        saveStatistic(statsFile, sim, 's');
         sim.geneticAlgorithm();
         sim.reloadGrid();
         
         // Пропуск раундов/поколений без визуализации
         for (int gen_skip = 1; gen_skip <= SKIP_GENERATIONS - 1; gen_skip++) {
-            for (int step = 0; step < NUMBER_OF_STEPS; step++) {
-                if (!sim.simulateStep()) { break; }
-            }
+            runARound(sim, false);
+
+            saveStatistic(statsFile, sim, 's');
 
             // Проверяем удачные ли гены
             if (sim.getSimulationData().averageEnergyLevel >= 1000) {
-                saveStatistic(statsFile, sim, 1);
                 sim.reloadGrid();
+                runARound(sim, true);
 
-                for (int step = 1; step <= NUMBER_OF_STEPS; step++) {
-                    updateField(sim.getGrid(), sim, GENERATIONS, SKIP_GENERATIONS, step, NUMBER_OF_STEPS);
-
-                    if (!sim.simulateStep()) { break; }
-
-                    this_thread::sleep_for(chrono::milliseconds(TICK_MS)); // FPS
-                }
+                sim.geneticAlgorithm();
+                saveStatistic(dataFile, sim, 'd');
+                sim.reloadGrid();
+            } else {
+                sim.geneticAlgorithm();
+                sim.reloadGrid();
             }
-            
-            saveStatistic(statsFile, sim, 0);
-            sim.geneticAlgorithm();
-            sim.reloadGrid();
         }
     }
     updateField(sim.getGrid(), sim, GENERATIONS, SKIP_GENERATIONS, NUMBER_OF_STEPS, NUMBER_OF_STEPS);
     
     statsFile.close();
+    dataFile.close();
     return 0;
 }

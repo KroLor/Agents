@@ -163,7 +163,7 @@ void EvolutionSimulation::geneticAlgorithm() {
 
     // Создаем новое поколение на основе старого
     for (int i = 0; i < bestCount; i++) {
-        // Клонируем лучшего агента
+        // Клонируем лучших агентов
         newPopulation.push_back(population[i]->clone()); // population[0]
     }
     // Несколько первых оставляем без изменения

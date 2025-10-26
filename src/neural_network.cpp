@@ -116,8 +116,8 @@ unique_ptr<NeuralNetwork> NeuralNetwork::crossing(const NeuralNetwork& otherNet)
         // Скрещивание
         for (int j = 0; j < weights1.size() && j < weights2.size(); j++) {
             for (int i = 0; i < weights1[j].size() && i < weights2[j].size(); i++) {
-                // С шансом 33.3% прошлый вес в слое нынешней нейросети заменится на новый, тот же вес из того же слоя, но другой нейросети
-                if (dist(rng) < 0.333f) {
+                // С шансом 50% прошлый вес в слое нынешней нейросети заменится на новый, тот же вес из того же слоя, но другой нейросети
+                if (dist(rng) < 0.5f) {
                     newWeights[j][i] = weights2[j][i];
                 }
             }
@@ -128,14 +128,6 @@ unique_ptr<NeuralNetwork> NeuralNetwork::crossing(const NeuralNetwork& otherNet)
     }
 
     return newNet;
-}
-
-vector<double> NeuralNetwork::getWeights() const {
-    vector<double> weights;
-
-    for (auto& layer : layers) {
-        layer->;
-    }
 }
 
 NeuralGene::NeuralGene() {
@@ -151,12 +143,12 @@ pair<int, int> NeuralGene::decideDirection(const vector<Cell>& surroundings, int
     vector<double> inputs(INPUT_VALUES);
     
     for (int i = 0; i < 4; i++) {
-        // Представляем клетки в виде чисел: EMPTY = -1; FOOD = 1; WALL = 0; AGENT = 0
+        // Представляем клетки в виде чисел: EMPTY = 0; FOOD = 1; WALL = -1; AGENT = -1
         switch (surroundings[i].type) {
-            case EMPTY: inputs[i] = -1.0; break;
+            case EMPTY: inputs[i] = 0.0; break;
             case FOOD: inputs[i] = 1.0; break;
-            case WALL: inputs[i] = 0.0; break;
-            case AGENT: inputs[i] = 0.0; break;
+            case WALL: inputs[i] = -1.0; break;
+            case AGENT: inputs[i] = -1.0; break;
         }
     }
     
@@ -164,7 +156,7 @@ pair<int, int> NeuralGene::decideDirection(const vector<Cell>& surroundings, int
     inputs[5] = directionToFood.second; // dy
     
     // Нормируем кол-во энергии
-    // inputs[6] = min((double)energy / ((double)INIT_ENERGY_AGENT * 2), 1.0);
+    inputs[6] = min((double)energy / ((double)INIT_ENERGY_AGENT * 2), 1.0);
     
     vector<double> outputs = neuralNet->predict(inputs); // 0 - Вниз, 1 - Вверх, 2 - Влево, 3 - Вправо
     
@@ -210,16 +202,6 @@ unique_ptr<Gene> NeuralGene::mutation(float mutationPower) const {
 
 unique_ptr<Gene> NeuralGene::crossing(const Gene& pairGene) const {
     const NeuralGene* otherNeuralGene = dynamic_cast<const NeuralGene*>(&pairGene);
-    // Подходит ли ген
-    if (!otherNeuralGene) {
-        // Если типы не совпадают, возвращаем клон текущего гена
-        return clone();
-    }
-    
     auto newNeuralNet = neuralNet->crossing(otherNeuralGene->getNeuralNet());
     return make_unique<NeuralGene>(move(newNeuralNet));
-}
-
-vector<double> NeuralGene::getWeights() const {
-    return neuralNet->getWeights();
 }
