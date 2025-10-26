@@ -10,7 +10,7 @@
 // }
 
 void saveStatistic(std::ofstream& statsFile, EvolutionSimulation& sim) {
-    statsFile << sim.getGeneration() << ";" << sim.getSimulationData().totalAlives << std::endl;
+    statsFile << sim.getGeneration() << ";" << sim.getSimulationData().averageEnergyLevel << std::endl;
     statsFile.flush();
 }
 

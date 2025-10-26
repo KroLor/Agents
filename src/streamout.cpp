@@ -51,17 +51,17 @@ void updateTable(const EvolutionSimulation& sim, int generation, int skipGen, in
     // Создаем строки статистики
     stringstream line1, line2, line3, line4, line5;
     
-    line1 << "|---------------------------------------------------|";
+    line1 << "|---------------------------------------------------|    ";
     line2 << "| Gen: " << setw(4) << data.generation << "/" << generation
           << "| Food: " << setw(9) << data.totalFood
-          << "| Avg Energy: " << setw(3) << data.averageEnergyLevel << "|";
+          << "| Avg Energy: " << setw(3) << data.averageEnergyLevel << "|    ";
     line3 << "| Step: " << setw(7) << currentStep << "/" << totalSteps
           << "| Skip Gen: " << setw(5) << skipGen
-          << "| Max Energy: " << setw(3) << data.maxEnergyLevel << "|";
+          << "| Max Energy: " << setw(3) << data.maxEnergyLevel << "|    ";
     line4 << "| Agents: " << setw(5) << (data.populationSize - data.totalDeaths) << "/" << data.populationSize
           << "| Mut Power: " << fixed << setprecision(2) << data.mutationPower
-          << "| Min Energy: " << setw(3) << data.minEnergyLevel << "|";
-    line5 << "|---------------------------------------------------|";
+          << "| Min Energy: " << setw(3) << data.minEnergyLevel << "|    ";
+    line5 << "|---------------------------------------------------|    ";
     
     string lines[] = {line1.str(), line2.str(), line3.str(), line4.str(), line5.str()};
     

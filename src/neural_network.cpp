@@ -153,8 +153,8 @@ pair<int, int> NeuralGene::decideDirection(const vector<Cell>& surroundings, int
     }
     
     // // Сдвинем крайние значения ({-1, 1} => {-0.1, 0.1}), чтобы уменьшить влияние этого параметра
-    inputs[8] = directionToFood.first/* / 10*/;  // dx
-    inputs[9] = directionToFood.second/* / 10*/; // dy
+    inputs[8] = directionToFood.first / 10;  // dx
+    inputs[9] = directionToFood.second / 10; // dy
     
     // Нормируем кол-во энергии
     inputs[10] = min((double)energy / ((double)INIT_ENERGY_AGENT * 2), 1.0);

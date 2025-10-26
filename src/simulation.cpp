@@ -147,52 +147,45 @@ void EvolutionSimulation::geneticAlgorithm() {
     // Сортируем по количеству шагов (по убыванию)
     sort(population.begin(), population.end(), /* Лямбда функция для принцыпа сравнения */
                     [](const unique_ptr<Agent>& a, const unique_ptr<Agent>& b) { 
-                        return (a->getSteps() + a->getEnergy()) > (b->getSteps() + b->getEnergy());
+                        int A = a->getSteps() * 0.1 + a->getEnergy() * 0.9;
+                        int B = b->getSteps() * 0.1 + b->getEnergy() * 0.9;
+                        return A > B;
                     });
-                                            /*a->getEnergy() > b->getEnergy();    a->getSteps() > b->getSteps();*/
+                                            /*a->getEnergy() > b->getEnergy();    a->getSteps() > b->getSteps();
+                                            return (a->getSteps() + a->getEnergy()) > (b->getSteps() + b->getEnergy());*/
     int bestCount = population.size() / 2; // Берем первую лучшую половину
     vector<unique_ptr<Agent>> newPopulation;
     
     uniform_real_distribution<float> chance(0.0f, 1.0f);
 
-    // Лучшие агенты
-    for (int i = 0; i < 3; i++) {
+    // Создаем новое поколение на основе лучших агентов
+    for (int i = 0; i < bestCount; i++) {
+        // Клонируем лучших агентов
         newPopulation.push_back(population[i]->clone());
     }
-
-    // Клонируем первую половину
-    for (int i = 3; i < bestCount; i++) {
-        auto agent = population[i]->clone();
-        
-        // Скрещивание с случайным агентом из первой половины
+    // Несколько первых - лучшие из лучших, их оставляем без изменения
+    for (int i = 3; i < bestCount - 1; i++) {
+        // С некоторым шансом скрещиваем первую половину
         if (chance(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
-            uniform_int_distribution<int> dist(0, bestCount - 1);
-            int index = dist(rng);
-
-            agent->crossing(*population[index]);
+            newPopulation[i]->crossing(*newPopulation[i+1]);
         }
-        
-        newPopulation.push_back(move(agent));
     }
-
-    // Вторая половина
+    
+    // Худших агентов клонируем
     for (int i = bestCount; i < population.size(); i++) {
-        auto agent = population[i]->clone();
-        
-        // Скрещивание с случайным агентом из всей популяции
-        if (chance(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
-            uniform_int_distribution<int> dist(0, population.size() - 1);
-            int index = dist(rng);
+        // Клонируем худшего агента с его текущим геном
+        newPopulation.push_back(population[i]->clone());
 
-            agent->crossing(*population[index]);
-        }
-        
-        // Мутация для второй половины
+        // Случайная мутация для худших
         if (chance(rng) < AGENT_MUTATION_CHANCE) {
-            agent->mutateGene(mutationPower);
+            newPopulation[i]->mutateGene(mutationPower);
         }
-        
-        newPopulation.push_back(move(agent));
+    }
+    for (int i = bestCount; i < population.size() - 1; i++) {
+        // С некоторым шансом скрещиваем вторую половину
+        if (chance(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
+            newPopulation[i]->crossing(*newPopulation[i+1]);
+        }
     }
     
     // Заменяем старую популяцию новой
