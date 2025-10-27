@@ -152,8 +152,8 @@ void EvolutionSimulation::geneticAlgorithm() {
                                             /*
                                             return (a->getSteps() + a->getEnergy()) > (b->getSteps() + b->getEnergy());
 
-                                            int A = a->getSteps() * 0.1 + a->getEnergy() * 0.9;
-                                            int B = b->getSteps() * 0.1 + b->getEnergy() * 0.9;
+                                            int A = a->getSteps() * 0.9 + a->getEnergy() * 0.1;
+                                            int B = b->getSteps() * 0.9 + b->getEnergy() * 0.1;
                                             return A > B;
                                             */
     int bestCount = population.size() / 2; // Берем первую лучшую половину
