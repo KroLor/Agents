@@ -2,6 +2,7 @@
 #include <random>
 #include <algorithm>
 #include <cmath>
+#include <sstream>
 #include "neural_network.h"
 #include "main.h"
 
@@ -204,4 +205,40 @@ unique_ptr<Gene> NeuralGene::crossing(const Gene& pairGene) const {
     const NeuralGene* otherNeuralGene = dynamic_cast<const NeuralGene*>(&pairGene);
     auto newNeuralNet = neuralNet->crossing(otherNeuralGene->getNeuralNet());
     return make_unique<NeuralGene>(move(newNeuralNet));
+}
+
+string NeuralGene::saveDataCSV() const {
+    // Пока всегда 3 слоя
+    const auto& weights1 = neuralNet->getLayers()[0]->getWeights();
+    const auto& weights2 = neuralNet->getLayers()[1]->getWeights();
+    stringstream data;
+    data << fixed;
+    
+    data << "Weights;Layers;InputValues;InHiddenLayer;OutputValues;ActivationMid;ActivationLast\n";
+    data << (float)weights1[0][0] << ";";
+    data << (int)neuralNet->getLayers().size() + 1 << ";";
+    data << (int)weights1.size() << ";";
+    data << (int)weights2.size() << ";";
+    data << (int)weights2[0].size() << ";";
+    data << neuralNet->getLayers()[0]->getActivation() << ";";
+    data << neuralNet->getLayers()[1]->getActivation() << "\n";
+
+    // Продолжение weights1[0][k]
+    for (int k = 1; k < weights1[0].size(); k++) {
+        data << (float)weights1[0][k] << "\n";
+    }
+    // Веса второго слоя
+    for (int i = 1; i < weights1.size(); i++) {
+        for (int j = 0; j < weights1[i].size(); j++) {
+            data << (float)weights1[i][j] << "\n";
+        }
+    }
+    // Веса третьего слоя
+    for (int i = 0; i < weights2.size(); i++) {
+        for (int j = 0; j < weights2[i].size(); j++) {
+            data << (float)weights2[i][j] << "\n";
+        }
+    }
+
+    return data.str();
 }

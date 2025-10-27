@@ -55,7 +55,7 @@ void updateTable(const EvolutionSimulation& sim, int generation, int skipGen, in
     line2 << "| Gen: " << setw(4) << data.generation << "/" << generation
           << "| Food: " << setw(9) << data.totalFood
           << "| Avg Energy: " << setw(3) << data.averageEnergyLevel << "|    ";
-    line3 << "| Step: " << setw(7) << currentStep << "/" << totalSteps
+    line3 << "| Step: " << setw(6) << currentStep << "/" << totalSteps
           << "| Skip Gen: " << setw(5) << skipGen
           << "| Max Energy: " << setw(3) << data.maxEnergyLevel << "|    ";
     line4 << "| Agents: " << setw(5) << (data.populationSize - data.totalDeaths) << "/" << data.populationSize

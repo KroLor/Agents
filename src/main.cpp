@@ -33,14 +33,12 @@ void saveStatistic(std::ofstream& file, EvolutionSimulation& sim, char typeSave)
         file.flush();
     }
     // Сохранение конфигурации и весов лучшей нейросети
-    // else if (typeSave == 'd') {
-    //     sim.getPopulation()[0]->getGene()
-
-    //     file << "Layers;";
-    //     for (->)
-
-    //     file.flush();
-    // }
+    else if (typeSave == 'd') {
+        // Сохраняем лучшую нейросеть (отсортировано после ген. алгоритма)
+        string data = sim.getPopulation()[0]->getGene().saveDataCSV();
+        file << data;
+        file.flush();
+    }
 }
 
 int main() {

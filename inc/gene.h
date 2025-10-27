@@ -47,5 +47,11 @@ public:
     virtual unique_ptr<Gene> crossing(const Gene& pairGene) const = 0;
     
     // Методы для сохранения/загрузки гена
+
+    /**
+     * 
+     */
+    virtual string saveDataCSV() const = 0;
+    
     // virtual void deserialize() = 0;
 };

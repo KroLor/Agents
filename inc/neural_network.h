@@ -138,4 +138,6 @@ public:
      * 
      */
     void setNewNeuralNet(unique_ptr<NeuralNetwork>& newNeuralNet) { neuralNet = move(newNeuralNet); };
+
+    string saveDataCSV() const;
 };
