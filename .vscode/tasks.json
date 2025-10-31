@@ -1,0 +1,40 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/build",
+                "--config",
+                "Release"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "Run Training",
+            "dependsOn": "Build",
+            "type": "shell",
+            "command": "${workspaceFolder}/build/Release/Agents_d.exe",
+            "group": "none",
+            "presentation": {
+                "echo": true,
+                "reveal": "always"
+            }
+        },
+        {
+            "label": "Run Visualization",
+            "dependsOn": "Build",
+            "type": "shell",
+            "command": "${workspaceFolder}/build/Release/Agents_d.exe",
+            "args": ["-v"],
+            "group": "none",
+            "presentation": {
+                "echo": true,
+                "reveal": "always"
+            }
+        }
+    ]
+}
