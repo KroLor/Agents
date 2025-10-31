@@ -134,7 +134,7 @@ unique_ptr<NeuralNetwork> NeuralNetwork::crossing(const NeuralNetwork& otherNet)
 NeuralGene::NeuralGene() {
     neuralNet = make_unique<NeuralNetwork>();
 
-    neuralNet->addLayer(make_unique<GeneLayer>(INPUT_VALUES, NEURONS_IN_HIDDEN_LAYER, "relu")); // Скрытый слой
+    neuralNet->addLayer(make_unique<GeneLayer>(INPUT_VALUES, NEURONS_IN_HIDDEN_LAYER, "sigmoid")); // Скрытый слой
     neuralNet->addLayer(make_unique<GeneLayer>(NEURONS_IN_HIDDEN_LAYER, OUTPUT_VALUES, "sigmoid")); // Выходной слой
 }
 
