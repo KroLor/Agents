@@ -174,7 +174,7 @@ NeuralGene::NeuralGene() {
     neuralNet = make_unique<NeuralNetwork>();
 
     neuralNet->addLayer(make_unique<GeneLayer>(INPUT_VALUES, NEURONS_IN_HIDDEN_LAYER, "sigmoid")); // Скрытый слой
-    neuralNet->addLayer(make_unique<GeneLayer>(NEURONS_IN_HIDDEN_LAYER, OUTPUT_VALUES, "sigmoid")); // Выходной слой
+    neuralNet->addLayer(make_unique<GeneLayer>(NEURONS_IN_HIDDEN_LAYER, OUTPUT_VALUES, "relu")); // Выходной слой
 }
 
 NeuralGene::NeuralGene(unique_ptr<NeuralNetwork> network) : neuralNet(move(network)) {}
