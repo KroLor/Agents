@@ -30,7 +30,7 @@ void runARound(EvolutionSimulation& sim, bool visualize) {
 void saveStatistic(std::ofstream& file, EvolutionSimulation& sim, char typeSave) {
     // Краткая информация
     if (typeSave == 's') {
-        file << sim.getGeneration() << ";" << sim.getSimulationData().averageEnergyLevel << ";" << sim.getSimulationData().totalAlives << std::endl;
+        file << sim.getGeneration() << ";" << sim.getSimulationData().averageEnergyLevel << ";" << sim.getPopulation()[0]->getSteps() << ";" << sim.getSimulationData().totalAlives << std::endl;
         file.flush();
     }
     // Сохранение конфигурации и весов лучшей нейросети
@@ -47,7 +47,7 @@ int main() {
 
     std::ofstream statsFile("simulation_stats.csv", std::ios::app);
     std::ofstream dataFile("simulation_data.csv", std::ios::app);
-    statsFile << "Generation;AvgEnergy;AliveAgents" << std::endl;
+    statsFile << "Generation;AvgEnergy;TopSteps;AliveAgents" << std::endl;
 
     auto field = createField(FIELD_WIDTH, FIELD_HEIGHT);
     EvolutionSimulation sim(field);

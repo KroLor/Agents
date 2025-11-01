@@ -147,14 +147,14 @@ void EvolutionSimulation::geneticAlgorithm() {
     // Сортируем агентов по эффективности (шаги + энергия)
     sort(population.begin(), population.end(),
         [](const unique_ptr<Agent>& a, const unique_ptr<Agent>& b) { 
+            return (a->getSteps() + a->getEnergy()) > (b->getSteps() + b->getEnergy());
+        });
+        /*
+            return a->getSteps() > b->getSteps();
+
             int A = a->getSteps() * 0.8 + a->getEnergy() * 0.2;
             int B = b->getSteps() * 0.8 + b->getEnergy() * 0.2;
             return A > B;
-        });
-        /*
-            return (a->getSteps() + a->getEnergy()) > (b->getSteps() + b->getEnergy());
-
-            return a->getSteps() > b->getSteps();
         */
 
     const int currentPopulationSize = population.size();
@@ -262,20 +262,20 @@ void EvolutionSimulation::geneticAlgorithm() {
     }
 
     // 5. АДАПТИВНАЯ НАСТРОЙКА ПАРАМЕТРОВ
-    // static int previousBestScore = 0;
-    // int currentBestScore = currentPopulationSize > 0 ? population[0]->getSteps() : 0;
+    static int previousBestScore = 0;
+    int currentBestScore = currentPopulationSize > 0 ? population[0]->getSteps() : 0;
     
-    // // Обновляем каждые 5 поколений
-    // if (generation % 5 == 0 && currentPopulationSize > 0) {
-    //     if (currentBestScore <= previousBestScore) {
-    //         // Застой - увеличиваем исследование
-    //         mutationPower = min(mutationPower * 1.15f, AGENT_MUTATION_POWER * 2.0f);
-    //     } else {
-    //         // Прогресс - стабилизируем
-    //         mutationPower = max(mutationPower * 0.9f, AGENT_MUTATION_POWER * 0.3f);
-    //     }
-    //     previousBestScore = currentBestScore;
-    // }
+    // Обновляем каждые 5 поколений
+    if (generation % 5 == 0 && currentPopulationSize > 0) {
+        if (currentBestScore <= previousBestScore) {
+            // Застой - увеличиваем исследование
+            mutationPower = min(mutationPower * 1.15f, AGENT_MUTATION_POWER * 2.0f);
+        } else {
+            // Прогресс - стабилизируем
+            mutationPower = max(mutationPower * 0.9f, AGENT_MUTATION_POWER * 0.3f);
+        }
+        previousBestScore = currentBestScore;
+    }
 
     // 6. ОБНОВЛЕНИЕ ПОПУЛЯЦИИ
     population = move(newPopulation);

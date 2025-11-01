@@ -13,12 +13,12 @@ static mt19937 rng(random_device{}());
 
 // Функции активации
 float sigmoid(float x) {
-    return 1.0 / (1.0 + exp(-x)); // F(x) = 1 / (1 + e^(-x)), "плющим" значение до диапозона от 0 до 1
+    return 1.0f / (1.0f + exp(-x * 8.0f)); // F(x) = 1 / (1 + e^(-x * 8)), "плющим" значение до диапозона от 0 до 1
 }
 
 float relu(float x) {
     // return max(0.0f, x); // Отсекаем всё, что меньше 0
-    x = max(x, -1.0f);
+    x = max(-1.0f, x);
     x = min(x, 1.0f);
     return x;
 }
@@ -145,9 +145,9 @@ unique_ptr<NeuralNetwork> NeuralNetwork::crossing(const NeuralNetwork& otherNet)
         // Скрещивание весов
         for (int i = 0; i < weights1.size(); i++) {
             for (int j = 0; j < weights1[i].size(); j++) {
-                if (dist(rng) < 0.7f) { // 70% от первого
+                if (dist(rng) < 0.5f) {
                     newWeights[i][j] = weights1[i][j];
-                } else { // 30% от второго
+                } else {
                     newWeights[i][j] = weights2[i][j];
                 }
             }
@@ -155,7 +155,7 @@ unique_ptr<NeuralNetwork> NeuralNetwork::crossing(const NeuralNetwork& otherNet)
 
         // Скрещивание смещений
         for (int i = 0; i < biases1.size(); i++) {
-            if (dist(rng) < 0.7f) {
+            if (dist(rng) < 0.5f) {
                 newBiases[i] = biases1[i];
             } else {
                 newBiases[i] = biases2[i];
@@ -173,8 +173,8 @@ unique_ptr<NeuralNetwork> NeuralNetwork::crossing(const NeuralNetwork& otherNet)
 NeuralGene::NeuralGene() {
     neuralNet = make_unique<NeuralNetwork>();
 
-    neuralNet->addLayer(make_unique<GeneLayer>(INPUT_VALUES, NEURONS_IN_HIDDEN_LAYER, "sigmoid")); // Скрытый слой
-    neuralNet->addLayer(make_unique<GeneLayer>(NEURONS_IN_HIDDEN_LAYER, OUTPUT_VALUES, "relu")); // Выходной слой
+    neuralNet->addLayer(make_unique<GeneLayer>(INPUT_VALUES, NEURONS_IN_HIDDEN_LAYER, "relu")); // Скрытый слой
+    neuralNet->addLayer(make_unique<GeneLayer>(NEURONS_IN_HIDDEN_LAYER, OUTPUT_VALUES, "sigmoid")); // Выходной слой
 }
 
 NeuralGene::NeuralGene(unique_ptr<NeuralNetwork> network) : neuralNet(move(network)) {}
@@ -204,7 +204,7 @@ pair<int, int> NeuralGene::decideDirection(const vector<Cell>& surroundings, int
     int index = -1;
     auto el = max_element(outputs.begin(), outputs.end());
     int max_i = distance(outputs.begin(), el);
-    if (outputs[max_i] >= 0.8f) {
+    if (outputs[max_i] > 0.5f) {
         index = max_i;
     }
     
