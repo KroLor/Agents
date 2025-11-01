@@ -9,27 +9,38 @@
 using namespace std;
 
 /**
- * @brief Класс слоя нейронной сети с матрицами весов.
+ * @brief Класс слоя нейронной сети с матрицами весов и смещениями.
  */
 class GeneLayer {
 private:
-    vector<vector<double>> weights; // [input] [output]
-    string activation;              // "sigmoid" или "relu"
+    vector<vector<float>> weights; // [input] [output]
+    vector<float> biases;          // Смещения для каждого нейрона
+    string activation;             // "sigmoid" или "relu"
 
 public:
     GeneLayer(int inputSize, int outputSize, const string& activation);
     
-    vector<double> forward(const vector<double>& inputs) const;
+    vector<float> forward(const vector<float>& inputs) const;
     
     /**
      * @brief Устанавливает веса слоя.
      */
-    void setWeights(const vector<vector<double>>& newWeights) { weights = newWeights; }
+    void setWeights(const vector<vector<float>>& newWeights) { weights = newWeights; }
+    
+    /**
+     * @brief Устанавливает bias слоя.
+     */
+    void setBiases(const vector<float>& newBiases) { biases = newBiases; }
     
     /**
      * @brief Возвращает копию весов слоя.
      */
-    vector<vector<double>> getWeightsCopy() const { return weights; }
+    vector<vector<float>> getWeightsCopy() const { return weights; }
+    
+    /**
+     * @brief Возвращает копию bias слоя.
+     */
+    vector<float> getBiasesCopy() const { return biases; }
     
     /**
      * @brief Возвращает тип активации.
@@ -37,12 +48,17 @@ public:
     string getActivation() const { return activation; }
     
     /**
-     * @brief Возвращает веса слоя (константная ссылка).
+     * @brief Возвращает веса слоя.
      */
-    const vector<vector<double>>& getWeights() const { return weights; }
+    const vector<vector<float>>& getWeights() const { return weights; }
     
     /**
-     * @brief Мутирует веса слоя.
+     * @brief Возвращает bias.
+     */
+    const vector<float>& getBiases() const { return biases; }
+    
+    /**
+     * @brief Мутирует веса и bias.
      */
     void mutate(float mutationPower);
 };
@@ -68,7 +84,7 @@ public:
      * @param inputs Входные значения для сети.
      * @return Выходные значения сети.
      */
-    vector<double> predict(const vector<double>& inputs) const;
+    vector<float> predict(const vector<float>& inputs) const;
     
     /**
      * @brief Возвращает слои нейронной сети.
@@ -77,11 +93,10 @@ public:
     const vector<unique_ptr<GeneLayer>>& getLayers() const { return layers; }
     
     /**
-     * @brief Применяет мутации к весам нейронной сети.
+     * @brief Применяет мутации к весам и bias.
      * @param mutationPower Интенсивность мутаций.
      */
     void mutate(float mutationPower);
-
 
     unique_ptr<NeuralNetwork> crossing(const NeuralNetwork& otherNet) const;
     
@@ -91,7 +106,7 @@ public:
      */
     unique_ptr<NeuralNetwork> clone() const;
 
-    vector<double> getWeights() const;
+    vector<float> getWeights() const;
 };
 
 /**

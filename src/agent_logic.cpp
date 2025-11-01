@@ -34,11 +34,11 @@ void Agent::stepTick() {
 void Agent::lookAround(vector<vector<Cell>>* grid) {
     surroundings.clear();
     
-    // 8 клеток вокруг агента
+    // 4 клетки вокруг агента
     vector<pair<int, int>> directions = {
-        {-1, -1}, {-1, 0}, {-1, 1},
-        {0, -1},           {0, 1},
-        {1, -1},  {1, 0},  {1, 1}
+                {0, -1},
+        {-1, 0},        {1, 0},
+                {0, 1}
     };
     
     for (const auto& [dx, dy] : directions) {
@@ -60,7 +60,16 @@ const pair<int, int>& Agent::getDirectionToFood(vector<vector<Cell>>* grid) {
 
                 if (distance < minDistance) {
                     minDistance = distance;
-                    directionToFood = {i - x, j - y}; // Если агент на {5; 5}, а еда на {4; 4}, то {4; 4} - {5; 5} = {-1; -1}, что соответсвует напрвлению влево вверх
+                    // directionToFood = {i - x, j - y};
+                    if (i >= x && y >= j) {
+                        directionToFood = {1, 1};
+                    } else if (i >= x && y < j) {
+                        directionToFood = {1, -1};
+                    } else if (i < x && y >= j) {
+                        directionToFood = {-1, 1};
+                    } else if (i < x && y < j) {
+                        directionToFood = {-1, -1};
+                    }
                 }
             }
         }

@@ -23,6 +23,7 @@ void runARound(EvolutionSimulation& sim, bool visualize) {
         for (int step = 1; step <= NUMBER_OF_STEPS; step++) {
             if (!sim.simulateStep()) { break; }
         }
+        updateField(sim.getGrid(), sim, GENERATIONS, SKIP_GENERATIONS, NUMBER_OF_STEPS, NUMBER_OF_STEPS);
     }
 }
 
