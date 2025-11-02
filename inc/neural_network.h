@@ -106,20 +106,7 @@ public:
      */
     unique_ptr<NeuralNetwork> clone() const;
 
-    vector<double> getWeights() const;
-
-    /**
-     * @brief Устанавливает веса для всех слоев
-     */
-    void setAllWeights(const std::vector<std::vector<std::vector<double>>>& allWeights) {
-        if (allWeights.size() != layers.size()) {
-            throw std::invalid_argument("Несоответствие количества слоев");
-        }
-        
-        for (size_t i = 0; i < layers.size(); i++) {
-            layers[i]->setWeights(allWeights[i]);
-        }
-    }
+    vector<float> getWeights() const;
 };
 
 /**

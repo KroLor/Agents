@@ -312,8 +312,7 @@ void EvolutionSimulation::updateGrid() {
     }
 }
 
-// Статическая вспомогательная функция для создания нейросети
-unique_ptr<NeuralNetwork> EvolutionSimulation::createNetworkFromWeights(const ProgramParameters& param) {
+unique_ptr<NeuralNetwork> EvolutionSimulation::createNetw(const ProgramParameters& param) {
     auto neuralNet = make_unique<NeuralNetwork>();
     
     // Создаем первый слой
@@ -321,15 +320,15 @@ unique_ptr<NeuralNetwork> EvolutionSimulation::createNetworkFromWeights(const Pr
     
     // Устанавливаем веса для первого слоя
     const auto& weights1 = param.weights[0];
-    vector<vector<double>> layer1Weights(param.InputValues, vector<double>(param.NeuronsInHiddenLayer));
+    vector<vector<float>> layer1_w(param.InputValues, vector<float>(param.NeuronsInHiddenLayer));
     
-    int index = 0;
+    int k = 0;
     for (int i = 0; i < param.InputValues; i++) {
         for (int j = 0; j < param.NeuronsInHiddenLayer; j++) {
-            layer1Weights[i][j] = weights1[index++];
+            layer1_w[i][j] = weights1[k]; k++;
         }
     }
-    layer1->setWeights(layer1Weights);
+    layer1->setWeights(layer1_w);
     neuralNet->addLayer(move(layer1));
     
     // Создаем второй слой
@@ -337,54 +336,38 @@ unique_ptr<NeuralNetwork> EvolutionSimulation::createNetworkFromWeights(const Pr
     
     // Устанавливаем веса для второго слоя
     const auto& weights2 = param.weights[1];
-    vector<vector<double>> layer2Weights(param.NeuronsInHiddenLayer, vector<double>(param.OutputValues));
+    vector<vector<float>> layer2_w(param.NeuronsInHiddenLayer, vector<float>(param.OutputValues));
     
-    index = 0;
+    k = 0;
     for (int i = 0; i < param.NeuronsInHiddenLayer; i++) {
         for (int j = 0; j < param.OutputValues; j++) {
-            layer2Weights[i][j] = weights2[index++];
+            layer2_w[i][j] = weights2[k]; k++;
         }
     }
-    layer2->setWeights(layer2Weights);
+    layer2->setWeights(layer2_w);
     neuralNet->addLayer(move(layer2));
     
     return neuralNet;
 }
 
-// Реализация статического метода
-unique_ptr<EvolutionSimulation> EvolutionSimulation::createWithTrainedAgents(vector<vector<Cell>> field, const ProgramParameters& param) {
-    auto sim = make_unique<EvolutionSimulation>(move(field), 0, 0);
+void EvolutionSimulation::tuneSimWithTrainedAgents(vector<vector<Cell>> field, const ProgramParameters& param) {
+    // Создаем одну нейросеть
+    auto neuralNet = createNetw(param);
     
-    // Создаем ОДНУ нейросеть с загруженными весами
-    auto neuralNet = createNetworkFromWeights(param);
-    if (!neuralNet) {
-        cerr << "Не удалось создать нейросеть" << endl;
-        return sim;
-    }
+    // Создаем NeuralGene с этой нейросетью ()
+    auto newNeuralGene = make_unique<NeuralGene>(move(neuralNet));
     
-    // Создаем NeuralGene с этой нейросетью
-    auto masterNeuralGene = make_unique<NeuralGene>(move(neuralNet));
-    
-    // Создаем агентов с ОДНОЙ И ТОЙ ЖЕ нейросетью (без клонирования)
+    // Создаем агентов с одной нейросетью
     for (int i = 0; i < INIT_POP_SIZE; i++) {
         int x, y;
-        if (sim->findRandomEmptyPosition(x, y)) {
-            // Передаем ссылку на одну и ту же нейросеть
-            sim->addAgent(x, y, INIT_ENERGY_AGENT, masterNeuralGene->clone());
+        if (findRandomEmptyPosition(x, y)) {
+            addAgent(x, y, INIT_ENERGY_AGENT, newNeuralGene->clone());
         }
     }
+
+    initializeFood(INIT_FOOD_COUNT);
     
-    // Инициализируем еду
-    for (int i = 0; i < INIT_FOOD_COUNT; i++) {
-        int x, y;
-        if (sim->findRandomEmptyPosition(x, y)) {
-            sim->addFood(x, y);
-        }
-    }
-    
-    sim->updateGrid();
-    
-    return sim;
+    updateGrid();
 }
 
 Agent* EvolutionSimulation::addAgent(int x, int y, int energy, unique_ptr<Gene> genome) {

@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#define FIELD_WIDTH 80 //51 Ширина поля
-#define FIELD_HEIGHT 21 //20 Высота поля
+#define FIELD_WIDTH 51 // Ширина поля
+#define FIELD_HEIGHT 20 // Высота поля
 
 #define GENERATIONS 200000 // Всего поколений
 #define SKIP_GENERATIONS 1000 // Кол-во пропусков раундов/поколений
@@ -23,14 +23,14 @@
 #define TICK_MS 50 //150 Интервал между тиками (мс)
 
 #define USE_A_NEURAL_NETWORK 1 // Отвечает за использование нейросети в агентах
-#define INPUT_VALUES 11 // Входные значения
+#define INPUT_VALUES 7 // Входные значения
 // #define HIDDEN_LAYERS 1 // Скрытых слоев
-#define NEURONS_IN_HIDDEN_LAYER 7 // Кол-во нейронов в скрытых(ом) слоях(е) // (одинаково)
+#define NEURONS_IN_HIDDEN_LAYER 14 // Кол-во нейронов в скрытых(ом) слоях(е) // (одинаково)
 #define OUTPUT_VALUES 4 // Выходные значения
 
-#define AGENT_MUTATION_CHANCE 0.2f // Шанс мутации гена
-#define AGENT_MUTATION_POWER 0.3 // Число-диапозон (+, -), которое суммируется с каждым весом
-#define AGENT_CHANCE_TO_CROSS_OVER 0.3f // Шанс скрещивания (кроссинговера)
+#define AGENT_MUTATION_CHANCE 0.02f //0.05f Шанс мутации гена
+#define AGENT_MUTATION_POWER 0.02f // Число-диапозон (+, -), которое суммируется с каждым весом
+#define AGENT_CHANCE_TO_CROSS_OVER 0.2f // Шанс скрещивания (кроссинговера)
 
 extern bool UseNeuralNetwork;
 extern int InputValues;
@@ -39,11 +39,11 @@ extern int OutputValues;
 
 struct ProgramParameters {
     bool useNeuralNetwork;
-    char type; // 1 - обучение, 0 - обзор
+    char type; // 't' - обучение, 'v' - обзор
     int InputValues;
     int NeuronsInHiddenLayer;
     int OutputValues;
-    std::vector<std::vector<double>> weights;
+    std::vector<std::vector<float>> weights;
 };
 
 void settingConstants(ProgramParameters param);

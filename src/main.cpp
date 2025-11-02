@@ -15,77 +15,61 @@ int NeuronsInHiddenLayer = NEURONS_IN_HIDDEN_LAYER;
 int OutputValues = OUTPUT_VALUES;
 
 ProgramParameters parseFile(ProgramParameters param) {
-    try {
-        std::ifstream file("simulation_data.csv");
-        
-        if (!file.is_open()) {
-            return param;
-        }
-
-        std::string line;
-        std::vector<double> weights;
-        
-        // Читаем заголовок
-        if (!std::getline(file, line)) {
-            return param;
-        }
-
-        // Читаем вторую строку с параметрами
-        if (std::getline(file, line)) {
-            std::istringstream ss(line);
-            std::string token;
-            std::vector<std::string> tokens;
-            
-            // Парсим вторую строку с параметрами
-            while (std::getline(ss, token, ';')) {
-                tokens.push_back(token);
-            }
-            
-            if (tokens.size() >= 7) {
-                // Устанавливаем параметры из файла
-                param.useNeuralNetwork = true;
-                param.InputValues = std::stoi(tokens[2]);      // 7
-                param.NeuronsInHiddenLayer = std::stoi(tokens[3]); // 6
-                param.OutputValues = std::stoi(tokens[4]);     // 4
-            }
-        }
-
-        // Читаем веса нейросети
-        while (std::getline(file, line)) {
-            double weight = std::stod(line);
-            weights.push_back(weight);
-        }
-
-        param.weights = std::vector<std::vector<double>>();
-        if (!weights.empty()) {
-            // Преобразуем одномерный вектор весов в двумерную структуру
-            // Предполагаем структуру: [InputValues x NeuronsInHiddenLayer] + [NeuronsInHiddenLayer x OutputValues]
-            int totalWeightsExpected = param.InputValues * param.NeuronsInHiddenLayer + 
-                                     param.NeuronsInHiddenLayer * param.OutputValues;
-            
-            if (weights.size() == totalWeightsExpected) {
-                // Первый слой: InputValues x NeuronsInHiddenLayer
-                std::vector<double> layer1Weights;
-                layer1Weights.insert(layer1Weights.end(), 
-                    weights.begin(), 
-                    weights.begin() + param.InputValues * param.NeuronsInHiddenLayer);
-                
-                // Второй слой: NeuronsInHiddenLayer x OutputValues  
-                std::vector<double> layer2Weights;
-                layer2Weights.insert(layer2Weights.end(),
-                    weights.begin() + param.InputValues * param.NeuronsInHiddenLayer,
-                    weights.end());
-                
-                param.weights.push_back(layer1Weights);
-                param.weights.push_back(layer2Weights);
-            }
-        }
-        
-        file.close();
-        
-    } catch (const std::exception& err) {
-        std::cerr << "Ошибка при чтении файла: " << err.what() << '\n';
+    std::ifstream file("simulation_data.csv");
+    
+    if (!file.is_open()) {
+        return param;
     }
+
+    std::string line;
+    std::vector<float> weights;
+    
+    // Читаем заголовок
+    if (!std::getline(file, line)) {
+        return param;
+    }
+
+    // Парсим вторую строку с параметрами
+    if (std::getline(file, line)) {
+        std::istringstream ss(line);
+        std::string value;
+        std::vector<std::string> values;
+        
+        while (std::getline(ss, value, ';')) {
+            values.push_back(value);
+        }
+        
+        if (values.size() >= 7) {
+            // Устанавливаем параметры из файла
+            param.useNeuralNetwork = true;
+            param.InputValues = std::stoi(values[2]);
+            param.NeuronsInHiddenLayer = std::stoi(values[3]);
+            param.OutputValues = std::stoi(values[4]);
+        }
+    }
+
+    // Парсим веса нейросети
+    while (std::getline(file, line)) {
+        float weight = (float)std::stod(line);
+        weights.push_back(weight);
+    }
+
+    // (InputValues * NeuronsInHiddenLayer) + (NeuronsInHiddenLayer * OutputValues)
+    int totalWeights = param.InputValues * param.NeuronsInHiddenLayer + param.NeuronsInHiddenLayer * param.OutputValues;
+    
+    // Проверяем соответствие заголовка с кол-вом весов
+    if (weights.size() == totalWeights) {
+        std::vector<float> layer1_w;
+        layer1_w.insert(layer1_w.end(), weights.begin(), weights.begin() + param.InputValues * param.NeuronsInHiddenLayer);
+        
+        std::vector<float> layer2_w;
+        layer2_w.insert(layer2_w.end(), weights.begin() + param.InputValues * param.NeuronsInHiddenLayer, weights.end());
+        
+        param.weights.push_back(layer1_w);
+        param.weights.push_back(layer2_w);
+    }
+    
+    file.close();
     
     return param;
 }
@@ -170,34 +154,17 @@ void _train() {
     dataFile.close();
 }
 
-void _show() {
-    ProgramParameters param;
-    param.type = 1;
+void _show(ProgramParameters param) {
     param = parseFile(param);
+    settingConstants(param);
     
-    if (param.weights.empty()) {
-        auto field = createField(FIELD_WIDTH, FIELD_HEIGHT);
-        EvolutionSimulation sim(field);
-        
-        while (true) {
-            runARound(sim, true);
-            sim.reloadGrid();
-        }
-    } else {
-        // Используем ТОЛЬКО статический метод из EvolutionSimulation
-        settingConstants(param);
-        auto field = createField(FIELD_WIDTH, FIELD_HEIGHT);
-        auto sim = EvolutionSimulation::createWithTrainedAgents(move(field), param);
-        
-        if (sim->getPopulation().empty()) {
-            cerr << "Ошибка: не удалось создать агентов с обученной моделью" << endl;
-            return;
-        }
-        
-        while (true) {
-            runARound(*sim, true);
-            sim->reloadGrid();
-        }
+    auto field = createField(FIELD_WIDTH, FIELD_HEIGHT);
+    auto sim = make_unique<EvolutionSimulation>(move(field), 0, 0);
+    sim->tuneSimWithTrainedAgents(field, param);
+    
+    while (true) {
+        runARound(*sim, true);
+        sim->reloadGrid();
     }
 }
 
@@ -205,7 +172,7 @@ int main(int argc, char* argv[]) {
     ProgramParameters param;
 
     if (argc == 1) {
-        param.type = 0;
+        param.type = 't';
         param.useNeuralNetwork = USE_A_NEURAL_NETWORK;
         param.InputValues = INPUT_VALUES;
         param.NeuronsInHiddenLayer = NEURONS_IN_HIDDEN_LAYER;
@@ -213,8 +180,8 @@ int main(int argc, char* argv[]) {
         settingConstants(param);
         _train();
     } else if (argc == 2 && std::string(argv[1]) == "-v") {
-        param.type = 1;
-        _show();
+        param.type = 'v';
+        _show(param);
     }
     
     return 0;

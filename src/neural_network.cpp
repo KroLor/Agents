@@ -180,7 +180,7 @@ NeuralGene::NeuralGene() {
 NeuralGene::NeuralGene(unique_ptr<NeuralNetwork> network) : neuralNet(move(network)) {}
 
 pair<int, int> NeuralGene::decideDirection(const vector<Cell>& surroundings, int energy, pair<int, int> directionToFood) {
-    vector<double> inputs(InputValues); // InputValues должно быть 11
+    vector<float> inputs(InputValues); // InputValues должно быть 11
     
     // ДОЛЖНО БЫТЬ 8 клеток окружения!
     for (int i = 0; i < 8; i++) {  // ИЗМЕНИТЬ с 4 на 8

@@ -56,7 +56,7 @@ private:
      */
     void spawnNewFood();
 
-    static unique_ptr<NeuralNetwork> createNetworkFromWeights(const ProgramParameters& param);
+    unique_ptr<NeuralNetwork> createNetw(const ProgramParameters& param);
 
 public:
     /**
@@ -73,9 +73,8 @@ public:
      * @brief Создает симуляцию с предобученными агентами.
      * @param field Поле.
      * @param param Параметры с весами нейросети.
-     * @return Указатель на созданную симуляцию.
      */
-    static unique_ptr<EvolutionSimulation> createWithTrainedAgents(vector<vector<Cell>> field, const ProgramParameters& param);
+    void tuneSimWithTrainedAgents(vector<vector<Cell>> field, const ProgramParameters& param);
     
     /**
      * @brief Выполняет один такт симуляции.
