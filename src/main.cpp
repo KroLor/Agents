@@ -67,27 +67,28 @@ ProgramParameters parseFile(ProgramParameters param) {
         // Если кол-во параметров не совпадает
         return param;
     }
+
+    auto point = weightsBiases.begin();
     
     // Веса первого слоя
     std::vector<float> layer1_w;
-    layer1_w.insert(layer1_w.end(), weightsBiases.begin(), weightsBiases.begin() + param.InputValues * param.NeuronsInHiddenLayer);
-    weightsBiases.begin() += param.InputValues * param.NeuronsInHiddenLayer;
+    layer1_w.insert(layer1_w.end(), point, point + param.InputValues * param.NeuronsInHiddenLayer);
+    point += param.InputValues * param.NeuronsInHiddenLayer;
     
     // Смещения первого слоя
     std::vector<float> layer1_b;
-    layer1_b.insert(layer1_b.end(), weightsBiases.begin(), weightsBiases.begin() + param.NeuronsInHiddenLayer);
-    weightsBiases.begin() += param.NeuronsInHiddenLayer;
+    layer1_b.insert(layer1_b.end(), point, point + param.NeuronsInHiddenLayer);
+    point += param.NeuronsInHiddenLayer;
     
     // Веса второго слоя
     std::vector<float> layer2_w;
-    layer2_w.insert(layer2_w.end(), weightsBiases.begin(), weightsBiases.begin() + param.NeuronsInHiddenLayer * param.OutputValues);
-    weightsBiases.begin() += param.NeuronsInHiddenLayer * param.OutputValues;
+    layer2_w.insert(layer2_w.end(), point, point + param.NeuronsInHiddenLayer * param.OutputValues);
+    point += param.NeuronsInHiddenLayer * param.OutputValues;
     
     // Смещения второго слоя
     std::vector<float> layer2_b;
-    layer2_b.insert(layer2_b.end(), weightsBiases.begin(), weightsBiases.begin() + param.OutputValues);
+    layer2_b.insert(layer2_b.end(), point, point + param.OutputValues);
     
-    // Сохраняем в структуру
     param.weights = {layer1_w, layer2_w};
     param.biases = {layer1_b, layer2_b};
     
@@ -212,7 +213,7 @@ void _show(ProgramParameters param) {
 int main(int argc, char* argv[]) {
     ProgramParameters param;
 
-    if (argc == 1) {
+    if (argc == 2) {
         param.type = 't';
         param.useNeuralNetwork = USE_A_NEURAL_NETWORK;
         param.InputValues = INPUT_VALUES;
@@ -222,7 +223,7 @@ int main(int argc, char* argv[]) {
         param.activationLast = "sigmoid";
         settingConstants(param);
         _train();
-    } else if (argc == 2 && std::string(argv[1]) == "-v") {
+    } else if (argc == 1) {
         param.type = 'v';
         param.activationMid = "relu";
         param.activationLast = "sigmoid";
