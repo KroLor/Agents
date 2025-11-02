@@ -147,14 +147,14 @@ void EvolutionSimulation::geneticAlgorithm() {
     // Сортируем агентов по эффективности (шаги + энергия)
     sort(population.begin(), population.end(),
         [](const unique_ptr<Agent>& a, const unique_ptr<Agent>& b) { 
-            return (a->getSteps() + a->getEnergy()) > (b->getSteps() + b->getEnergy());
+            int A = (float)a->getSteps() * 0.2f + (float)a->getEnergy() * 0.8f;
+            int B = (float)b->getSteps() * 0.2f + (float)b->getEnergy() * 0.8f;
+            return A > B;
         });
         /*
             return a->getSteps() > b->getSteps();
 
-            int A = a->getSteps() * 0.8 + a->getEnergy() * 0.2;
-            int B = b->getSteps() * 0.8 + b->getEnergy() * 0.2;
-            return A > B;
+            return a->getEnergy() > b->getEnergy();
         */
 
     const int currentPopulationSize = population.size();

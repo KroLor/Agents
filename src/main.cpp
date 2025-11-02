@@ -5,10 +5,6 @@
 #include "streamout.h"
 #include "simulation.h"
 
-// void assignConstants() {
-
-// }
-
 void runARound(EvolutionSimulation& sim, bool visualize) {
     if (visualize) {
         // Визуализация раунда/поколения
@@ -43,8 +39,6 @@ void saveStatistic(std::ofstream& file, EvolutionSimulation& sim, char typeSave)
 }
 
 int main() {
-    // assignConstants();
-
     std::ofstream statsFile("simulation_stats.csv", std::ios::app);
     std::ofstream dataFile("simulation_data.csv", std::ios::app);
     statsFile << "Generation;AvgEnergy;TopSteps;AliveAgents" << std::endl;
@@ -67,11 +61,11 @@ int main() {
 
             // Проверяем удачные ли гены
             if (sim.getSimulationData().averageEnergyLevel >= 1000) {
-                sim.reloadGrid();
-                runARound(sim, true);
-
                 sim.geneticAlgorithm();
                 saveStatistic(dataFile, sim, 'd');
+
+                sim.reloadGrid();
+                runARound(sim, true);
                 sim.reloadGrid();
             } else {
                 sim.geneticAlgorithm();
