@@ -149,12 +149,12 @@ void EvolutionSimulation::geneticAlgorithm() {
     // Сортируем агентов по эффективности (шаги + энергия)
     sort(population.begin(), population.end(),
         [](const unique_ptr<Agent>& a, const unique_ptr<Agent>& b) { 
-            int A = (float)a->getSteps() * 0.2f + (float)a->getEnergy() * 0.8f;
-            int B = (float)b->getSteps() * 0.2f + (float)b->getEnergy() * 0.8f;
-            return A > B;
+            return a->getSteps() > b->getSteps();
         });
         /*
-            return a->getSteps() > b->getSteps();
+            int A = (float)a->getSteps() * 0.8f + (float)a->getEnergy() * 0.2f;
+            int B = (float)b->getSteps() * 0.8f + (float)b->getEnergy() * 0.2f;
+            return A > B;
 
             return a->getEnergy() > b->getEnergy();
         */

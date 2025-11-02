@@ -110,7 +110,7 @@ void settingConstants(ProgramParameters param) {
 void saveStatistic(std::ofstream& file, EvolutionSimulation& sim, char typeSave) {
     // Краткая информация
     if (typeSave == 's') {
-        file << sim.getGeneration() << ";" << sim.getSimulationData().averageEnergyLevel << ";" << sim.getPopulation()[0]->getSteps() << ";" << sim.getSimulationData().totalAlives << std::endl;
+        file << sim.getGeneration() << ";" << sim.getSimulationData().maxEnergyLevel << ";" << sim.getPopulation()[0]->getSteps() << ";" << sim.getSimulationData().totalAlives << std::endl;
         file.flush();
     }
     // Сохранение конфигурации и весов лучшей нейросети
@@ -143,7 +143,7 @@ void runARound(EvolutionSimulation& sim, bool visualize) {
 void _train() {
     std::ofstream statsFile("simulation_stats.csv", std::ios::app);
     std::ofstream dataFile("simulation_data.csv", std::ios::app);
-    statsFile << "Generation;AvgEnergy;TopSteps;AliveAgents" << std::endl;
+    statsFile << "Generation;MaxEnergy;TopSteps;AliveAgents" << std::endl;
 
     auto field = createField(FIELD_WIDTH, FIELD_HEIGHT);
     EvolutionSimulation sim(field);
@@ -162,7 +162,7 @@ void _train() {
             saveStatistic(statsFile, sim, 's');
 
             // Проверяем удачные ли гены
-            if (sim.getSimulationData().averageEnergyLevel >= 2000) {
+            if (sim.getSimulationData().maxEnergyLevel >= 2000) {
                 sim.geneticAlgorithm();
                 saveStatistic(dataFile, sim, 'd');
 
