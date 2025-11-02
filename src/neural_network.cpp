@@ -236,7 +236,6 @@ unique_ptr<Gene> NeuralGene::crossing(const Gene& pairGene) const {
 }
 
 string NeuralGene::saveDataCSV() const {
-    // Пока всегда 2 слоя
     const auto& weights1 = neuralNet->getLayers()[0]->getWeights();
     const auto& weights2 = neuralNet->getLayers()[1]->getWeights();
     const auto& biases1 = neuralNet->getLayers()[0]->getBiases();

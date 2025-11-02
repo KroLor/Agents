@@ -44,6 +44,9 @@ struct ProgramParameters {
     int NeuronsInHiddenLayer;
     int OutputValues;
     std::vector<std::vector<float>> weights;
+    std::vector<std::vector<float>> biases;
+    std::string activationMid;
+    std::string activationLast;
 };
 
 void settingConstants(ProgramParameters param);

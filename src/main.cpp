@@ -22,9 +22,8 @@ ProgramParameters parseFile(ProgramParameters param) {
     }
 
     std::string line;
-    std::vector<float> weights;
+    std::vector<float> weightsBiases;
     
-    // Читаем заголовок
     if (!std::getline(file, line)) {
         return param;
     }
@@ -45,28 +44,55 @@ ProgramParameters parseFile(ProgramParameters param) {
             param.InputValues = std::stoi(values[2]);
             param.NeuronsInHiddenLayer = std::stoi(values[3]);
             param.OutputValues = std::stoi(values[4]);
+            param.activationMid = values[5];
+            param.activationLast = values[6];
         }
     }
 
-    // Парсим веса нейросети
+    // Парсим веса и смещения
     while (std::getline(file, line)) {
         float weight = (float)std::stod(line);
-        weights.push_back(weight);
+        weightsBiases.push_back(weight);
     }
 
-    // (InputValues * NeuronsInHiddenLayer) + (NeuronsInHiddenLayer * OutputValues)
-    int totalWeights = param.InputValues * param.NeuronsInHiddenLayer + param.NeuronsInHiddenLayer * param.OutputValues;
+    // Общее количество параметров
+    int totalWeightsBiases = param.InputValues * param.NeuronsInHiddenLayer + // веса1
+                            param.NeuronsInHiddenLayer +                      // смещения1
+                            param.NeuronsInHiddenLayer * param.OutputValues + // веса2
+                            param.OutputValues;                               // смещения2
     
-    // Проверяем соответствие заголовка с кол-вом весов
-    if (weights.size() == totalWeights) {
+    // Проверяем целостность весов
+    if (weightsBiases.size() == totalWeightsBiases) {
+        int num = 0;
+        
+        // Веса первого слоя
         std::vector<float> layer1_w;
-        layer1_w.insert(layer1_w.end(), weights.begin(), weights.begin() + param.InputValues * param.NeuronsInHiddenLayer);
+        int weights1_size = param.InputValues * param.NeuronsInHiddenLayer;
+        layer1_w.insert(layer1_w.end(), weightsBiases.begin() + num, weightsBiases.begin() + num + weights1_size);
+        num += weights1_size;
         
+        // Смещения первого слоя
+        std::vector<float> layer1_b;
+        layer1_b.insert(layer1_b.end(), weightsBiases.begin() + num, weightsBiases.begin() + num + param.NeuronsInHiddenLayer);
+        num += param.NeuronsInHiddenLayer;
+        
+        // Веса второго слоя
         std::vector<float> layer2_w;
-        layer2_w.insert(layer2_w.end(), weights.begin() + param.InputValues * param.NeuronsInHiddenLayer, weights.end());
+        int weights2_size = param.NeuronsInHiddenLayer * param.OutputValues;
+        layer2_w.insert(layer2_w.end(), weightsBiases.begin() + num, weightsBiases.begin() + num + weights2_size);
+        num += weights2_size;
         
+        // Смещения второго слоя
+        std::vector<float> layer2_b;
+        layer2_b.insert(layer2_b.end(), weightsBiases.begin() + num, weightsBiases.begin() + num + param.OutputValues);
+        
+        param.weights.clear();
         param.weights.push_back(layer1_w);
         param.weights.push_back(layer2_w);
+        
+        param.biases.clear();
+        param.biases.push_back(layer1_b);
+        param.biases.push_back(layer2_b);
     }
     
     file.close();
@@ -177,10 +203,14 @@ int main(int argc, char* argv[]) {
         param.InputValues = INPUT_VALUES;
         param.NeuronsInHiddenLayer = NEURONS_IN_HIDDEN_LAYER;
         param.OutputValues = OUTPUT_VALUES;
+        param.activationMid = "relu";
+        param.activationLast = "sigmoid";
         settingConstants(param);
         _train();
     } else if (argc == 2 && std::string(argv[1]) == "-v") {
         param.type = 'v';
+        param.activationMid = "relu";
+        param.activationLast = "sigmoid";
         _show(param);
     }
     
