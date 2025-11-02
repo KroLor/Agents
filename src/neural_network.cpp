@@ -243,9 +243,7 @@ string NeuralGene::saveDataCSV() const {
     stringstream data;
     data << fixed;
     
-    data << "Weights;Layers;InputValues;InHiddenLayer;OutputValues;ActivationMid;ActivationLast\n";
-    data << (float)weights1[0][0] << ";";
-    data << (int)neuralNet->getLayers().size() + 1 << ";";
+    data << "InputValues;InHiddenLayer;OutputValues;ActivationMid;ActivationLast\n";
     data << (int)weights1.size() << ";";
     data << (int)weights2.size() << ";";
     data << (int)weights2[0].size() << ";";
