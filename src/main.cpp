@@ -2,6 +2,7 @@
 #include <chrono>
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 #include <string>
 #include <sstream>
 #include <memory>
@@ -115,9 +116,8 @@ void saveStatistic(std::ofstream& file, EvolutionSimulation& sim, char typeSave)
     }
     // Сохранение конфигурации и весов лучшей нейросети
     else if (typeSave == 'd') {
-        // Сохраняем лучшую нейросеть (отсортировано после ген. алгоритма)
         string data = sim.getPopulation()[0]->getGene().saveDataCSV();
-        file << data;
+        file << data << "               " << sim.getGeneration() << "               " << sim.getPopulation()[0]->getEnergy() << "\n";
         file.flush();
     }
 }
@@ -162,12 +162,16 @@ void _train() {
             saveStatistic(statsFile, sim, 's');
 
             // Проверяем удачные ли гены
-            if (sim.getSimulationData().maxEnergyLevel >= 2000) {
-                sim.geneticAlgorithm();
+            sim.sortPop();
+            if (sim.getPopulation()[0]->getEnergy() >= 1000) {
+                // sim.geneticAlgorithm();
                 saveStatistic(dataFile, sim, 'd');
 
                 sim.reloadGrid();
                 runARound(sim, true);
+                // sim.reloadGrid();
+
+                sim.geneticAlgorithm();
                 sim.reloadGrid();
             } else {
                 sim.geneticAlgorithm();

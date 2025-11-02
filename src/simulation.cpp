@@ -145,19 +145,23 @@ bool EvolutionSimulation::updateAgents() {
     return true;
 }
 
-void EvolutionSimulation::geneticAlgorithm() {
-    // Сортируем агентов по эффективности (шаги + энергия)
+void EvolutionSimulation::sortPop() {
     sort(population.begin(), population.end(),
-        [](const unique_ptr<Agent>& a, const unique_ptr<Agent>& b) { 
-            return a->getSteps() > b->getSteps();
-        });
-        /*
-            int A = (float)a->getSteps() * 0.8f + (float)a->getEnergy() * 0.2f;
-            int B = (float)b->getSteps() * 0.8f + (float)b->getEnergy() * 0.2f;
-            return A > B;
+    [](const unique_ptr<Agent>& a, const unique_ptr<Agent>& b) { 
+        return a->getSteps() > b->getSteps();
+    });
+    /*
+        int A = (float)a->getSteps() * 0.8f + (float)a->getEnergy() * 0.2f;
+        int B = (float)b->getSteps() * 0.8f + (float)b->getEnergy() * 0.2f;
+        return A > B;
 
-            return a->getEnergy() > b->getEnergy();
-        */
+        return a->getEnergy() > b->getEnergy();
+    */
+}
+
+void EvolutionSimulation::geneticAlgorithm() {
+    // Сортируем агентов по эффективности
+    sortPop();
 
     const int currentPopulationSize = population.size();
     const int targetPopulationSize = INIT_POP_SIZE;
@@ -166,7 +170,7 @@ void EvolutionSimulation::geneticAlgorithm() {
     uniform_real_distribution<float> chance(0.0f, 1.0f);
 
     // 1. ЭЛИТИЗМ - СОХРАНЯЕМ ЛУЧШИХ (5% популяции, минимум 1)
-    const int eliteCount = max(1, (int)(targetPopulationSize * 0.05f));
+    const int eliteCount = 1;
     for (int i = 0; i < min(eliteCount, currentPopulationSize); i++) {
         newPopulation.push_back(population[i]->clone());
     }
