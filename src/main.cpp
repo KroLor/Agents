@@ -140,6 +140,24 @@ void runARound(EvolutionSimulation& sim, bool visualize) {
     }
 }
 
+void visualBestAgent(EvolutionSimulation& sim) {
+    auto bestAgent = sim.getPopulation()[0]->clone();
+
+    auto field = createField(FIELD_WIDTH, FIELD_HEIGHT);
+    EvolutionSimulation visualSim(field, 0, 0);
+
+    // Добавляем только лучшего агента
+    int x, y;
+    for (int i = 0; i < 10; i++) {
+        visualSim.findRandomEmptyPosition(x, y);
+        visualSim.addAgent(x, y, INIT_ENERGY_AGENT, bestAgent->getGene().clone());
+    }
+    visualSim.reloadGrid();
+
+    runARound(visualSim, true);
+    sim.reloadGrid();
+}
+
 void _train() {
     std::ofstream statsFile("simulation_stats.csv", std::ios::app);
     std::ofstream dataFile("simulation_data.csv", std::ios::app);
@@ -150,33 +168,32 @@ void _train() {
 
     while (sim.getGeneration() < GENERATIONS) {
         runARound(sim, true);
-
         saveStatistic(statsFile, sim, 's');
+        
+        // Проверяем удачные ли гены
+        sim.sortPop();
+        if (sim.getPopulation()[0]->getEnergy() >= 1000) {
+            saveStatistic(dataFile, sim, 'd');
+            visualBestAgent(sim);
+        }
+        
         sim.geneticAlgorithm();
         sim.reloadGrid();
         
-        // Пропуск раундов/поколений без визуализации
+        // Пропуск раундов без визуализации
         for (int gen_skip = 1; gen_skip <= SKIP_GENERATIONS - 1; gen_skip++) {
             runARound(sim, false);
-
             saveStatistic(statsFile, sim, 's');
-
+            
             // Проверяем удачные ли гены
             sim.sortPop();
             if (sim.getPopulation()[0]->getEnergy() >= 1000) {
-                // sim.geneticAlgorithm();
                 saveStatistic(dataFile, sim, 'd');
-
-                sim.reloadGrid();
-                runARound(sim, true);
-                // sim.reloadGrid();
-
-                sim.geneticAlgorithm();
-                sim.reloadGrid();
-            } else {
-                sim.geneticAlgorithm();
-                sim.reloadGrid();
+                visualBestAgent(sim);
             }
+            
+            sim.geneticAlgorithm();
+            sim.reloadGrid();
         }
     }
     updateField(sim.getGrid(), sim, GENERATIONS, SKIP_GENERATIONS, NUMBER_OF_STEPS, NUMBER_OF_STEPS);

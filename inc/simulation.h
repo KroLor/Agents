@@ -32,20 +32,6 @@ private:
     void initializePopulation(int initialPopulationSize);
 
     /**
-     * @brief Создает начальное количество еды.
-     * @param initialFoodCount Начальное количество еды.
-     */
-    void initializeFood(int initialFoodCount);
-
-    /**
-     * @brief Находит случайную свободную позицию на поле.
-     * @param x Ссылка для сохранения координаты X.
-     * @param y Ссылка для сохранения координаты Y.
-     * @return true если свободная позиция найдена, иначе false.
-     */
-    bool findRandomEmptyPosition(int& x, int& y) const;
-
-    /**
      * @brief Обновляет состояние всех агентов.
      * @return Удачно или нет.
      */
@@ -75,6 +61,14 @@ public:
      * @param param Параметры с весами нейросети.
      */
     void tuneSimWithTrainedAgents(vector<vector<Cell>> field, const ProgramParameters& param);
+
+    /**
+     * @brief Находит случайную свободную позицию на поле.
+     * @param x Ссылка для сохранения координаты X.
+     * @param y Ссылка для сохранения координаты Y.
+     * @return true если свободная позиция найдена, иначе false.
+     */
+    bool findRandomEmptyPosition(int& x, int& y) const;
     
     /**
      * @brief Выполняет один такт симуляции.
@@ -91,6 +85,12 @@ public:
      * @brief Выполняет процесс эволюции агентов.
      */
     void geneticAlgorithm();
+
+    /**
+     * @brief Создает начальное количество еды.
+     * @param initialFoodCount Начальное количество еды.
+     */
+    void initializeFood(int initialFoodCount);
     
     /**
      * @brief Добавляет агента в указанную позицию.
