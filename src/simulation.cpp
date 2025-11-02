@@ -320,37 +320,35 @@ void EvolutionSimulation::updateGrid() {
 unique_ptr<NeuralNetwork> EvolutionSimulation::createNetw(const ProgramParameters& param) {
     auto neuralNet = make_unique<NeuralNetwork>();
     
-    // Создаем средний слой
     auto layer1 = make_unique<GeneLayer>(param.InputValues, param.NeuronsInHiddenLayer, param.activationMid);
     
-    // Устанавливаем веса
     const auto& weights1 = param.weights[0];
     vector<vector<float>> layer1_w(param.InputValues, vector<float>(param.NeuronsInHiddenLayer));
     
-    int k = 0;
     for (int i = 0; i < param.InputValues; i++) {
-        for (int j = 0; j < param.NeuronsInHiddenLayer; j++) {
-            layer1_w[i][j] = weights1[k]; k++;
+        for (int o = 0; o < param.NeuronsInHiddenLayer; o++) {
+            int indx = i * param.NeuronsInHiddenLayer + o;
+            layer1_w[i][o] = weights1[indx];
         }
     }
     layer1->setWeights(layer1_w);
     
-    // Устанавливаем смещения для мреднего слоя
+    // Устанавливаем смещения для среднего слоя
     layer1->setBiases(param.biases[0]);
     
     neuralNet->addLayer(move(layer1));
     
-    // Создаем последний слой
     auto layer2 = make_unique<GeneLayer>(param.NeuronsInHiddenLayer, param.OutputValues, param.activationLast);
     
-    // Устанавливаем веса для последнего слоя
+    // Устанавливаем веса для второго слоя
     const auto& weights2 = param.weights[1];
     vector<vector<float>> layer2_w(param.NeuronsInHiddenLayer, vector<float>(param.OutputValues));
     
-    k = 0;
+    // Преобразуем плоский вектор в матрицу [hidden_size][output_size]
     for (int i = 0; i < param.NeuronsInHiddenLayer; i++) {
-        for (int j = 0; j < param.OutputValues; j++) {
-            layer2_w[i][j] = weights2[k]; k++;
+        for (int o = 0; o < param.OutputValues; o++) {
+            int indx = i * param.OutputValues + o;
+            layer2_w[i][o] = weights2[indx];
         }
     }
     layer2->setWeights(layer2_w);
