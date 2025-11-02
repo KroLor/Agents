@@ -162,7 +162,7 @@ void _train() {
             saveStatistic(statsFile, sim, 's');
 
             // Проверяем удачные ли гены
-            if (sim.getSimulationData().averageEnergyLevel >= 1000) {
+            if (sim.getSimulationData().averageEnergyLevel >= 2000) {
                 sim.geneticAlgorithm();
                 saveStatistic(dataFile, sim, 'd');
 

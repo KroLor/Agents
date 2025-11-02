@@ -9,7 +9,7 @@
 #define SKIP_GENERATIONS 1000 // Кол-во пропусков раундов/поколений
 
 #define INIT_POP_SIZE 35 // Размер популяции
-#define NUMBER_OF_STEPS 150 // Кол-во шагов в раунде
+#define NUMBER_OF_STEPS 175 // Кол-во шагов в раунде
 #define INIT_ENERGY_AGENT 200 // Кол-во энергии у агента
 #define ENERGY_LOSS_PER_STEP 4 //2 Потеря энергии за шаг //
 #define ENERGY_LOSS_DUE_TO_INACTION 2 //3 Потеря энергии за бездействие //
@@ -23,9 +23,9 @@
 #define TICK_MS 50 //150 Интервал между тиками (мс)
 
 #define USE_A_NEURAL_NETWORK 1 // Отвечает за использование нейросети в агентах
-#define INPUT_VALUES 7 // Входные значения
+#define INPUT_VALUES 6 // Входные значения
 // #define HIDDEN_LAYERS 1 // Скрытых слоев
-#define NEURONS_IN_HIDDEN_LAYER 14 // Кол-во нейронов в скрытых(ом) слоях(е) // (одинаково)
+#define NEURONS_IN_HIDDEN_LAYER 5 // Кол-во нейронов в скрытых(ом) слоях(е) // (одинаково)
 #define OUTPUT_VALUES 4 // Выходные значения
 
 #define AGENT_MUTATION_CHANCE 0.02f //0.05f Шанс мутации гена
