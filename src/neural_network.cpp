@@ -13,21 +13,21 @@ static mt19937 rng(random_device{}());
 
 // Функции активации
 float sigmoid(float x) {
-    return 1.0f / (1.0f + exp(-x * 3.0f)); // F(x) = 1 / (1 + e^(-x * 3)), "плющим" значение до диапозона от 0 до 1
+    return 1.0f / (1.0f + exp(-x * 8.0f)); // F(x) = 1 / (1 + e^(-x * 3)), "плющим" значение до диапозона от 0 до 1
 }
 
 float relu(float x) {
-    // return max(0.0f, x); // Отсекаем всё, что меньше 0
-    x = max(-1.0f, x);
-    x = min(x, 1.0f);
-    return x;
+    return max(0.0f, x); // Отсекаем всё, что меньше 0
+    // x = max(-1.0f, x);
+    // x = min(x, 1.0f);
+    // return x;
 }
 
 GeneLayer::GeneLayer(int inputSize, int outputSize, const string& activation) : activation(activation) {
     weights.resize(inputSize, vector<float>(outputSize));
     biases.resize(outputSize, 0.0f);
     
-    uniform_real_distribution<float> dist(-1.0, 1.0);
+    uniform_real_distribution<float> dist(-1.0f, 1.0f);
     
     // Инициализация случайными весами
     for (int i = 0; i < inputSize; i++) {
@@ -196,7 +196,7 @@ pair<int, int> NeuralGene::decideDirection(const vector<Cell>& surroundings, int
     inputs[5] = directionToFood.second; // dy
     
     // Нормируем кол-во энергии
-    inputs[6] = min((float)energy / (INIT_ENERGY_AGENT * 2), 1.0f);
+    inputs[6] = min((float)energy / (float)(INIT_ENERGY_AGENT * 2), 1.0f);
     
     vector<float> outputs = neuralNet->predict(inputs); // 0 - Вниз, 1 - Вверх, 2 - Влево, 3 - Вправо
     
