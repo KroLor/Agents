@@ -93,7 +93,7 @@ bool EvolutionSimulation::updateAgents() {
     if (totalAlives == 0) { return false; }
 
     // Перемешаем популяцию
-    // shuffle(population.begin(), population.end(), rng);
+    shuffle(population.begin(), population.end(), rng);
 
     for (auto& agent : population) {
         if (agent->getIsAlive()) {
