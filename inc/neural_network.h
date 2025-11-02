@@ -106,7 +106,20 @@ public:
      */
     unique_ptr<NeuralNetwork> clone() const;
 
-    vector<float> getWeights() const;
+    vector<double> getWeights() const;
+
+    /**
+     * @brief Устанавливает веса для всех слоев
+     */
+    void setAllWeights(const std::vector<std::vector<std::vector<double>>>& allWeights) {
+        if (allWeights.size() != layers.size()) {
+            throw std::invalid_argument("Несоответствие количества слоев");
+        }
+        
+        for (size_t i = 0; i < layers.size(); i++) {
+            layers[i]->setWeights(allWeights[i]);
+        }
+    }
 };
 
 /**
@@ -119,6 +132,11 @@ private:
 public:
     NeuralGene();
     NeuralGene(unique_ptr<NeuralNetwork> network);
+    NeuralGene(const NeuralGene& other) {
+        if (other.neuralNet) {
+            this->neuralNet = other.neuralNet->clone();
+        }
+    }
     
     /**
      * @brief Определяет направление движения на основе окружения, энергии и направления к еде.

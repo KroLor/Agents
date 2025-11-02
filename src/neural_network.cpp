@@ -173,17 +173,17 @@ unique_ptr<NeuralNetwork> NeuralNetwork::crossing(const NeuralNetwork& otherNet)
 NeuralGene::NeuralGene() {
     neuralNet = make_unique<NeuralNetwork>();
 
-    neuralNet->addLayer(make_unique<GeneLayer>(INPUT_VALUES, NEURONS_IN_HIDDEN_LAYER, "relu")); // Скрытый слой
-    neuralNet->addLayer(make_unique<GeneLayer>(NEURONS_IN_HIDDEN_LAYER, OUTPUT_VALUES, "sigmoid")); // Выходной слой
+    neuralNet->addLayer(make_unique<GeneLayer>(InputValues, NeuronsInHiddenLayer, "relu"));
+    neuralNet->addLayer(make_unique<GeneLayer>(NeuronsInHiddenLayer, OutputValues, "sigmoid"));
 }
 
 NeuralGene::NeuralGene(unique_ptr<NeuralNetwork> network) : neuralNet(move(network)) {}
 
 pair<int, int> NeuralGene::decideDirection(const vector<Cell>& surroundings, int energy, pair<int, int> directionToFood) {
-    vector<float> inputs(INPUT_VALUES);
+    vector<double> inputs(InputValues); // InputValues должно быть 11
     
-    for (int i = 0; i < 4; i++) {
-        // Представляем клетки в виде чисел: EMPTY = 0; FOOD = 1; WALL = -1; AGENT = -1
+    // ДОЛЖНО БЫТЬ 8 клеток окружения!
+    for (int i = 0; i < 8; i++) {  // ИЗМЕНИТЬ с 4 на 8
         switch (surroundings[i].type) {
             case EMPTY: inputs[i] = 0.0; break;
             case FOOD: inputs[i] = 1.0; break;

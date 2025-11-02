@@ -5,6 +5,7 @@
 #include <string>
 #include "cells.h"
 #include "agent_logic.h"
+#include "neural_network.h"
 #include "main.h"
 
 using namespace std;
@@ -55,6 +56,8 @@ private:
      */
     void spawnNewFood();
 
+    static unique_ptr<NeuralNetwork> createNetworkFromWeights(const ProgramParameters& param);
+
 public:
     /**
      * @brief Конструктор симуляции эволюции.
@@ -65,6 +68,14 @@ public:
     EvolutionSimulation(vector<vector<Cell>> grid, int initialPopulationSize = INIT_POP_SIZE, int initialFoodCount = INIT_FOOD_COUNT);
     
     ~EvolutionSimulation();
+
+    /**
+     * @brief Создает симуляцию с предобученными агентами.
+     * @param field Поле.
+     * @param param Параметры с весами нейросети.
+     * @return Указатель на созданную симуляцию.
+     */
+    static unique_ptr<EvolutionSimulation> createWithTrainedAgents(vector<vector<Cell>> field, const ProgramParameters& param);
     
     /**
      * @brief Выполняет один такт симуляции.
