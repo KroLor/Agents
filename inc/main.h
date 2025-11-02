@@ -5,20 +5,20 @@
 #define FIELD_WIDTH 80 //51 Ширина поля
 #define FIELD_HEIGHT 21 //20 Высота поля
 
-#define GENERATIONS 100000 // Всего поколений
+#define GENERATIONS 200000 // Всего поколений
 #define SKIP_GENERATIONS 1000 // Кол-во пропусков раундов/поколений
 
-#define INIT_POP_SIZE 100 //35 Размер популяции
-#define NUMBER_OF_STEPS 150 // Кол-во шагов в раунде
+#define INIT_POP_SIZE 35 // Размер популяции
+#define NUMBER_OF_STEPS 175 // Кол-во шагов в раунде
 #define INIT_ENERGY_AGENT 200 // Кол-во энергии у агента
-#define ENERGY_LOSS_PER_STEP 4 // Потеря энергии за шаг //
-#define ENERGY_LOSS_DUE_TO_INACTION 4 // Потеря энергии за бездействие //
+#define ENERGY_LOSS_PER_STEP 4 //2 Потеря энергии за шаг //
+#define ENERGY_LOSS_DUE_TO_INACTION 2 //3 Потеря энергии за бездействие //
 
-#define INIT_FOOD_COUNT 150 // Кол-во еды, появляющейся в начале раунда
-#define FOOD_SPAWN_INTERVAL 15 // Каждый N-й тик появляется еда
-#define FOOD_ADD_TIMES 70 // Кол-во появлений еды за раз
-#define CHANCE_OF_FOOD_APPEARANCE 0.5f //0.5f Шанс появления еды в клетке
-#define ENERGY_FOOD_VALUE 40 //40 Энергетическая ценность еды //
+#define INIT_FOOD_COUNT 100 // Кол-во еды, появляющейся в начале раунда
+#define FOOD_SPAWN_INTERVAL 20 // Каждый N-й тик появляется еда
+#define FOOD_ADD_TIMES 100 // Кол-во появлений еды за раз
+#define CHANCE_OF_FOOD_APPEARANCE 0.5f // Шанс появления еды в клетке
+#define ENERGY_FOOD_VALUE 30 //40 Энергетическая ценность еды //
 
 #define TICK_MS 50 //150 Интервал между тиками (мс)
 
