@@ -90,10 +90,11 @@ bool EvolutionSimulation::simulateStep()
 }
 
 bool EvolutionSimulation::updateAgents() {
-    shuffle(population.begin(), population.end(), rng); // Перемешать популяцию
-
     if (totalAlives == 0) { return false; }
-    
+
+    // Перемешаем популяцию
+    // shuffle(population.begin(), population.end(), rng);
+
     for (auto& agent : population) {
         if (agent->getIsAlive()) {
             // Проверяем смерть от голода
@@ -362,7 +363,7 @@ void EvolutionSimulation::tuneSimWithTrainedAgents(vector<vector<Cell>> field, c
     // Создаем одну нейросеть
     auto neuralNet = createNetw(param);
     
-    // Создаем NeuralGene с этой нейросетью ()
+    // Создаем NeuralGene с этой нейросетью
     auto newNeuralGene = make_unique<NeuralGene>(move(neuralNet));
     
     // Создаем агентов с одной нейросетью

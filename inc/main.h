@@ -9,7 +9,7 @@
 #define SKIP_GENERATIONS 1000 // Кол-во пропусков раундов/поколений
 
 #define INIT_POP_SIZE 35 // Размер популяции
-#define NUMBER_OF_STEPS 175 // Кол-во шагов в раунде
+#define NUMBER_OF_STEPS 150 // Кол-во шагов в раунде
 #define INIT_ENERGY_AGENT 200 // Кол-во энергии у агента
 #define ENERGY_LOSS_PER_STEP 4 //2 Потеря энергии за шаг //
 #define ENERGY_LOSS_DUE_TO_INACTION 2 //3 Потеря энергии за бездействие //
