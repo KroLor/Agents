@@ -212,7 +212,7 @@ void _show(ProgramParameters param) {
 int main(int argc, char* argv[]) {
     ProgramParameters param;
 
-    if (argc == 2) {
+    if (argc == 1) {
         param.type = 't';
         param.useNeuralNetwork = USE_A_NEURAL_NETWORK;
         param.InputValues = INPUT_VALUES;
@@ -222,7 +222,7 @@ int main(int argc, char* argv[]) {
         param.activationLast = "sigmoid";
         settingConstants(param);
         _train();
-    } else if (argc == 1) {
+    } else if (argc == 2 && std::string(argv[1]) == "-v") {
         param.type = 'v';
         param.activationMid = "relu";
         param.activationLast = "sigmoid";
