@@ -148,14 +148,14 @@ bool EvolutionSimulation::updateAgents() {
 void EvolutionSimulation::sortPop() {
     sort(population.begin(), population.end(),
     [](const unique_ptr<Agent>& a, const unique_ptr<Agent>& b) { 
-        return a->getSteps() > b->getSteps();
+        return a->getEnergy() > b->getEnergy();
     });
     /*
         int A = (float)a->getSteps() * 0.8f + (float)a->getEnergy() * 0.2f;
         int B = (float)b->getSteps() * 0.8f + (float)b->getEnergy() * 0.2f;
         return A > B;
 
-        return a->getEnergy() > b->getEnergy();
+        return a->getSteps() > b->getSteps();
     */
 }
 
@@ -163,128 +163,52 @@ void EvolutionSimulation::geneticAlgorithm() {
     // Сортируем агентов по эффективности
     sortPop();
 
-    const int currentPopulationSize = population.size();
-    const int targetPopulationSize = INIT_POP_SIZE;
-    vector<unique_ptr<Agent>> newPopulation;
+    const int targetSize = INIT_POP_SIZE;
+    vector<unique_ptr<Agent>> newPop;
     
-    uniform_real_distribution<float> chance(0.0f, 1.0f);
+    uniform_real_distribution<float> random(0.0f, 1.0f);
 
-    // 1. ЭЛИТИЗМ - СОХРАНЯЕМ ЛУЧШИХ (5% популяции, минимум 1)
+    // 1. СОХРАНЯЕМ САМЫХ ЛУЧШИХ (местная элита)
     const int eliteCount = 1;
-    for (int i = 0; i < min(eliteCount, currentPopulationSize); i++) {
-        newPopulation.push_back(population[i]->clone());
+    for (int i = 0; i < min(eliteCount, (int)population.size()); i++) {
+        newPop.push_back(population[i]->clone());
     }
 
-    // 2. РАЗМНОЖЕНИЕ ЛУЧШИХ АГЕНТОВ
-    int createdCount = newPopulation.size();
-    
-    // Топ-агенты создают основную массу потомков (60% популяции)
-    const int topBreedersCount = max(2, (int)(currentPopulationSize * 0.3f)); // Топ-30%
-    const int topChildrenTarget = (int)(targetPopulationSize * 0.6f);
-    
-    for (int parentRank = 0; parentRank < topBreedersCount && createdCount < targetPopulationSize; parentRank++) {
-        // Количество потомков зависит от ранга (лучшие = больше потомков)
-        int maxChildrenForThisRank = topChildrenTarget / (parentRank + 1);
-        int childrenForThisParent = min(maxChildrenForThisRank, targetPopulationSize - createdCount);
+    // 2. СОЗДАЕМ ПОТОМКОВ ОТ ЛУЧШИХ АГЕНТОВ (сверху вниз)
+    while (newPop.size() < targetSize * 0.7f) { // 70%
+        // Берём родителей из лучшей половины
+        int parent1 = rand() % (population.size() / 2);
+        int parent2 = rand() % (population.size() / 2);
         
-        for (int i = 0; i < childrenForThisParent && createdCount < targetPopulationSize; i++) {
-            auto child = population[parentRank]->clone();
-            
-            // Скрещивание с другим хорошим агентом
-            if (currentPopulationSize > 1 && chance(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
-                int partnerRank;
-                // Чем лучше родитель, тем более качественного партнера выбираем
-                if (parentRank < topBreedersCount / 2) {
-                    partnerRank = rand() % (topBreedersCount / 2); // Топ-15%
-                } else {
-                    partnerRank = rand() % topBreedersCount; // Топ-30%
-                }
-                
-                if (partnerRank != parentRank) {
-                    child->crossing(*population[partnerRank]);
-                }
-            }
-            
-            // Адаптивная мутация: чем лучше родитель, тем слабее мутация
-            float rankFactor = (float)parentRank / topBreedersCount;
-            float mutationChance = AGENT_MUTATION_CHANCE * (0.3f + 0.7f * rankFactor);
-            float mutationStrength = mutationPower * (0.2f + 0.8f * rankFactor);
-            
-            if (chance(rng) < mutationChance) {
-                child->mutateGene(mutationStrength);
-            }
-            
-            newPopulation.push_back(move(child));
-            createdCount++;
-        }
-    }
-
-    // 3. СЛУЧАЙНОЕ РАЗМНОЖЕНИЕ ДЛЯ РАЗНООБРАЗИЯ (35% популяции)
-    const int randomChildrenTarget = targetPopulationSize - createdCount;
-    
-    for (int i = 0; i < randomChildrenTarget && createdCount < targetPopulationSize; i++) {
-        // Турнирная селекция для выбора достойных родителей
-        auto tournamentSelect = [&](int tournamentSize) -> int {
-            int bestIndex = rand() % currentPopulationSize;
-            int bestScore = population[bestIndex]->getSteps();
-            
-            for (int t = 1; t < tournamentSize; t++) {
-                int candidate = rand() % currentPopulationSize;
-                int candidateScore = population[candidate]->getSteps();
-                if (candidateScore > bestScore) {
-                    bestIndex = candidate;
-                    bestScore = candidateScore;
-                }
-            }
-            return bestIndex;
-        };
+        auto newAgent = population[parent1]->clone();
         
-        int parent1 = tournamentSelect(3);
-        int parent2 = tournamentSelect(3);
-        
-        // Убеждаемся, что родители разные
-        while (parent1 == parent2 && currentPopulationSize > 1) {
-            parent2 = tournamentSelect(3);
+        // Скрещиваем с вторым родителем
+        if (parent1 != parent2) {
+            newAgent->crossing(*population[parent2]);
         }
         
-        auto child = population[parent1]->clone();
-        child->crossing(*population[parent2]);
-        
-        // Сильная мутация для случайных потомков
-        if (chance(rng) < AGENT_MUTATION_CHANCE * 1.5f) {
-            child->mutateGene(mutationPower * 1.2f);
+        // Мутируем
+        if (random(rng) < AGENT_MUTATION_CHANCE) {
+            newAgent->mutateGene(mutationPower);
         }
         
-        newPopulation.push_back(move(child));
-        createdCount++;
+        newPop.push_back(move(newAgent));
     }
 
-    // 4. ГАРАНТИЯ ЗАПОЛНЕНИЯ (если что-то пошло не так)
-    while (createdCount < targetPopulationSize) {
-        // Просто клонируем случайных агентов из текущей популяции
-        int randomParent = rand() % currentPopulationSize;
-        newPopulation.push_back(population[randomParent]->clone());
-        createdCount++;
-    }
-
-    // 5. АДАПТИВНАЯ НАСТРОЙКА ПАРАМЕТРОВ
-    static int previousBestScore = 0;
-    int currentBestScore = currentPopulationSize > 0 ? population[0]->getSteps() : 0;
-    
-    // Обновляем каждые 5 поколений
-    if (generation % 5 == 0 && currentPopulationSize > 0) {
-        if (currentBestScore <= previousBestScore) {
-            // Застой - увеличиваем исследование
-            mutationPower = min(mutationPower * 1.15f, AGENT_MUTATION_POWER * 2.0f);
-        } else {
-            // Прогресс - стабилизируем
-            mutationPower = max(mutationPower * 0.9f, AGENT_MUTATION_POWER * 0.3f);
+    // 3. ДОБАВЛЯЕМ СЛУЧАЙНЫХ АГЕНТОВ
+    while (newPop.size() < targetSize) {
+        int randomAgent = rand() % population.size();
+        auto agent = population[randomAgent]->clone();
+        
+        // Мутируем сильнее
+        if (random(rng) < AGENT_MUTATION_CHANCE * 1.5f) {
+            agent->mutateGene(mutationPower * 1.5f);
         }
-        previousBestScore = currentBestScore;
+        
+        newPop.push_back(move(agent));
     }
 
-    // 6. ОБНОВЛЕНИЕ ПОПУЛЯЦИИ
-    population = move(newPopulation);
+    population = move(newPop);
     generation++;
 }
 
