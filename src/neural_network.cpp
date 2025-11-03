@@ -72,16 +72,12 @@ void GeneLayer::mutate(float mutationPower) {
     for (auto& row : weights) {
         for (auto& weight : row) {
             weight += dist(rng);
-            weight = min(weight, 1.0f);
-            weight = max(weight, -1.0f);
         }
     }
     
     // Мутируем смещения
     for (auto& bias : biases) {
         bias += dist(rng) * 0.3f;
-        bias = min(bias, 1.0f);
-        bias = max(bias, -1.0f);
     }
 }
 
@@ -124,49 +120,41 @@ void NeuralNetwork::mutate(float mutationPower) {
     }
 }
 
-unique_ptr<NeuralNetwork> NeuralNetwork::crossing(const NeuralNetwork& otherNet) const {
-    auto newNet = make_unique<NeuralNetwork>();
-    const auto& otherLayers = otherNet.getLayers();
-
+void NeuralNetwork::crossing(NeuralNetwork& otherNet) {
+    auto& otherLayers = otherNet.getLayers();
     uniform_real_distribution<float> dist(0.0, 1.0);
 
     for (int i = 0; i < layers.size(); i++) {
-        const auto& weights1 = layers[i]->getWeights();
-        const auto& weights2 = otherLayers[i]->getWeights();
-        const auto& biases1 = layers[i]->getBiases();
-        const auto& biases2 = otherLayers[i]->getBiases();
-
-        auto newLayer = make_unique<GeneLayer>(weights1.size(), weights1[0].size(), layers[i]->getActivation());
-
-        vector<vector<float>> newWeights(weights1.size(), vector<float>(weights1[0].size()));
-        vector<float> newBiases(biases1.size());
+        auto& layer1 = layers[i];
+        auto& layer2 = otherLayers[i];
+        
+        auto& weights1 = layer1->getWeights();
+        auto& weights2 = layer2->getWeights();
+        auto& biases1 = layer1->getBiases();
+        auto& biases2 = layer2->getBiases();
 
         // Скрещивание весов
-        for (int i = 0; i < weights1.size(); i++) {
-            for (int j = 0; j < weights1[i].size(); j++) {
+        for (int i_val = 0; i_val < weights1.size(); i_val++) {
+            for (int j = 0; j < weights1[i_val].size(); j++) {
                 if (dist(rng) < 0.5f) {
-                    newWeights[i][j] = weights1[i][j];
-                } else {
-                    newWeights[i][j] = weights2[i][j];
+                    // Обмен весами между нейросетями
+                    float temp = weights1[i_val][j];
+                    weights1[i_val][j] = weights2[i_val][j];
+                    weights2[i_val][j] = temp;
                 }
             }
         }
 
         // Скрещивание смещений
-        for (int i = 0; i < biases1.size(); i++) {
+        for (int i_val = 0; i_val < biases1.size(); i_val++) {
             if (dist(rng) < 0.5f) {
-                newBiases[i] = biases1[i];
-            } else {
-                newBiases[i] = biases2[i];
+                // Обмен смещениями между нейросетями
+                float temp = biases1[i_val];
+                biases1[i_val] = biases2[i_val];
+                biases2[i_val] = temp;
             }
         }
-
-        newLayer->setWeights(newWeights);
-        newLayer->setBiases(newBiases);
-        newNet->addLayer(move(newLayer));
     }
-
-    return newNet;
 }
 
 NeuralGene::NeuralGene() {
@@ -228,10 +216,11 @@ unique_ptr<Gene> NeuralGene::mutation(float mutationPower) const {
     return make_unique<NeuralGene>(move(mutatedNet));
 }
 
-unique_ptr<Gene> NeuralGene::crossing(const Gene& pairGene) const {
-    const NeuralGene* otherNeuralGene = dynamic_cast<const NeuralGene*>(&pairGene);
-    auto newNeuralNet = neuralNet->crossing(otherNeuralGene->getNeuralNet());
-    return make_unique<NeuralGene>(move(newNeuralNet));
+void NeuralGene::crossing(Gene& otherGene) {
+    NeuralGene* otherNeuralGene = dynamic_cast<NeuralGene*>(&otherGene);
+    if (otherNeuralGene) {
+        neuralNet->crossing(otherNeuralGene->getNeuralNet());
+    }
 }
 
 string NeuralGene::saveDataCSV() const {

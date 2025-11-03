@@ -24,6 +24,7 @@ private:
     int totalDeaths;                      // Общее количество смертей
     int totalAlives;                      // Общее количество живых
     int currentTick;                      // Счетчик тиков для контроля появления еды
+    vector<pair<int, int>> fixedFoodPositions;  // Фиксированные позиции еды
 
     /**
      * @brief Создает начальную популяцию агентов.
@@ -54,6 +55,8 @@ public:
     EvolutionSimulation(vector<vector<Cell>> grid, int initialPopulationSize = INIT_POP_SIZE, int initialFoodCount = INIT_FOOD_COUNT);
     
     ~EvolutionSimulation();
+
+    void generateFixedFoodPositions(int foodCount);
 
     /**
      * @brief Создает симуляцию с предобученными агентами.

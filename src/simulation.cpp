@@ -13,6 +13,8 @@ static mt19937 rng(random_device{}());
 EvolutionSimulation::EvolutionSimulation(vector<vector<Cell>> grid, int initialPopulationSize, int initialFoodCount)
     : grid(move(grid)), mutationPower(AGENT_MUTATION_POWER), generation(0), totalDeaths(0), totalAlives(INIT_POP_SIZE), currentTick(0)
 {
+    // Генерируем фиксированные позиции для еды один раз
+    generateFixedFoodPositions(initialFoodCount);
     initializePopulation(initialPopulationSize);
     initializeFood(initialFoodCount);
 }
@@ -33,13 +35,32 @@ void EvolutionSimulation::initializePopulation(int initialPopulationSize)
     }
 }
 
-void EvolutionSimulation::initializeFood(int initialFoodCount)
-{
-    for (int i = 0; i < initialFoodCount; i++) {
-        int x, y;
-        if (findRandomEmptyPosition(x, y)) {
-            addFood(x, y);
+
+void EvolutionSimulation::generateFixedFoodPositions(int foodCount) {
+    fixedFoodPositions.clear();
+    
+    // Собираем все возможные пустые позиции
+    vector<pair<int, int>> emptyPositions;
+    for (int x = 1; x < grid.size() - 1; x++) {
+        for (int y = 1; y < grid[x].size() - 1; y++) {
+            if (grid[x][y].type == EMPTY) {
+                emptyPositions.emplace_back(x, y);
+            }
         }
+    }
+    
+    // Перемешиваем и берем нужное количество
+    shuffle(emptyPositions.begin(), emptyPositions.end(), rng);
+    
+    for (int i = 0; i < min(foodCount, (int)emptyPositions.size()); i++) {
+        fixedFoodPositions.push_back(emptyPositions[i]);
+    }
+}
+
+void EvolutionSimulation::initializeFood(int initialFoodCount) {
+    // Используем фиксированные позиции вместо случайных
+    for (const auto& pos : fixedFoodPositions) {
+        addFood(pos.first, pos.second);
     }
 }
 
@@ -70,20 +91,14 @@ bool EvolutionSimulation::findRandomEmptyPosition(int& x, int& y) const
     return true;
 }
 
-bool EvolutionSimulation::simulateStep()
-{
+bool EvolutionSimulation::simulateStep() {
     if (!updateAgents()) {
         return false;
     }
     
     currentTick++;
-    // Добавляем новую еду FOOD_ADD_TIMES раз каждые FOOD_SPAWN_INTERVAL тиков
-    if (currentTick % FOOD_SPAWN_INTERVAL == 0) {
-        for (int times = 0; times < FOOD_ADD_TIMES; times++) {
-            spawnNewFood();
-        }
-    }
     
+    // УБИРАЕМ случайное появление еды - теперь еда только в фиксированных позициях
     updateGrid();
 
     return true;
@@ -160,54 +175,46 @@ void EvolutionSimulation::sortPop() {
 }
 
 void EvolutionSimulation::geneticAlgorithm() {
-    // Сортируем агентов по эффективности
+    // Сортируем агентов по эффективности (лучшие - первые)
     sortPop();
-
-    const int targetSize = INIT_POP_SIZE;
+    
+    const int popSize = population.size();
     vector<unique_ptr<Agent>> newPop;
     
     uniform_real_distribution<float> random(0.0f, 1.0f);
 
-    // 1. СОХРАНЯЕМ САМЫХ ЛУЧШИХ (местная элита)
-    const int eliteCount = 1;
-    for (int i = 0; i < min(eliteCount, (int)population.size()); i++) {
-        newPop.push_back(population[i]->clone());
+    // 1. СОХРАНЯЕМ ТОП-1 АГЕНТА БЕЗ ИЗМЕНЕНИЙ
+    newPop.push_back(population[0]->clone());
+
+    // 2. БЕРЕМ ВТОРУЮ ПОЛОВИНУ (исключая топ-1)
+    const int secondHalfStart = 1; // начинаем с индекса 1, пропуская топ-1
+    const int secondHalfSize = popSize - secondHalfStart;
+    
+    // Создаем временный вектор для второй половины
+    vector<unique_ptr<Agent>> secondHalf;
+    for (int i = secondHalfStart; i < popSize; i++) {
+        secondHalf.push_back(population[i]->clone());
     }
 
-    // 2. СОЗДАЕМ ПОТОМКОВ ОТ ЛУЧШИХ АГЕНТОВ (сверху вниз)
-    while (newPop.size() < targetSize * 0.7f) { // 70%
-        // Берём родителей из лучшей половины
-        int parent1 = rand() % (population.size() / 2);
-        int parent2 = rand() % (population.size() / 2);
-        
-        auto newAgent = population[parent1]->clone();
-        
-        // Скрещиваем с вторым родителем
-        if (parent1 != parent2) {
-            newAgent->crossing(*population[parent2]);
-        }
-        
-        // Мутируем
-        if (random(rng) < AGENT_MUTATION_CHANCE) {
-            newAgent->mutateGene(mutationPower);
-        }
-        
-        newPop.push_back(move(newAgent));
+    // 3. СКРЕЩИВАЕМ ВТОРУЮ ПОЛОВИНУ ПО ПАРАМ (i с i+1)
+    for (int i = 0; i < secondHalfSize - 1; i += 2) {
+        // Скрещиваем пару агентов
+        secondHalf[i]->crossing(*secondHalf[i + 1]);
     }
 
-    // 3. ДОБАВЛЯЕМ СЛУЧАЙНЫХ АГЕНТОВ
-    while (newPop.size() < targetSize) {
-        int randomAgent = rand() % population.size();
-        auto agent = population[randomAgent]->clone();
-        
-        // Мутируем сильнее
-        if (random(rng) < AGENT_MUTATION_CHANCE * 2.0f) {
-            agent->mutateGene(mutationPower * 1.5f);
-        }
-        
+    // 4. ДОБАВЛЯЕМ ВСЮ ВТОРУЮ ПОЛОВИНУ В НОВУЮ ПОПУЛЯЦИЮ
+    for (auto& agent : secondHalf) {
         newPop.push_back(move(agent));
     }
 
+    // 5. МУТИРУЕМ ВСЮ ВТОРУЮ ПОЛОВИНУ (всех кроме топ-1)
+    for (int i = 1; i < newPop.size(); i++) {
+        if (random(rng) < AGENT_MUTATION_CHANCE) {
+            newPop[i]->mutateGene(mutationPower);
+        }
+    }
+
+    // 6. ОБНОВЛЯЕМ ПОПУЛЯЦИЮ
     population = move(newPop);
     generation++;
 }
@@ -427,6 +434,7 @@ void EvolutionSimulation::reloadGrid() {
     totalAlives = INIT_POP_SIZE;
     currentTick = 0;
 
+    // Теперь еда всегда появляется в одних и тех же позициях
     initializeFood(INIT_FOOD_COUNT);
     updateGrid();
 }
@@ -447,6 +455,8 @@ void EvolutionSimulation::resetSim() {
     currentTick = 0;
     generation = 0;
     
+    // Генерируем новые фиксированные позиции при полном сбросе
+    generateFixedFoodPositions(INIT_FOOD_COUNT);
     initializePopulation(INIT_POP_SIZE);
     initializeFood(INIT_FOOD_COUNT);
 }

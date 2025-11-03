@@ -78,7 +78,7 @@ public:
      * @brief Скрещивает гены агента со вторым.
      * @param pair Пара для скрещивания.
      */
-    void crossing(const Agent& pair);
+    void crossing(Agent& other);
 
     /**
      * @brief Клонирует агента.
@@ -139,7 +139,7 @@ public:
     /**
      * @brief Возвращает ссылку на ген агента.
      */
-    const Gene& getGene() const { return *gene; }
+    Gene& getGene() { return *gene; }
 
     void setIsAlive(bool alive) { isAlive = alive; }
 
