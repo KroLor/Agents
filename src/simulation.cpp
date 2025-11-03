@@ -196,7 +196,7 @@ void EvolutionSimulation::geneticAlgorithm() {
     }
     
     // Скрещиваем первую часть по принципу: первый со вторым, второй с третьим и т.д.
-    for (int i = 0; i < firstPartSize - 1; i += 2) {
+    for (int i = 0; i < firstPartSize - 1; i++) {
         if (random(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
             firstPart[i]->crossing(*firstPart[i + 1]);
         }

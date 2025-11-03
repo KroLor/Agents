@@ -76,7 +76,7 @@ public:
 
     /**
      * @brief Скрещивает гены агента со вторым.
-     * @param pair Пара для скрещивания.
+     * @param other Пара для скрещивания.
      */
     void crossing(Agent& other);
 

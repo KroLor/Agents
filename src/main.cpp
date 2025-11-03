@@ -111,7 +111,7 @@ void saveStatistic(std::ofstream& file, EvolutionSimulation& sim, char typeSave)
     // Сохранение конфигурации и весов лучшей нейросети
     else if (typeSave == 'd') {
         string data = sim.getPopulation()[0]->getGene().saveDataCSV();
-        file << data << "               " << sim.getGeneration() << "               " << sim.getPopulation()[0]->getEnergy() << "\n";
+        file << data << "               " << sim.getGeneration() << "               " << sim.getSimulationData().averageEnergyLevel << "\n";
         file.flush();
     }
 }
@@ -157,7 +157,7 @@ void _train() {
 
             // Проверяем удачные ли гены
             sim.sortPop();
-            if (sim.getSimulationData().averageEnergyLevel >= 1300) {
+            if (sim.getSimulationData().averageEnergyLevel >= 300) {
                 saveStatistic(dataFile, sim, 'd');
 
                 sim.geneticAlgorithm();
