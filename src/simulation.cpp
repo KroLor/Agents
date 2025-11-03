@@ -180,20 +180,50 @@ void EvolutionSimulation::geneticAlgorithm() {
     uniform_real_distribution<float> random(0.0f, 1.0f);
 
     // 1. СОХРАНЯЕМ ТОП-1 АГЕНТА БЕЗ ИЗМЕНЕНИЙ
-    // newPop.push_back(population[0]->clone());
-
     newPop.push_back(population[0]->clone());
 
-    if (random(rng) < AGENT_MUTATION_CHANCE && newPop[0]->getEnergy() < 1300) {
-        newPop[0]->mutateGene(mutationPower);
+    // 2. ДЕЛИМ ОСТАВШУЮСЯ ЧАСТЬ ПОПУЛЯЦИИ НА ДВЕ ЧАСТИ
+    const int remainingSize = popSize - 1; // Все кроме топ-1
+    
+    // Разделяем оставшуюся популяцию на две части
+    const int firstPartSize = remainingSize / 2;
+    const int secondPartSize = remainingSize - firstPartSize;
+    
+    // 3. ПЕРВАЯ ЧАСТЬ (лучшая) - СКРЕЩИВАНИЕ
+    vector<unique_ptr<Agent>> firstPart;
+    for (int i = 1; i < 1 + firstPartSize; i++) {
+        firstPart.push_back(population[i]->clone());
+    }
+    
+    // Скрещиваем первую часть по принципу: первый со вторым, второй с третьим и т.д.
+    for (int i = 0; i < firstPartSize - 1; i += 2) {
+        if (random(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
+            firstPart[i]->crossing(*firstPart[i + 1]);
+        }
+    }
+    
+    // Добавляем первую часть в новую популяцию
+    for (auto& agent : firstPart) {
+        newPop.push_back(move(agent));
+    }
+    
+    // 4. ВТОРАЯ ЧАСТЬ - МУТАЦИЯ
+    vector<unique_ptr<Agent>> secondPart;
+    for (int i = 1 + firstPartSize; i < popSize; i++) {
+        secondPart.push_back(population[i]->clone());
+    }
+    
+    // Мутируем вторую часть
+    for (auto& agent : secondPart) {
+        if (random(rng) < AGENT_MUTATION_CHANCE) {
+            agent->mutateGene(mutationPower);
+        }
+        newPop.push_back(move(agent));
     }
 
     // 5. ОБНОВЛЯЕМ ПОПУЛЯЦИЮ
     population = move(newPop);
     generation++;
-
-    // 6. ДИНАМИЧЕСКАЯ ПОДСТРОЙКА СИЛЫ МУТАЦИИ
-    // mutationPower = max(0.05f, 0.2f * exp(-generation / 50.0f)); // Экспоненциальное затухание
 }
 
 void EvolutionSimulation::spawnNewFood(uniform_int_distribution<int> foodV) {
