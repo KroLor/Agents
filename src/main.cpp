@@ -142,35 +142,46 @@ void _train() {
     auto field = createField(FIELD_WIDTH, FIELD_HEIGHT);
     EvolutionSimulation sim(field);
 
+    int bestEnergy = 0; // Для отслеживания лучшего результата
+    
     while (sim.getGeneration() < GENERATIONS) {
-        runARound(sim, true);
+        bool shouldVisualize = (sim.getGeneration() % 10 == 0); // Визуализируем каждое 10-е поколение
+        
+        runARound(sim, shouldVisualize);
 
         saveStatistic(statsFile, sim, 's');
+        
+        // Сохраняем лучшие агенты (более реалистичное условие)
+        auto currentData = sim.getSimulationData();
+        if (currentData.averageEnergyLevel > bestEnergy || 
+            sim.getPopulation()[0]->getSteps() > NUMBER_OF_STEPS * 0.8) {
+            
+            bestEnergy = currentData.averageEnergyLevel;
+            saveStatistic(dataFile, sim, 'd');
+        }
+
         sim.geneticAlgorithm();
         sim.reloadGrid();
         
-        // Пропуск раундов/поколений без визуализации
+        // Пропуск поколений БЕЗ сложной логики
         for (int gen_skip = 1; gen_skip <= SKIP_GENERATIONS - 1; gen_skip++) {
             runARound(sim, false);
-
             saveStatistic(statsFile, sim, 's');
-
-            // Проверяем удачные ли гены
-            sim.sortPop();
-            if (sim.getSimulationData().averageEnergyLevel >= 700) {
+            
+            // Простая проверка для сохранения
+            currentData = sim.getSimulationData();
+            if (currentData.averageEnergyLevel > bestEnergy) {
+                bestEnergy = currentData.averageEnergyLevel;
                 saveStatistic(dataFile, sim, 'd');
-
-                sim.geneticAlgorithm();
-                sim.reloadGrid();
-
-                runARound(sim, true);
-            } else {
-                sim.geneticAlgorithm();
-                sim.reloadGrid();
             }
+            
+            sim.geneticAlgorithm();
+            sim.reloadGrid();
         }
     }
-    updateField(sim.getGrid(), sim, GENERATIONS, SKIP_GENERATIONS, NUMBER_OF_STEPS, NUMBER_OF_STEPS);
+    
+    // Финальная визуализация лучшего поколения
+    runARound(sim, true);
     
     statsFile.close();
     dataFile.close();

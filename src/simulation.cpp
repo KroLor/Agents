@@ -139,11 +139,12 @@ bool EvolutionSimulation::updateAgents() {
             int oldY = agent->getY();
             
             // Агент думает и делает свой ход
-            for (int i = 0; i < 16; i++) {
-                if (agent->decideAction(grid)) {
-                    break;
-                }
-            }
+            // for (int i = 0; i < 16; i++) {
+            //     if (agent->decideAction(grid)) {
+            //         break;
+            //     }
+            // }
+            agent->decideAction(grid);
             
             // Обновляем новую позицию
             int newX = agent->getX();
