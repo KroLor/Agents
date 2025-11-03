@@ -142,46 +142,35 @@ void _train() {
     auto field = createField(FIELD_WIDTH, FIELD_HEIGHT);
     EvolutionSimulation sim(field);
 
-    int bestEnergy = 0; // Для отслеживания лучшего результата
-    
     while (sim.getGeneration() < GENERATIONS) {
-        bool shouldVisualize = (sim.getGeneration() % 10 == 0); // Визуализируем каждое 10-е поколение
-        
-        runARound(sim, shouldVisualize);
+        runARound(sim, true);
 
         saveStatistic(statsFile, sim, 's');
-        
-        // Сохраняем лучшие агенты (более реалистичное условие)
-        auto currentData = sim.getSimulationData();
-        if (currentData.averageEnergyLevel > bestEnergy || 
-            sim.getPopulation()[0]->getSteps() > NUMBER_OF_STEPS * 0.8) {
-            
-            bestEnergy = currentData.averageEnergyLevel;
-            saveStatistic(dataFile, sim, 'd');
-        }
-
         sim.geneticAlgorithm();
         sim.reloadGrid();
         
-        // Пропуск поколений БЕЗ сложной логики
+        // Пропуск раундов/поколений без визуализации
         for (int gen_skip = 1; gen_skip <= SKIP_GENERATIONS - 1; gen_skip++) {
             runARound(sim, false);
+
             saveStatistic(statsFile, sim, 's');
-            
-            // Простая проверка для сохранения
-            currentData = sim.getSimulationData();
-            if (currentData.averageEnergyLevel > bestEnergy) {
-                bestEnergy = currentData.averageEnergyLevel;
+
+            // Проверяем удачные ли гены
+            sim.sortPop();
+            if (sim.getSimulationData().averageEnergyLevel >= 500) {
                 saveStatistic(dataFile, sim, 'd');
+
+                sim.geneticAlgorithm();
+                sim.reloadGrid();
+
+                runARound(sim, true);
+            } else {
+                sim.geneticAlgorithm();
+                sim.reloadGrid();
             }
-            
-            sim.geneticAlgorithm();
-            sim.reloadGrid();
         }
     }
-    
-    // Финальная визуализация лучшего поколения
-    runARound(sim, true);
+    updateField(sim.getGrid(), sim, GENERATIONS, SKIP_GENERATIONS, NUMBER_OF_STEPS, NUMBER_OF_STEPS);
     
     statsFile.close();
     dataFile.close();

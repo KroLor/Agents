@@ -186,61 +186,72 @@ void EvolutionSimulation::sortPop() {
 }
 
 void EvolutionSimulation::geneticAlgorithm() {
+    // Сортируем агентов по эффективности (лучшие - первые)
     sortPop();
     
     const int popSize = population.size();
     vector<unique_ptr<Agent>> newPop;
     
     uniform_real_distribution<float> random(0.0f, 1.0f);
+
+    // 1. СОХРАНЯЕМ ТОП-1 АГЕНТА БЕЗ ИЗМЕНЕНИЙ
+    newPop.push_back(population[0]->clone());
+
+    // 2. ДЕЛИМ ОСТАВШУЮСЯ ЧАСТЬ ПОПУЛЯЦИИ НА ДВЕ ЧАСТИ
+    const int remainingSize = popSize - 1; // Все кроме топ-1
     
-    // 1. ЭЛИТИЗМ - сохраняем лучших 20% без изменений
-    int eliteCount = max(1, (int)(popSize * 0.2f));
-    for (int i = 0; i < eliteCount; i++) {
-        newPop.push_back(population[i]->clone());
+    // Если осталось меньше 2 агентов, просто добавляем их и выходим
+    if (remainingSize < 2) {
+        for (int i = 1; i < popSize; i++) {
+            newPop.push_back(population[i]->clone());
+        }
+        population = move(newPop);
+        generation++;
+        return;
     }
     
-    // 2. СКРЕЩИВАНИЕ И МУТАЦИЯ - создаем остальную популяцию
-    while (newPop.size() < INIT_POP_SIZE) {
-        // Выбираем двух случайных родителей из лучшей половины
-        uniform_int_distribution<int> parentDist(0, popSize / 2);
-        int parent1 = parentDist(rng);
-        int parent2 = parentDist(rng);
-        
-        auto child = population[parent1]->clone();
-        
-        // Скрещивание с некоторой вероятностью
-        if (random(rng) < AGENT_CHANCE_TO_CROSS_OVER && parent1 != parent2) {
-            child->crossing(*population[parent2]);
-        }
-        
-        // Мутация с высокой вероятностью для исследовательского поведения
-        if (random(rng) < 0.8f) { // Увеличиваем шанс мутации
-            child->mutateGene(mutationPower);
-        }
-        
-        newPop.push_back(move(child));
+    // Разделяем оставшуюся популяцию на две части
+    const int firstPartSize = remainingSize / 2;
+    const int secondPartSize = remainingSize - firstPartSize;
+    
+    // 3. ПЕРВАЯ ЧАСТЬ (лучшая) - СКРЕЩИВАНИЕ
+    vector<unique_ptr<Agent>> firstPart;
+    for (int i = 1; i < 1 + firstPartSize; i++) {
+        firstPart.push_back(population[i]->clone());
     }
     
-    // 3. ОБНОВЛЯЕМ ПОПУЛЯЦИЮ
+    // Скрещиваем первую часть по принципу: первый со вторым, второй с третьим и т.д.
+    for (int i = 0; i < firstPartSize - 1; i++) {
+        if (random(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
+            firstPart[i]->crossing(*firstPart[i + 1]);
+        }
+    }
+    
+    // Добавляем первую часть в новую популяцию
+    for (auto& agent : firstPart) {
+        newPop.push_back(move(agent));
+    }
+    
+    // 4. ВТОРАЯ ЧАСТЬ - МУТАЦИЯ
+    vector<unique_ptr<Agent>> secondPart;
+    for (int i = 1 + firstPartSize; i < popSize; i++) {
+        secondPart.push_back(population[i]->clone());
+    }
+    
+    // Мутируем вторую часть
+    for (auto& agent : secondPart) {
+        if (random(rng) < AGENT_MUTATION_CHANCE) {
+            agent->mutateGene(mutationPower);
+        }
+        newPop.push_back(move(agent));
+    }
+
+    // 5. ОБНОВЛЯЕМ ПОПУЛЯЦИЮ
     population = move(newPop);
     generation++;
-    
-    // 4. АДАПТИВНАЯ МУТАЦИЯ - увеличиваем мутацию если прогресс остановился
-    static int lastBestEnergy = 0;
-    static int stagnationCount = 0;
-    
-    int currentBestEnergy = population[0]->getEnergy();
-    if (currentBestEnergy <= lastBestEnergy) {
-        stagnationCount++;
-        if (stagnationCount > 10) { // После 10 поколений без улучшений
-            mutationPower = min(0.3f, mutationPower * 1.5f); // Увеличиваем мутацию
-            stagnationCount = 0;
-        }
-    } else {
-        stagnationCount = 0;
-        mutationPower = AGENT_MUTATION_POWER; // Возвращаем к базовому значению
-    }
-    lastBestEnergy = currentBestEnergy;
+
+    // 6. ДИНАМИЧЕСКАЯ ПОДСТРОЙКА СИЛЫ МУТАЦИИ
+    mutationPower = max(0.05f, 0.2f * exp(-generation / 50.0f)); // Экспоненциальное затухание
 }
 
 void EvolutionSimulation::spawnNewFood() {
