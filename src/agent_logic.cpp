@@ -81,7 +81,7 @@ const pair<int, int>& Agent::getDirectionToFood(vector<vector<Cell>>* grid) {
 }
 
 bool Agent::randomMovement(const vector<vector<Cell>>& grid) {
-    vector<pair<int, int>> directions = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}}; // Вверх, вниз, влево, вправо
+    vector<pair<int, int>> directions = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // Влево, вправо, вверх, вниз
     vector<pair<int, int>> availableDirections;
 
     for (const auto& [dx, dy] : directions) {
