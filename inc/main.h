@@ -6,13 +6,13 @@
 #define FIELD_HEIGHT 15 //15 20 Высота поля
 
 #define GENERATIONS 100000 // Всего поколений
-#define SKIP_GENERATIONS 10000 // Кол-во пропусков раундов/поколений
+#define SKIP_GENERATIONS 1000 //1000 10000 Кол-во пропусков раундов/поколений
 
 #define INIT_POP_SIZE 5 //5 35 Размер популяции
 #define NUMBER_OF_STEPS 100 //100 Кол-во шагов в раунде
 #define INIT_ENERGY_AGENT 500 //200 500 Кол-во энергии у агента
 #define ENERGY_LOSS_PER_STEP 3 //3 Потеря энергии за шаг //
-#define ENERGY_LOSS_DUE_TO_INACTION 5 //3 Потеря энергии за бездействие //
+#define ENERGY_LOSS_DUE_TO_INACTION 2 //3 Потеря энергии за бездействие //
 
 #define INIT_FOOD_COUNT 150 // Кол-во еды, появляющейся в начале раунда
 #define FOOD_SPAWN_INTERVAL 20 // Каждый N-й тик появляется еда

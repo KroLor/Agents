@@ -154,4 +154,6 @@ public:
      * @return Вектор направления.
      */
     const pair<int, int>& getDirectionToFood(vector<vector<Cell>>* grid);
+
+    bool randomMovement(const vector<vector<Cell>>& grid);
 };

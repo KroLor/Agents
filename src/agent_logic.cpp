@@ -78,32 +78,41 @@ const pair<int, int>& Agent::getDirectionToFood(vector<vector<Cell>>* grid) {
     return directionToFood;
 }
 
+bool Agent::randomMovement(const vector<vector<Cell>>& grid) {
+    vector<pair<int, int>> directions = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}}; // Вверх, вниз, влево, вправо
+    vector<pair<int, int>> availableDirections;
+
+    for (const auto& [dx, dy] : directions) {
+        int newX = x + dx;
+        int newY = y + dy;
+
+        if (grid[newX][newY].type == EMPTY || grid[newX][newY].type == FOOD) {
+            availableDirections.push_back({dx, dy});
+        }
+    }
+    
+    if (availableDirections.empty()) {
+        return move(0, 0, grid);
+    }
+    
+    uniform_int_distribution<int> dist(0, availableDirections.size() - 1);
+    auto [dx, dy] = availableDirections[dist(rng)];
+    return move(dx, dy, grid);
+}
+
 bool Agent::decideAction(const vector<vector<Cell>>& grid) {
     if (UseNeuralNetwork == 1) {
         // Использование гена для принятия решения
         auto direction = gene->decideDirection(surroundings, energy, directionToFood);
+
+        if (direction.first == 0 && direction.second == 0) {
+            return randomMovement(grid);
+        }
         return move(direction.first, direction.second, grid);
+
     } else if (UseNeuralNetwork == 0) {
         // Случайное движение
-        vector<pair<int, int>> directions = {{0, 1}, {0, -1}, {-1, 0}, {1, 0}}; // Вверх, вниз, влево, вправо
-        vector<pair<int, int>> availableDirections;
-
-        for (const auto& [dx, dy] : directions) {
-            int newX = x + dx;
-            int newY = y + dy;
-
-            if (grid[newX][newY].type == EMPTY || grid[newX][newY].type == FOOD) {
-                availableDirections.push_back({dx, dy});
-            }
-        }
-        
-        if (availableDirections.empty()) {
-            return move(0, 0, grid);
-        }
-        
-        uniform_int_distribution<int> dist(0, availableDirections.size() - 1);
-        auto [dx, dy] = availableDirections[dist(rng)];
-        return move(dx, dy, grid);
+        randomMovement(grid);
     }
     return 0;
 }
@@ -113,7 +122,7 @@ bool Agent::move(int dx, int dy, const vector<vector<Cell>>& grid) {
         dEnergy(-ENERGY_LOSS_DUE_TO_INACTION);
         return false;
     }
-    
+
     int newX = x + dx;
     int newY = y + dy;
 
