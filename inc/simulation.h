@@ -18,14 +18,13 @@ using namespace std;
 class EvolutionSimulation {
 private:
     vector<vector<Cell>> grid;            // Двумерное поле клеток
+    vector<int> FoodValue;
     vector<unique_ptr<Agent>> population; // Популяция агентов
     float mutationPower;                  // Коэффициент мутации
     int generation;                       // Текущее поколение
     int totalDeaths;                      // Общее количество смертей
     int totalAlives;                      // Общее количество живых
     int currentTick;                      // Счетчик тиков для контроля появления еды
-    vector<pair<int, int>> fixedFoodPositions;  // Фиксированные позиции еды
-    vector<int> fixedFoodValue;
 
     /**
      * @brief Создает начальную популяцию агентов.
@@ -42,7 +41,7 @@ private:
     /**
      * @brief Генерирует новую еду на поле.
      */
-    void spawnNewFood();
+    void spawnNewFood(uniform_int_distribution<int> foodV);
 
     unique_ptr<NeuralNetwork> createNetw(const ProgramParameters& param);
 
@@ -56,8 +55,6 @@ public:
     EvolutionSimulation(vector<vector<Cell>> grid, int initialPopulationSize = INIT_POP_SIZE, int initialFoodCount = INIT_FOOD_COUNT);
     
     ~EvolutionSimulation();
-
-    void generateFixedFood(int foodCount);
 
     /**
      * @brief Создает симуляцию с предобученными агентами.
