@@ -171,29 +171,50 @@ void EvolutionSimulation::sortPop() {
 }
 
 void EvolutionSimulation::geneticAlgorithm() {
-    // Сортируем агентов по эффективности (лучшие - первые)
-    sortPop();
+    // Находим лучшего агента текущего поколения
+    unique_ptr<Agent> bestAgent = nullptr;
+    int bestEnergy = -1;
     
-    const int popSize = population.size();
-    vector<unique_ptr<Agent>> newPop;
-    
-    uniform_real_distribution<float> random(0.0f, 1.0f);
-
-    // 1. СОХРАНЯЕМ ТОП-1 АГЕНТА БЕЗ ИЗМЕНЕНИЙ
-    // newPop.push_back(population[0]->clone());
-
-    newPop.push_back(population[0]->clone());
-
-    if (random(rng) < AGENT_MUTATION_CHANCE && newPop[0]->getEnergy() < 1300) {
-        newPop[0]->mutateGene(mutationPower);
+    for (auto& agent : population) {
+        if (agent->getIsAlive() && agent->getEnergy() > bestEnergy) {
+            bestEnergy = agent->getEnergy();
+            bestAgent = agent->clone(); // Создаем копию лучшего агента
+        }
     }
-
-    // 5. ОБНОВЛЯЕМ ПОПУЛЯЦИЮ
-    population = move(newPop);
+    
+    // Если нашли живого агента, создаем новую популяцию на его основе
+    if (bestAgent != nullptr) {
+        population.clear();
+        
+        // Создаем одного агента - клон лучшего
+        population.push_back(move(bestAgent));
+        
+        // Применяем мутацию с некоторой вероятностью
+        uniform_real_distribution<float> random(0.0f, 1.0f);
+        if (random(rng) < AGENT_MUTATION_CHANCE) {
+            population[0]->mutateGene(mutationPower);
+        }
+        
+        // Адаптивная регулировка силы мутации
+        if (population[0]->getEnergy() > 300) {
+            // Успешный агент - уменьшаем мутацию
+            mutationPower = max(0.01f, mutationPower * 0.7f);
+        } else {
+            // Неуспешный агент - увеличиваем мутацию для исследования
+            mutationPower = min(0.2f, mutationPower * 1.1f);
+        }
+    } else {
+        // Все агенты мертвы - создаем нового случайного агента
+        population.clear();
+        int x, y;
+        if (findRandomEmptyPosition(x, y)) {
+            addAgent(x, y);
+        }
+    }
+    
     generation++;
-
-    // 6. ДИНАМИЧЕСКАЯ ПОДСТРОЙКА СИЛЫ МУТАЦИИ
-    // mutationPower = max(0.05f, 0.2f * exp(-generation / 50.0f)); // Экспоненциальное затухание
+    totalAlives = population.size();
+    totalDeaths = 0;
 }
 
 void EvolutionSimulation::spawnNewFood(uniform_int_distribution<int> foodV) {

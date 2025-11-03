@@ -38,7 +38,7 @@ GeneLayer::GeneLayer(int inputSize, int outputSize, const string& activation) : 
     
     // Инициализация biases
     for (int j = 0; j < outputSize; j++) {
-        biases[j] = dist(rng) * 0.1f;
+        biases[j] = dist(rng) * 0.3f;
         // biases[j] = 0.5f * 0.1f;
     }
 }
@@ -79,7 +79,7 @@ void GeneLayer::mutate(float mutationPower) {
     
     // Мутируем смещения
     for (auto& bias : biases) {
-        bias += dist(rng) * 0.3f;
+        bias += dist(rng) * 0.5f;
     }
 }
 
