@@ -160,11 +160,10 @@ void _train() {
             if (sim.getSimulationData().averageEnergyLevel >= 2500) {
                 saveStatistic(dataFile, sim, 'd');
 
-                sim.reloadGrid();
-                runARound(sim, true);
-
                 sim.geneticAlgorithm();
                 sim.reloadGrid();
+
+                runARound(sim, true);
             } else {
                 sim.geneticAlgorithm();
                 sim.reloadGrid();

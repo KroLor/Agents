@@ -10,9 +10,9 @@
 
 #define INIT_POP_SIZE 5 //5 35 Размер популяции
 #define NUMBER_OF_STEPS 100 //100 Кол-во шагов в раунде
-#define INIT_ENERGY_AGENT 500 // Кол-во энергии у агента
+#define INIT_ENERGY_AGENT 500 //200 500 Кол-во энергии у агента
 #define ENERGY_LOSS_PER_STEP 3 //3 Потеря энергии за шаг //
-#define ENERGY_LOSS_DUE_TO_INACTION 4 //3 Потеря энергии за бездействие //
+#define ENERGY_LOSS_DUE_TO_INACTION 5 //3 Потеря энергии за бездействие //
 
 #define INIT_FOOD_COUNT 150 // Кол-во еды, появляющейся в начале раунда
 #define FOOD_SPAWN_INTERVAL 20 // Каждый N-й тик появляется еда
@@ -25,7 +25,7 @@
 #define USE_A_NEURAL_NETWORK 1 // Отвечает за использование нейросети в агентах
 #define INPUT_VALUES 6 // Входные значения
 // #define HIDDEN_LAYERS 1 // Скрытых слоев
-#define NEURONS_IN_HIDDEN_LAYER 35 //5 Кол-во нейронов в скрытых(ом) слоях(е) // (одинаково)
+#define NEURONS_IN_HIDDEN_LAYER 5 //5 Кол-во нейронов в скрытых(ом) слоях(е) // (одинаково)
 #define OUTPUT_VALUES 4 // Выходные значения
 
 #define AGENT_MUTATION_CHANCE 0.15f //0.1f Шанс мутации гена

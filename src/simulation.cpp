@@ -215,8 +215,11 @@ void EvolutionSimulation::geneticAlgorithm() {
         firstPart.push_back(population[i]->clone());
     }
     
-    // Скрещиваем первую часть по принципу: первый со вторым, второй с третьим и т.д.
-    for (int i = 0; i < firstPartSize - 1; i++) {
+    // Перемешиваем для случайного скрещивания
+    shuffle(firstPart.begin(), firstPart.end(), rng);
+    
+    // Скрещиваем пары (0-1, 2-3, и т.д.)
+    for (int i = 0; i < firstPartSize - 1; i += 2) {
         if (random(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
             firstPart[i]->crossing(*firstPart[i + 1]);
         }
@@ -246,7 +249,57 @@ void EvolutionSimulation::geneticAlgorithm() {
     generation++;
 
     // 6. ДИНАМИЧЕСКАЯ ПОДСТРОЙКА СИЛЫ МУТАЦИИ
-    mutationPower = max(0.05f, 0.2f * exp(-generation / 50.0f)); // Экспоненциальное затухание
+    // Основано на разнообразии популяции и прогрессе
+    if (popSize >= 3) {
+        // Вычисляем разнообразие популяции по энергии
+        float avgEnergy = 0.0f;
+        float energyVariance = 0.0f;
+        
+        for (const auto& agent : population) {
+            avgEnergy += agent->getEnergy();
+        }
+        avgEnergy /= popSize;
+        
+        for (const auto& agent : population) {
+            float diff = agent->getEnergy() - avgEnergy;
+            energyVariance += diff * diff;
+        }
+        energyVariance /= popSize;
+        
+        // Нормализуем дисперсию (предполагаем максимальную дисперсию 10000)
+        float normalizedVariance = min(energyVariance / 10000.0f, 1.0f);
+        
+        // Вычисляем прогресс между поколениями (сравниваем топ-1 с предыдущим топ-1)
+        static int prevTopEnergy = population[0]->getEnergy();
+        float progressRatio = 0.0f;
+        
+        if (prevTopEnergy > 0) {
+            progressRatio = (population[0]->getEnergy() - prevTopEnergy) / (float)prevTopEnergy;
+        }
+        prevTopEnergy = population[0]->getEnergy();
+        
+        // Адаптируем силу мутации:
+        // - Увеличиваем, если разнообразие низкое (застой)
+        // - Уменьшаем, если разнообразие высокое и есть прогресс
+        // - Увеличиваем, если прогресс отрицательный (регресс)
+        
+        float mutationChange = 0.0f;
+        
+        if (normalizedVariance < 0.1f) { // Низкое разнообразие
+            mutationChange = 0.05f; // Увеличиваем мутацию
+        } else if (normalizedVariance > 0.3f && progressRatio > 0.05f) { // Высокое разнообразие и прогресс
+            mutationChange = -0.03f; // Уменьшаем мутацию
+        } else if (progressRatio < -0.1f) { // Регресс
+            mutationChange = 0.08f; // Значительно увеличиваем мутацию
+        }
+        
+        // Применяем изменение с ограничениями
+        mutationPower += mutationChange;
+        mutationPower = max(0.01f, min(mutationPower, 1.0f)); // Ограничиваем диапазон [0.01, 1.0]
+        
+        // Альтернативный простой метод: адаптация на основе размера популяции и поколения
+        // mutationPower = max(0.05f, 0.2f * exp(-generation / 50.0f)); // Экспоненциальное затухание
+    }
 }
 
 void EvolutionSimulation::spawnNewFood() {

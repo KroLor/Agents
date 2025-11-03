@@ -122,25 +122,33 @@ void NeuralNetwork::mutate(float mutationPower) {
 
 void NeuralNetwork::crossing(NeuralNetwork& otherNet) {
     auto& otherLayers = otherNet.getLayers();
+    
+    // Проверка совместимости
+    if (layers.size() != otherLayers.size()) {
+        return;
+    }
+    
     uniform_real_distribution<float> dist(0.0, 1.0);
 
     for (int i = 0; i < layers.size(); i++) {
         auto& layer1 = layers[i];
         auto& layer2 = otherLayers[i];
         
-        auto& weights1 = layer1->getWeights();
-        auto& weights2 = layer2->getWeights();
-        auto& biases1 = layer1->getBiases();
-        auto& biases2 = layer2->getBiases();
+        auto weights1 = layer1->getWeightsCopy();
+        auto weights2 = layer2->getWeightsCopy();
+        auto biases1 = layer1->getBiasesCopy();
+        auto biases2 = layer2->getBiasesCopy();
+        
+        // Проверка размеров
+        if (weights1.size() != weights2.size() || weights1[0].size() != weights2[0].size() || biases1.size() != biases2.size()) {
+            continue;
+        }
 
         // Скрещивание весов
         for (int i_val = 0; i_val < weights1.size(); i_val++) {
             for (int j = 0; j < weights1[i_val].size(); j++) {
                 if (dist(rng) < 0.5f) {
-                    // Обмен весами между нейросетями
-                    float temp = weights1[i_val][j];
-                    weights1[i_val][j] = weights2[i_val][j];
-                    weights2[i_val][j] = temp;
+                    swap(weights1[i_val][j], weights2[i_val][j]);
                 }
             }
         }
@@ -148,12 +156,15 @@ void NeuralNetwork::crossing(NeuralNetwork& otherNet) {
         // Скрещивание смещений
         for (int i_val = 0; i_val < biases1.size(); i_val++) {
             if (dist(rng) < 0.5f) {
-                // Обмен смещениями между нейросетями
-                float temp = biases1[i_val];
-                biases1[i_val] = biases2[i_val];
-                biases2[i_val] = temp;
+                swap(biases1[i_val], biases2[i_val]);
             }
         }
+        
+        // Устанавливаем новые значения
+        layer1->setWeights(weights1);
+        layer1->setBiases(biases1);
+        layer2->setWeights(weights2);
+        layer2->setBiases(biases2);
     }
 }
 
