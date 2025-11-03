@@ -57,7 +57,7 @@ void EvolutionSimulation::generateFixedFood(int foodCount) {
         fixedFoodPositions.push_back(emptyPositions[i]);
     }
 
-    uniform_int_distribution<int> random(10, ENERGY_FOOD_VALUE);
+    uniform_int_distribution<int> random((int)ENERGY_FOOD_VALUE / 2, ENERGY_FOOD_VALUE);
     for (int i = 0; i < fixedFoodPositions.size(); i++) {
         fixedFoodValue.push_back(random(rng));
     }
@@ -185,125 +185,61 @@ void EvolutionSimulation::sortPop() {
 }
 
 void EvolutionSimulation::geneticAlgorithm() {
-    // Сортируем агентов по эффективности (лучшие - первые)
     sortPop();
     
     const int popSize = population.size();
     vector<unique_ptr<Agent>> newPop;
     
     uniform_real_distribution<float> random(0.0f, 1.0f);
-
-    // 1. СОХРАНЯЕМ ТОП-1 АГЕНТА БЕЗ ИЗМЕНЕНИЙ
-    newPop.push_back(population[0]->clone());
-
-    // 2. ДЕЛИМ ОСТАВШУЮСЯ ЧАСТЬ ПОПУЛЯЦИИ НА ДВЕ ЧАСТИ
-    const int remainingSize = popSize - 1; // Все кроме топ-1
     
-    // Если осталось меньше 2 агентов, просто добавляем их и выходим
-    if (remainingSize < 2) {
-        for (int i = 1; i < popSize; i++) {
-            newPop.push_back(population[i]->clone());
+    // 1. ЭЛИТИЗМ - сохраняем лучших 20% без изменений
+    int eliteCount = max(1, (int)(popSize * 0.2f));
+    for (int i = 0; i < eliteCount; i++) {
+        newPop.push_back(population[i]->clone());
+    }
+    
+    // 2. СКРЕЩИВАНИЕ И МУТАЦИЯ - создаем остальную популяцию
+    while (newPop.size() < INIT_POP_SIZE) {
+        // Выбираем двух случайных родителей из лучшей половины
+        uniform_int_distribution<int> parentDist(0, popSize / 2);
+        int parent1 = parentDist(rng);
+        int parent2 = parentDist(rng);
+        
+        auto child = population[parent1]->clone();
+        
+        // Скрещивание с некоторой вероятностью
+        if (random(rng) < AGENT_CHANCE_TO_CROSS_OVER && parent1 != parent2) {
+            child->crossing(*population[parent2]);
         }
-        population = move(newPop);
-        generation++;
-        return;
-    }
-    
-    // Разделяем оставшуюся популяцию на две части
-    const int firstPartSize = remainingSize / 2;
-    const int secondPartSize = remainingSize - firstPartSize;
-    
-    // 3. ПЕРВАЯ ЧАСТЬ (лучшая) - СКРЕЩИВАНИЕ
-    vector<unique_ptr<Agent>> firstPart;
-    for (int i = 1; i < 1 + firstPartSize; i++) {
-        firstPart.push_back(population[i]->clone());
-    }
-    
-    // Перемешиваем для случайного скрещивания
-    shuffle(firstPart.begin(), firstPart.end(), rng);
-    
-    // Скрещиваем пары (0-1, 2-3, и т.д.)
-    for (int i = 0; i < firstPartSize - 1; i += 2) {
-        if (random(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
-            firstPart[i]->crossing(*firstPart[i + 1]);
+        
+        // Мутация с высокой вероятностью для исследовательского поведения
+        if (random(rng) < 0.8f) { // Увеличиваем шанс мутации
+            child->mutateGene(mutationPower);
         }
+        
+        newPop.push_back(move(child));
     }
     
-    // Добавляем первую часть в новую популяцию
-    for (auto& agent : firstPart) {
-        newPop.push_back(move(agent));
-    }
-    
-    // 4. ВТОРАЯ ЧАСТЬ - МУТАЦИЯ
-    vector<unique_ptr<Agent>> secondPart;
-    for (int i = 1 + firstPartSize; i < popSize; i++) {
-        secondPart.push_back(population[i]->clone());
-    }
-    
-    // Мутируем вторую часть
-    for (auto& agent : secondPart) {
-        if (random(rng) < AGENT_MUTATION_CHANCE) {
-            agent->mutateGene(mutationPower);
-        }
-        newPop.push_back(move(agent));
-    }
-
-    // 5. ОБНОВЛЯЕМ ПОПУЛЯЦИЮ
+    // 3. ОБНОВЛЯЕМ ПОПУЛЯЦИЮ
     population = move(newPop);
     generation++;
-
-    // 6. ДИНАМИЧЕСКАЯ ПОДСТРОЙКА СИЛЫ МУТАЦИИ
-    // Основано на разнообразии популяции и прогрессе
-    if (popSize >= 3) {
-        // Вычисляем разнообразие популяции по энергии
-        float avgEnergy = 0.0f;
-        float energyVariance = 0.0f;
-        
-        for (const auto& agent : population) {
-            avgEnergy += agent->getEnergy();
+    
+    // 4. АДАПТИВНАЯ МУТАЦИЯ - увеличиваем мутацию если прогресс остановился
+    static int lastBestEnergy = 0;
+    static int stagnationCount = 0;
+    
+    int currentBestEnergy = population[0]->getEnergy();
+    if (currentBestEnergy <= lastBestEnergy) {
+        stagnationCount++;
+        if (stagnationCount > 10) { // После 10 поколений без улучшений
+            mutationPower = min(0.3f, mutationPower * 1.5f); // Увеличиваем мутацию
+            stagnationCount = 0;
         }
-        avgEnergy /= popSize;
-        
-        for (const auto& agent : population) {
-            float diff = agent->getEnergy() - avgEnergy;
-            energyVariance += diff * diff;
-        }
-        energyVariance /= popSize;
-        
-        // Нормализуем дисперсию (предполагаем максимальную дисперсию 10000)
-        float normalizedVariance = min(energyVariance / 10000.0f, 1.0f);
-        
-        // Вычисляем прогресс между поколениями (сравниваем топ-1 с предыдущим топ-1)
-        static int prevTopEnergy = population[0]->getEnergy();
-        float progressRatio = 0.0f;
-        
-        if (prevTopEnergy > 0) {
-            progressRatio = (population[0]->getEnergy() - prevTopEnergy) / (float)prevTopEnergy;
-        }
-        prevTopEnergy = population[0]->getEnergy();
-        
-        // Адаптируем силу мутации:
-        // - Увеличиваем, если разнообразие низкое (застой)
-        // - Уменьшаем, если разнообразие высокое и есть прогресс
-        // - Увеличиваем, если прогресс отрицательный (регресс)
-        
-        float mutationChange = 0.0f;
-        
-        if (normalizedVariance < 0.1f) { // Низкое разнообразие
-            mutationChange = 0.05f; // Увеличиваем мутацию
-        } else if (normalizedVariance > 0.3f && progressRatio > 0.05f) { // Высокое разнообразие и прогресс
-            mutationChange = -0.03f; // Уменьшаем мутацию
-        } else if (progressRatio < -0.1f) { // Регресс
-            mutationChange = 0.08f; // Значительно увеличиваем мутацию
-        }
-        
-        // Применяем изменение с ограничениями
-        mutationPower += mutationChange;
-        mutationPower = max(0.01f, min(mutationPower, 1.0f)); // Ограничиваем диапазон [0.01, 1.0]
-        
-        // Альтернативный простой метод: адаптация на основе размера популяции и поколения
-        // mutationPower = max(0.05f, 0.2f * exp(-generation / 50.0f)); // Экспоненциальное затухание
+    } else {
+        stagnationCount = 0;
+        mutationPower = AGENT_MUTATION_POWER; // Возвращаем к базовому значению
     }
+    lastBestEnergy = currentBestEnergy;
 }
 
 void EvolutionSimulation::spawnNewFood() {

@@ -14,7 +14,7 @@ vector<vector<Cell>> createField(int width, int height) {
     // Инициализируем буферы
     previousField = vector<vector<Cell>>(height + 2, vector<Cell>(width + 2, {EMPTY}));
     previousTable = vector<vector<char>>(5, vector<char>(width + 2, ' '));
-    table = vector<vector<char>>(5, vector<char>(width + 2, ' '));
+    table = vector<vector<char>>(5, vector<char>(width + 50, ' '));
     
     auto field = vector<vector<Cell>>(height + 2, vector<Cell>(width + 2, {EMPTY}));
 
