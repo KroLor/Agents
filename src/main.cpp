@@ -157,7 +157,7 @@ void _train() {
 
             // Проверяем удачные ли гены
             sim.sortPop();
-            if (sim.getSimulationData().averageEnergyLevel >= 1500) {
+            if (sim.getSimulationData().averageEnergyLevel >= 2500) {
                 saveStatistic(dataFile, sim, 'd');
 
                 sim.reloadGrid();

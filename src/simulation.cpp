@@ -14,7 +14,7 @@ EvolutionSimulation::EvolutionSimulation(vector<vector<Cell>> grid, int initialP
     : grid(move(grid)), mutationPower(AGENT_MUTATION_POWER), generation(0), totalDeaths(0), totalAlives(INIT_POP_SIZE), currentTick(0)
 {
     // Генерируем фиксированные позиции для еды один раз
-    generateFixedFoodPositions(initialFoodCount);
+    generateFixedFood(initialFoodCount);
     initializePopulation(initialPopulationSize);
     initializeFood(initialFoodCount);
 }
@@ -36,8 +36,9 @@ void EvolutionSimulation::initializePopulation(int initialPopulationSize)
 }
 
 
-void EvolutionSimulation::generateFixedFoodPositions(int foodCount) {
+void EvolutionSimulation::generateFixedFood(int foodCount) {
     fixedFoodPositions.clear();
+    fixedFoodValue.clear();
     
     // Собираем все возможные пустые позиции
     vector<pair<int, int>> emptyPositions;
@@ -55,12 +56,17 @@ void EvolutionSimulation::generateFixedFoodPositions(int foodCount) {
     for (int i = 0; i < min(foodCount, (int)emptyPositions.size()); i++) {
         fixedFoodPositions.push_back(emptyPositions[i]);
     }
+
+    uniform_int_distribution<int> random(10, ENERGY_FOOD_VALUE);
+    for (int i = 0; i < fixedFoodPositions.size(); i++) {
+        fixedFoodValue.push_back(random(rng));
+    }
 }
 
 void EvolutionSimulation::initializeFood(int initialFoodCount) {
     // Используем фиксированные позиции вместо случайных
-    for (const auto& pos : fixedFoodPositions) {
-        addFood(pos.first, pos.second);
+    for (int i = 0; i < fixedFoodPositions.size(); i++) {
+        addFood(fixedFoodPositions[i].first, fixedFoodPositions[i].second, fixedFoodValue[i]);
     }
 }
 
@@ -478,7 +484,7 @@ void EvolutionSimulation::resetSim() {
     generation = 0;
     
     // Генерируем новые фиксированные позиции при полном сбросе
-    generateFixedFoodPositions(INIT_FOOD_COUNT);
+    generateFixedFood(INIT_FOOD_COUNT);
     initializePopulation(INIT_POP_SIZE);
     initializeFood(INIT_FOOD_COUNT);
 }
