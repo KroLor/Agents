@@ -32,12 +32,14 @@ GeneLayer::GeneLayer(int inputSize, int outputSize, const string& activation) : 
     for (int i = 0; i < inputSize; i++) {
         for (int j = 0; j < outputSize; j++) {
             weights[i][j] = dist(rng);
+            // weights[i][j] = 0.5f;
         }
     }
     
     // Инициализация biases
     for (int j = 0; j < outputSize; j++) {
         biases[j] = dist(rng) * 0.1f;
+        // biases[j] = 0.5f * 0.1f;
     }
 }
 

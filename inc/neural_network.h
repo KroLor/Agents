@@ -119,11 +119,6 @@ private:
 public:
     NeuralGene();
     NeuralGene(unique_ptr<NeuralNetwork> network);
-    NeuralGene(const NeuralGene& other) {
-        if (other.neuralNet) {
-            this->neuralNet = other.neuralNet->clone();
-        }
-    }
     
     /**
      * @brief Определяет направление движения на основе окружения, энергии и направления к еде.

@@ -13,9 +13,11 @@ static mt19937 rng(random_device{}());
 Agent::Agent() : x(0), y(0), energy(INIT_ENERGY_AGENT), steps(0), isAlive(true), directionToFood({0,0}) {}
 
 Agent::Agent(int x, int y, int energy, unique_ptr<Gene> gene)
-    : x(x), y(y), energy(energy), steps(0), isAlive(true), directionToFood({0,0}), gene(std::move(gene)) 
+    : x(x), y(y), energy(energy), steps(0), isAlive(true), directionToFood({0,0})
 {
-    if (gene == nullptr) {
+    if (gene) {
+        this->gene = std::move(gene);
+    } else {
         initializeBrain();
     }
 }
