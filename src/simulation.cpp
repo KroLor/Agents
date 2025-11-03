@@ -186,35 +186,56 @@ void EvolutionSimulation::geneticAlgorithm() {
     // 1. СОХРАНЯЕМ ТОП-1 АГЕНТА БЕЗ ИЗМЕНЕНИЙ
     newPop.push_back(population[0]->clone());
 
-    // 2. БЕРЕМ ВТОРУЮ ПОЛОВИНУ (исключая топ-1)
-    const int secondHalfStart = 1; // начинаем с индекса 1, пропуская топ-1
-    const int secondHalfSize = popSize - secondHalfStart;
+    // 2. ДЕЛИМ ОСТАВШУЮСЯ ЧАСТЬ ПОПУЛЯЦИИ НА ДВЕ ЧАСТИ
+    const int remainingSize = popSize - 1; // Все кроме топ-1
     
-    // Создаем временный вектор для второй половины
-    vector<unique_ptr<Agent>> secondHalf;
-    for (int i = secondHalfStart; i < popSize; i++) {
-        secondHalf.push_back(population[i]->clone());
+    // Если осталось меньше 2 агентов, просто добавляем их и выходим
+    if (remainingSize < 2) {
+        for (int i = 1; i < popSize; i++) {
+            newPop.push_back(population[i]->clone());
+        }
+        population = move(newPop);
+        generation++;
+        return;
     }
-
-    // 3. СКРЕЩИВАЕМ ВТОРУЮ ПОЛОВИНУ ПО ПАРАМ (i с i+1)
-    for (int i = 0; i < secondHalfSize - 1; i += 2) {
-        // Скрещиваем пару агентов
-        secondHalf[i]->crossing(*secondHalf[i + 1]);
+    
+    // Разделяем оставшуюся популяцию на две части
+    const int firstPartSize = remainingSize / 2;
+    const int secondPartSize = remainingSize - firstPartSize;
+    
+    // 3. ПЕРВАЯ ЧАСТЬ (лучшая) - СКРЕЩИВАНИЕ
+    vector<unique_ptr<Agent>> firstPart;
+    for (int i = 1; i < 1 + firstPartSize; i++) {
+        firstPart.push_back(population[i]->clone());
     }
-
-    // 4. ДОБАВЛЯЕМ ВСЮ ВТОРУЮ ПОЛОВИНУ В НОВУЮ ПОПУЛЯЦИЮ
-    for (auto& agent : secondHalf) {
+    
+    // Скрещиваем первую часть по принципу: первый со вторым, второй с третьим и т.д.
+    for (int i = 0; i < firstPartSize - 1; i++) {
+        if (random(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
+            firstPart[i]->crossing(*firstPart[i + 1]);
+        }
+    }
+    
+    // Добавляем первую часть в новую популяцию
+    for (auto& agent : firstPart) {
+        newPop.push_back(move(agent));
+    }
+    
+    // 4. ВТОРАЯ ЧАСТЬ - МУТАЦИЯ
+    vector<unique_ptr<Agent>> secondPart;
+    for (int i = 1 + firstPartSize; i < popSize; i++) {
+        secondPart.push_back(population[i]->clone());
+    }
+    
+    // Мутируем вторую часть
+    for (auto& agent : secondPart) {
+        if (random(rng) < AGENT_MUTATION_CHANCE) {
+            agent->mutateGene(mutationPower);
+        }
         newPop.push_back(move(agent));
     }
 
-    // 5. МУТИРУЕМ ВСЮ ВТОРУЮ ПОЛОВИНУ (всех кроме топ-1)
-    for (int i = 1; i < newPop.size(); i++) {
-        if (random(rng) < AGENT_MUTATION_CHANCE) {
-            newPop[i]->mutateGene(mutationPower);
-        }
-    }
-
-    // 6. ОБНОВЛЯЕМ ПОПУЛЯЦИЮ
+    // 5. ОБНОВЛЯЕМ ПОПУЛЯЦИЮ
     population = move(newPop);
     generation++;
 }

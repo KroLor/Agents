@@ -25,12 +25,12 @@
 #define USE_A_NEURAL_NETWORK 1 // Отвечает за использование нейросети в агентах
 #define INPUT_VALUES 6 // Входные значения
 // #define HIDDEN_LAYERS 1 // Скрытых слоев
-#define NEURONS_IN_HIDDEN_LAYER 14 // Кол-во нейронов в скрытых(ом) слоях(е) // (одинаково)
+#define NEURONS_IN_HIDDEN_LAYER 5 // Кол-во нейронов в скрытых(ом) слоях(е) // (одинаково)
 #define OUTPUT_VALUES 4 // Выходные значения
 
-#define AGENT_MUTATION_CHANCE 0.1f //0.1f Шанс мутации гена
-#define AGENT_MUTATION_POWER 0.01f //0.02f Число-диапозон (+, -), которое суммируется с каждым весом
-#define AGENT_CHANCE_TO_CROSS_OVER 0.0f //0.33f Шанс скрещивания (кроссинговера)
+#define AGENT_MUTATION_CHANCE 0.2f //0.1f Шанс мутации гена
+#define AGENT_MUTATION_POWER 0.005f //0.02f Число-диапозон (+, -), которое суммируется с каждым весом
+#define AGENT_CHANCE_TO_CROSS_OVER 0.33f //0.33f Шанс скрещивания (кроссинговера)
 
 extern bool UseNeuralNetwork;
 extern int InputValues;
