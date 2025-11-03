@@ -105,7 +105,7 @@ void settingConstants(ProgramParameters param) {
 void saveStatistic(std::ofstream& file, EvolutionSimulation& sim, char typeSave) {
     // Краткая информация
     if (typeSave == 's') {
-        file << sim.getGeneration() << ";" << sim.getSimulationData().maxEnergyLevel << ";" << sim.getPopulation()[0]->getSteps() << ";" << sim.getSimulationData().totalAlives << std::endl;
+        file << sim.getGeneration() << ";" << sim.getSimulationData().averageEnergyLevel << ";" << sim.getPopulation()[0]->getSteps() << ";" << sim.getSimulationData().totalAlives << std::endl;
         file.flush();
     }
     // Сохранение конфигурации и весов лучшей нейросети
@@ -137,7 +137,7 @@ void runARound(EvolutionSimulation& sim, bool visualize) {
 void _train() {
     std::ofstream statsFile("simulation_stats.csv", std::ios::app);
     std::ofstream dataFile("simulation_data.csv", std::ios::app);
-    statsFile << "Generation;MaxEnergy;TopSteps;AliveAgents" << std::endl;
+    statsFile << "Generation;AvgEnergy;TopSteps;AliveAgents" << std::endl;
 
     auto field = createField(FIELD_WIDTH, FIELD_HEIGHT);
     EvolutionSimulation sim(field);
@@ -157,13 +157,13 @@ void _train() {
 
             // Проверяем удачные ли гены
             sim.sortPop();
-            if (sim.getPopulation()[0]->getEnergy() >= 1500) {
+            if (sim.getSimulationData().averageEnergyLevel >= 1500) {
                 saveStatistic(dataFile, sim, 'd');
 
-                sim.geneticAlgorithm();
                 sim.reloadGrid();
                 runARound(sim, true);
 
+                sim.geneticAlgorithm();
                 sim.reloadGrid();
             } else {
                 sim.geneticAlgorithm();
@@ -182,12 +182,12 @@ void _show(ProgramParameters param) {
     settingConstants(param);
     
     auto field = createField(FIELD_WIDTH, FIELD_HEIGHT);
-    auto sim = make_unique<EvolutionSimulation>(move(field), 0, 0);
-    sim->tuneSimWithTrainedAgents(field, param);
+    EvolutionSimulation sim(move(field), 0, 0);
+    sim.tuneSimWithTrainedAgents(field, param);
     
     while (true) {
-        runARound(*sim, true);
-        sim->reloadGrid();
+        runARound(sim, true);
+        sim.reloadGrid();
     }
 }
 

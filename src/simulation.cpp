@@ -238,6 +238,9 @@ void EvolutionSimulation::geneticAlgorithm() {
     // 5. ОБНОВЛЯЕМ ПОПУЛЯЦИЮ
     population = move(newPop);
     generation++;
+
+    // 6. ДИНАМИЧЕСКАЯ ПОДСТРОЙКА СИЛЫ МУТАЦИИ
+    mutationPower = max(0.05f, 0.2f * exp(-generation / 50.0f)); // Экспоненциальное затухание
 }
 
 void EvolutionSimulation::spawnNewFood() {
@@ -327,8 +330,6 @@ void EvolutionSimulation::tuneSimWithTrainedAgents(vector<vector<Cell>> field, c
             addAgent(x, y, INIT_ENERGY_AGENT, newNeuralGene->clone());
         }
     }
-
-    initializeFood(INIT_FOOD_COUNT);
     
     updateGrid();
 }

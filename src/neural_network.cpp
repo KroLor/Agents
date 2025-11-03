@@ -12,7 +12,7 @@ using namespace std;
 static mt19937 rng(random_device{}());
 
 float sigmoid(float x) {
-    return 1.0f / (1.0f + exp(-x * 6.0f)); // F(x) = 1 / (1 + e^(-x * 3)), "плющим" значение до диапозона от 0 до 1
+    return 1.0f / (1.0f + exp(-x)); // F(x) = 1 / (1 + e^(-x * 3)), "плющим" значение до диапозона от 0 до 1
 }
 
 float relu(float x) {
