@@ -199,7 +199,7 @@ void EvolutionSimulation::geneticAlgorithm() {
 
     newPop.push_back(population[0]->clone());
 
-    if (random(rng) < AGENT_MUTATION_CHANCE && newPop[0]->getEnergy() < 800) {
+    if (random(rng) < AGENT_MUTATION_CHANCE) {
         newPop[0]->mutateGene(mutationPower);
     }
 
