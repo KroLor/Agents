@@ -201,7 +201,7 @@ void EvolutionSimulation::geneticAlgorithm() {
         auto agent = population[randomAgent]->clone();
         
         // Мутируем сильнее
-        if (random(rng) < AGENT_MUTATION_CHANCE * 1.5f) {
+        if (random(rng) < AGENT_MUTATION_CHANCE * 2.0f) {
             agent->mutateGene(mutationPower * 1.5f);
         }
         
