@@ -159,14 +159,14 @@ bool EvolutionSimulation::updateAgents() {
 void EvolutionSimulation::sortPop() {
     sort(population.begin(), population.end(),
     [](const unique_ptr<Agent>& a, const unique_ptr<Agent>& b) { 
-        return a->getEnergy() > b->getEnergy();
+        int A = (float)a->getSteps() * 0.3f + (float)a->getEnergy() * 0.7f;
+        int B = (float)b->getSteps() * 0.3f + (float)b->getEnergy() * 0.7f;
+        return A > B;
     });
     /*
-        int A = (float)a->getSteps() * 0.8f + (float)a->getEnergy() * 0.2f;
-        int B = (float)b->getSteps() * 0.8f + (float)b->getEnergy() * 0.2f;
-        return A > B;
-
         return a->getSteps() > b->getSteps();
+
+        return a->getEnergy() > b->getEnergy();
     */
 }
 
@@ -174,54 +174,41 @@ void EvolutionSimulation::geneticAlgorithm() {
     // Сортируем агентов по эффективности (лучшие - первые)
     sortPop();
     
-    const int popSize = population.size();
     vector<unique_ptr<Agent>> newPop;
-    
     uniform_real_distribution<float> random(0.0f, 1.0f);
 
-    // 1. СОХРАНЯЕМ ТОП-1 АГЕНТА БЕЗ ИЗМЕНЕНИЙ
-    newPop.push_back(population[0]->clone());
-
-    // 2. ДЕЛИМ ОСТАВШУЮСЯ ЧАСТЬ ПОПУЛЯЦИИ НА ДВЕ ЧАСТИ
-    const int remainingSize = popSize - 1; // Все кроме топ-1
-    
-    // Разделяем оставшуюся популяцию на две части
-    const int firstPartSize = remainingSize / 2;
-    const int secondPartSize = remainingSize - firstPartSize;
-    
-    // 3. ПЕРВАЯ ЧАСТЬ (лучшая) - СКРЕЩИВАНИЕ
-    vector<unique_ptr<Agent>> firstPart;
-    for (int i = 1; i < 1 + firstPartSize; i++) {
-        firstPart.push_back(population[i]->clone());
+    // 1. СОХРАНЯЕМ ДВУХ ЛУЧШИХ АГЕНТОВ
+    if (population.size() >= 1) {
+        newPop.push_back(population[0]->clone()); // Лучший агент без изменений
     }
     
-    // Скрещиваем первую часть по принципу: первый со вторым, второй с третьим и т.д.
-    for (int i = 0; i < firstPartSize - 1; i++) {
-        if (random(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
-            firstPart[i]->crossing(*firstPart[i + 1]);
-        }
-    }
-    
-    // Добавляем первую часть в новую популяцию
-    for (auto& agent : firstPart) {
-        newPop.push_back(move(agent));
-    }
-    
-    // 4. ВТОРАЯ ЧАСТЬ - МУТАЦИЯ
-    vector<unique_ptr<Agent>> secondPart;
-    for (int i = 1 + firstPartSize; i < popSize; i++) {
-        secondPart.push_back(population[i]->clone());
-    }
-    
-    // Мутируем вторую часть
-    for (auto& agent : secondPart) {
-        if (random(rng) < AGENT_MUTATION_CHANCE) {
-            agent->mutateGene(mutationPower);
-        }
-        newPop.push_back(move(agent));
+    if (population.size() >= 2) {
+        newPop.push_back(population[1]->clone()); // Второй лучший агент
     }
 
-    // 5. ОБНОВЛЯЕМ ПОПУЛЯЦИЮ
+    // 2. ПРИМЕНЯЕМ МУТАЦИИ КО ВТОРОМУ АГЕНТУ
+    if (newPop.size() >= 2 && random(rng) < AGENT_MUTATION_CHANCE) {
+        newPop[1]->mutateGene(mutationPower);
+    }
+
+    // 3. ПОДГОНКА СИЛЫ МУТАЦИИ
+    if (newPop.size() >= 1) {
+        int bestEnergy = newPop[0]->getEnergy();
+        
+        if (bestEnergy >= INIT_ENERGY_AGENT * 1.2f) {
+            // Успешные агенты - уменьшаем мутацию
+            mutationPower = max(AGENT_MUTATION_POWER * 0.25f, mutationPower * 0.95f);
+        } else if (bestEnergy < INIT_ENERGY_AGENT * 0.75f) {
+            // Неуспешные агенты - увеличиваем мутацию
+            mutationPower = min(AGENT_MUTATION_POWER * 2.0f, mutationPower * 1.1f);
+        }
+        
+        // Периодическое увеличение мутации
+        if (generation % 50 == 0 && bestEnergy < INIT_ENERGY_AGENT * 0.5f) {
+            mutationPower = min(AGENT_MUTATION_POWER, mutationPower * 1.5f);
+        }
+    }
+
     population = move(newPop);
     generation++;
 }
