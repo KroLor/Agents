@@ -17,7 +17,7 @@
 #define INIT_FOOD_COUNT 75 //75 Кол-во еды, появляющейся в начале раунда
 #define FOOD_SPAWN_INTERVAL 75 // Каждый N-й тик появляется еда
 #define FOOD_ADD_TIMES 50 // Кол-во появлений еды за раз
-#define CHANCE_OF_FOOD_APPEARANCE 0.4f // Шанс появления еды в клетке
+#define CHANCE_OF_FOOD_APPEARANCE 0.5f // Шанс появления еды в клетке
 #define ENERGY_FOOD_VALUE 50 // Энергетическая ценность еды //
 
 #define TICK_MS 50 //150 Интервал между тиками (мс)
@@ -28,9 +28,9 @@
 #define NEURONS_IN_HIDDEN_LAYER 3 //5 Кол-во нейронов в скрытых(ом) слоях(е) // (одинаково)
 #define OUTPUT_VALUES 4 // Выходные значения
 
-#define AGENT_MUTATION_CHANCE 0.33f //0.1f Шанс мутации гена
-#define AGENT_MUTATION_POWER 0.05f //0.02f Число-диапозон (+, -), которое суммируется с каждым весом
-#define AGENT_CHANCE_TO_CROSS_OVER 0.2f //0.33f Шанс скрещивания (кроссинговера)
+#define AGENT_MUTATION_CHANCE 0.05f //0.1f Шанс мутации гена
+#define AGENT_MUTATION_POWER 0.01f //0.02f Число-диапозон (+, -), которое суммируется с каждым весом
+#define AGENT_CHANCE_TO_CROSS_OVER 0.33f //0.33f Шанс скрещивания (кроссинговера)
 
 extern bool UseNeuralNetwork;
 extern int InputValues;
