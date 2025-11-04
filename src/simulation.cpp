@@ -159,8 +159,8 @@ bool EvolutionSimulation::updateAgents() {
 void EvolutionSimulation::sortPop() {
     sort(population.begin(), population.end(),
     [](const unique_ptr<Agent>& a, const unique_ptr<Agent>& b) { 
-        int A = (float)a->getSteps() * 0.7f + (float)a->getEnergy() * 0.3f;
-        int B = (float)b->getSteps() * 0.7f + (float)b->getEnergy() * 0.3f;
+        int A = (float)a->getSteps() * 0.3f + (float)a->getEnergy() * 0.7f;
+        int B = (float)b->getSteps() * 0.3f + (float)b->getEnergy() * 0.7f;
         return A > B;
     });
     /*
@@ -186,30 +186,29 @@ void EvolutionSimulation::geneticAlgorithm() {
         newPop.push_back(population[1]->clone()); // Второй лучший агент
     }
 
-    // 2. ПРИМЕНЯЕМ МУТАЦИИ КО ВТОРОМУ АГЕНТУ ДЛЯ РАЗНООБРАЗИЯ
+    // 2. ПРИМЕНЯЕМ МУТАЦИИ КО ВТОРОМУ АГЕНТУ
     if (newPop.size() >= 2 && random(rng) < AGENT_MUTATION_CHANCE) {
         newPop[1]->mutateGene(mutationPower);
     }
 
-    // 3. АДАПТИВНАЯ РЕГУЛИРОВКА СИЛЫ МУТАЦИИ
+    // 3. ПОДГОНКА СИЛЫ МУТАЦИИ
     if (newPop.size() >= 1) {
         int bestEnergy = newPop[0]->getEnergy();
         
         if (bestEnergy >= INIT_ENERGY_AGENT * 1.2f) {
-            // Успешные агенты - уменьшаем мутацию для закрепления успеха
-            mutationPower = max(0.02f, mutationPower * 0.95f);
+            // Успешные агенты - уменьшаем мутацию
+            mutationPower = max(AGENT_MUTATION_POWER * 0.25f, mutationPower * 0.95f);
         } else if (bestEnergy < INIT_ENERGY_AGENT * 0.75f) {
-            // Неуспешные агенты - увеличиваем мутацию для исследования
-            mutationPower = min(0.15f, mutationPower * 1.1f);
+            // Неуспешные агенты - увеличиваем мутацию
+            mutationPower = min(AGENT_MUTATION_POWER * 2.0f, mutationPower * 1.1f);
         }
         
-        // Периодическое увеличение мутации для избежания локальных оптимумов
+        // Периодическое увеличение мутации
         if (generation % 50 == 0 && bestEnergy < INIT_ENERGY_AGENT * 0.5f) {
-            mutationPower = min(0.2f, mutationPower * 1.5f);
+            mutationPower = min(AGENT_MUTATION_POWER, mutationPower * 1.5f);
         }
     }
 
-    // 5. ОБНОВЛЯЕМ ПОПУЛЯЦИЮ
     population = move(newPop);
     generation++;
 }

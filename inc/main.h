@@ -6,7 +6,7 @@
 #define FIELD_HEIGHT 20 //15 20 Высота поля
 
 #define GENERATIONS 100000 // Всего поколений
-#define SKIP_GENERATIONS 5000 //1000 10000 Кол-во пропусков раундов/поколений
+#define SKIP_GENERATIONS 2500 //1000 10000 Кол-во пропусков раундов/поколений
 
 #define INIT_POP_SIZE 2 //5 35 Размер популяции
 #define NUMBER_OF_STEPS 200 //50 100 150 Кол-во шагов в раунде
