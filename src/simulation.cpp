@@ -159,62 +159,59 @@ bool EvolutionSimulation::updateAgents() {
 void EvolutionSimulation::sortPop() {
     sort(population.begin(), population.end(),
     [](const unique_ptr<Agent>& a, const unique_ptr<Agent>& b) { 
-        return a->getEnergy() > b->getEnergy();
+        int A = (float)a->getSteps() * 0.7f + (float)a->getEnergy() * 0.3f;
+        int B = (float)b->getSteps() * 0.7f + (float)b->getEnergy() * 0.3f;
+        return A > B;
     });
     /*
-        int A = (float)a->getSteps() * 0.8f + (float)a->getEnergy() * 0.2f;
-        int B = (float)b->getSteps() * 0.8f + (float)b->getEnergy() * 0.2f;
-        return A > B;
-
         return a->getSteps() > b->getSteps();
+
+        return a->getEnergy() > b->getEnergy();
     */
 }
 
 void EvolutionSimulation::geneticAlgorithm() {
-    // Находим лучшего агента текущего поколения
-    unique_ptr<Agent> bestAgent = nullptr;
-    int bestEnergy = -1;
+    // Сортируем агентов по эффективности (лучшие - первые)
+    sortPop();
     
-    for (auto& agent : population) {
-        if (agent->getIsAlive() && agent->getEnergy() > bestEnergy) {
-            bestEnergy = agent->getEnergy();
-            bestAgent = agent->clone(); // Создаем копию лучшего агента
-        }
+    vector<unique_ptr<Agent>> newPop;
+    uniform_real_distribution<float> random(0.0f, 1.0f);
+
+    // 1. СОХРАНЯЕМ ДВУХ ЛУЧШИХ АГЕНТОВ
+    if (population.size() >= 1) {
+        newPop.push_back(population[0]->clone()); // Лучший агент без изменений
     }
     
-    // Если нашли живого агента, создаем новую популяцию на его основе
-    if (bestAgent != nullptr) {
-        population.clear();
+    if (population.size() >= 2) {
+        newPop.push_back(population[1]->clone()); // Второй лучший агент
+    }
+
+    // 2. ПРИМЕНЯЕМ МУТАЦИИ КО ВТОРОМУ АГЕНТУ ДЛЯ РАЗНООБРАЗИЯ
+    if (newPop.size() >= 2 && random(rng) < AGENT_MUTATION_CHANCE) {
+        newPop[1]->mutateGene(mutationPower);
+    }
+
+    // 3. АДАПТИВНАЯ РЕГУЛИРОВКА СИЛЫ МУТАЦИИ
+    if (newPop.size() >= 1) {
+        int bestEnergy = newPop[0]->getEnergy();
         
-        // Создаем одного агента - клон лучшего
-        population.push_back(move(bestAgent));
-        
-        // Применяем мутацию с некоторой вероятностью
-        uniform_real_distribution<float> random(0.0f, 1.0f);
-        if (random(rng) < AGENT_MUTATION_CHANCE) {
-            population[0]->mutateGene(mutationPower);
+        if (bestEnergy >= INIT_ENERGY_AGENT * 1.2f) {
+            // Успешные агенты - уменьшаем мутацию для закрепления успеха
+            mutationPower = max(0.02f, mutationPower * 0.95f);
+        } else if (bestEnergy < INIT_ENERGY_AGENT * 0.75f) {
+            // Неуспешные агенты - увеличиваем мутацию для исследования
+            mutationPower = min(0.15f, mutationPower * 1.1f);
         }
         
-        // Адаптивная регулировка силы мутации
-        if (population[0]->getEnergy() > 300) {
-            // Успешный агент - уменьшаем мутацию
-            mutationPower = max(0.01f, mutationPower * 0.7f);
-        } else {
-            // Неуспешный агент - увеличиваем мутацию для исследования
-            mutationPower = min(0.2f, mutationPower * 1.1f);
-        }
-    } else {
-        // Все агенты мертвы - создаем нового случайного агента
-        population.clear();
-        int x, y;
-        if (findRandomEmptyPosition(x, y)) {
-            addAgent(x, y);
+        // Периодическое увеличение мутации для избежания локальных оптимумов
+        if (generation % 50 == 0 && bestEnergy < INIT_ENERGY_AGENT * 0.5f) {
+            mutationPower = min(0.2f, mutationPower * 1.5f);
         }
     }
-    
+
+    // 5. ОБНОВЛЯЕМ ПОПУЛЯЦИЮ
+    population = move(newPop);
     generation++;
-    totalAlives = population.size();
-    totalDeaths = 0;
 }
 
 void EvolutionSimulation::spawnNewFood(uniform_int_distribution<int> foodV) {
