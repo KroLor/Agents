@@ -183,17 +183,17 @@ pair<int, int> NeuralGene::decideDirection(const vector<Cell>& surroundings, int
     vector<float> inputs(InputValues);
     
     // 4 клетки окружения
-    // for (int i = 0; i < 4; i++) {
-    //     switch (surroundings[i].type) {
-    //         case EMPTY: inputs[i] = 0.0; break;
-    //         case FOOD: inputs[i] = 1.0; break;
-    //         case WALL: inputs[i] = -1.0; break;
-    //         case AGENT: inputs[i] = -1.0; break;
-    //     }
-    // }
+    for (int i = 0; i < 4; i++) {
+        switch (surroundings[i].type) {
+            case EMPTY: inputs[i] = 0.0f; break;
+            case FOOD: inputs[i] = 1.0f; break;
+            case WALL: inputs[i] = -1.0f; break;
+            case AGENT: inputs[i] = -0.5f; break;
+        }
+    }
     
-    inputs[0] = directionToFood.first;  // dx
-    inputs[1] = directionToFood.second; // dy
+    inputs[4] = directionToFood.first;  // dx
+    inputs[5] = directionToFood.second; // dy
     
     // Нормируем кол-во энергии
     // inputs[6] = min((float)energy / (float)(INIT_ENERGY_AGENT * 2), 1.0f);
