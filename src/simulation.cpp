@@ -188,18 +188,14 @@ void EvolutionSimulation::geneticAlgorithm() {
 
     // 3. СКРЕЩИВАЕМ ПЕРВУЮ ПОЛОВИНУ
     for (int i = 2; i < population.size() / 2; i++) {
-        int parent1 = randomAg(rng);
-        int parent2 = randomAg(rng);
-        
-        auto newAgent = population[parent1]->clone();
+        auto newAgent = population[i]->clone();
         
         if (random(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
-            if (parent1 != parent2) {
-                newAgent->crossing(*population[parent2]);
-            }
+            newAgent->crossing(*population[i+1]);
         }
 
         newPop.push_back(move(newAgent));
+        // newPop.push_back(population[i]->clone());
     }
 
     // 4. ПРИМЕНЯЕМ МУТАЦИИ КО ВТОРОЙ ПОЛОВИНЕ
