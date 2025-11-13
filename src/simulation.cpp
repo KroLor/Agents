@@ -176,7 +176,6 @@ void EvolutionSimulation::geneticAlgorithm() {
     
     vector<unique_ptr<Agent>> newPop;
     uniform_real_distribution<float> random(0.0f, 1.0f);
-    uniform_int_distribution<int> randomAg(2, population.size() - 1);
 
     // 1. СОХРАНЯЕМ ЛУЧШИХ АГЕНТОВ
     newPop.push_back(population[0]->clone()); // 1
@@ -190,9 +189,9 @@ void EvolutionSimulation::geneticAlgorithm() {
     for (int i = 2; i < population.size() / 2; i++) {
         auto newAgent = population[i]->clone();
         
-        if (random(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
-            newAgent->crossing(*population[i+1]);
-        }
+        // if (random(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
+        //     newAgent->crossing(*population[i+1]);
+        // }
 
         newPop.push_back(move(newAgent));
         // newPop.push_back(population[i]->clone());
