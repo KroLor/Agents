@@ -193,8 +193,10 @@ void EvolutionSimulation::geneticAlgorithm() {
         
         auto newAgent = population[parent1]->clone();
         
-        if (parent1 != parent2) {
-            newAgent->crossing(*population[parent2]);
+        if (random(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
+            if (parent1 != parent2) {
+                newAgent->crossing(*population[parent2]);
+            }
         }
 
         newPop.push_back(move(newAgent));
