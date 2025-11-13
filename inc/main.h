@@ -8,7 +8,7 @@
 #define GENERATIONS 100000 // Всего поколений
 #define SKIP_GENERATIONS 500 //1000 10000 Кол-во пропусков раундов/поколений
 
-#define INIT_POP_SIZE 40 //2 5 10 35 Размер популяции
+#define INIT_POP_SIZE 30 //2 5 10 35 Размер популяции
 #define NUMBER_OF_STEPS 200 //50 100 150 Кол-во шагов в раунде
 #define INIT_ENERGY_AGENT 125 //200 500 Кол-во энергии у агента
 #define ENERGY_LOSS_PER_STEP 1 //3 Потеря энергии за шаг //
