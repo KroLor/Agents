@@ -176,19 +176,37 @@ void EvolutionSimulation::geneticAlgorithm() {
     
     vector<unique_ptr<Agent>> newPop;
     uniform_real_distribution<float> random(0.0f, 1.0f);
+    uniform_int_distribution<int> randomAg(2, population.size() - 1);
 
-    // 1. СОХРАНЯЕМ ДВУХ ЛУЧШИХ АГЕНТОВ
-    if (population.size() >= 1) {
-        newPop.push_back(population[0]->clone()); // Лучший агент без изменений
-    }
-    
-    if (population.size() >= 2) {
-        newPop.push_back(population[1]->clone()); // Второй лучший агент
+    // 1. СОХРАНЯЕМ ЛУЧШИХ АГЕНТОВ
+    newPop.push_back(population[0]->clone()); // 1
+    newPop.push_back(population[1]->clone()); // 2
+
+    // // 2. ФОРМИРУЕМ ТОП ЛУЧШИХ И ХУДШИХ
+    // vector<unique_ptr<Agent>> goodPop;
+    // vector<unique_ptr<Agent>> badPop;
+
+    // 3. СКРЕЩИВАЕМ ПЕРВУЮ ПОЛОВИНУ
+    for (int i = 2; i < population.size() / 2; i++) {
+        int parent1 = randomAg(rng);
+        int parent2 = randomAg(rng);
+        
+        auto newAgent = population[parent1]->clone();
+        
+        if (parent1 != parent2) {
+            newAgent->crossing(*population[parent2]);
+        }
+
+        newPop.push_back(move(newAgent));
     }
 
-    // 2. ПРИМЕНЯЕМ МУТАЦИИ КО ВТОРОМУ АГЕНТУ
-    if (newPop.size() >= 2 && random(rng) < AGENT_MUTATION_CHANCE) {
-        newPop[1]->mutateGene(mutationPower);
+    // 4. ПРИМЕНЯЕМ МУТАЦИИ КО ВТОРОЙ ПОЛОВИНЕ
+    for (int i = population.size() / 2; i < population.size(); i++) {
+        newPop.push_back(population[i]->clone());
+
+        if (random(rng) < AGENT_MUTATION_CHANCE) {
+            newPop[i]->mutateGene(mutationPower);
+        }
     }
 
     // 3. ПОДГОНКА СИЛЫ МУТАЦИИ

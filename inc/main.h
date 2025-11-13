@@ -2,19 +2,19 @@
 
 #include <vector>
 
-#define FIELD_WIDTH 20 //36 51 Ширина поля
+#define FIELD_WIDTH 51 //36 51 Ширина поля
 #define FIELD_HEIGHT 20 //15 20 Высота поля
 
 #define GENERATIONS 100000 // Всего поколений
-#define SKIP_GENERATIONS 2500 //1000 10000 Кол-во пропусков раундов/поколений
+#define SKIP_GENERATIONS 1000 //1000 10000 Кол-во пропусков раундов/поколений
 
-#define INIT_POP_SIZE 2 //5 35 Размер популяции
+#define INIT_POP_SIZE 40 //2 5 10 35 Размер популяции
 #define NUMBER_OF_STEPS 200 //50 100 150 Кол-во шагов в раунде
 #define INIT_ENERGY_AGENT 125 //200 500 Кол-во энергии у агента
 #define ENERGY_LOSS_PER_STEP 1 //3 Потеря энергии за шаг //
 #define ENERGY_LOSS_DUE_TO_INACTION 1 //3 Потеря энергии за бездействие //
 
-#define INIT_FOOD_COUNT 75 //75 Кол-во еды, появляющейся в начале раунда
+#define INIT_FOOD_COUNT 125 //75 125 Кол-во еды, появляющейся в начале раунда
 #define FOOD_SPAWN_INTERVAL 75 // Каждый N-й тик появляется еда
 #define FOOD_ADD_TIMES 50 // Кол-во появлений еды за раз
 #define CHANCE_OF_FOOD_APPEARANCE 0.5f // Шанс появления еды в клетке
@@ -28,8 +28,8 @@
 #define NEURONS_IN_HIDDEN_LAYER 3 //5 Кол-во нейронов в скрытых(ом) слоях(е) // (одинаково)
 #define OUTPUT_VALUES 4 // Выходные значения
 
-#define AGENT_MUTATION_CHANCE 0.05f //0.1f Шанс мутации гена
-#define AGENT_MUTATION_POWER 0.01f //0.02f Число-диапозон (+, -), которое суммируется с каждым весом
+#define AGENT_MUTATION_CHANCE 0.1f //0.1f Шанс мутации гена
+#define AGENT_MUTATION_POWER 0.03f //0.02f Число-диапозон (+, -), которое суммируется с каждым весом
 #define AGENT_CHANCE_TO_CROSS_OVER 0.33f //0.33f Шанс скрещивания (кроссинговера)
 
 extern bool UseNeuralNetwork;
