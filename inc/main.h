@@ -6,7 +6,7 @@
 #define FIELD_HEIGHT 20 //15 20 Высота поля
 
 #define GENERATIONS 100000 // Всего поколений
-#define SKIP_GENERATIONS 500 //1000 10000 Кол-во пропусков раундов/поколений
+#define SKIP_GENERATIONS 1000 //1000 10000 Кол-во пропусков раундов/поколений
 
 #define INIT_POP_SIZE 30 //2 5 10 35 Размер популяции
 #define NUMBER_OF_STEPS 200 //50 100 150 Кол-во шагов в раунде
@@ -18,7 +18,7 @@
 #define FOOD_SPAWN_INTERVAL 75 // Каждый N-й тик появляется еда
 #define FOOD_ADD_TIMES 50 // Кол-во появлений еды за раз
 #define CHANCE_OF_FOOD_APPEARANCE 0.5f // Шанс появления еды в клетке
-#define ENERGY_FOOD_VALUE 50 // Энергетическая ценность еды //
+#define ENERGY_FOOD_VALUE 75 // Энергетическая ценность еды //
 
 #define TICK_MS 50 //150 Интервал между тиками (мс)
 
@@ -28,9 +28,9 @@
 #define NEURONS_IN_HIDDEN_LAYER 5 //5 Кол-во нейронов в скрытых(ом) слоях(е) // (одинаково)
 #define OUTPUT_VALUES 4 // Выходные значения
 
-#define AGENT_MUTATION_CHANCE 0.1f //0.1f Шанс мутации гена
+#define AGENT_MUTATION_CHANCE 0.05f //0.1f Шанс мутации гена
 #define AGENT_MUTATION_POWER 0.03f //0.02f Число-диапозон (+, -), которое суммируется с каждым весом
-#define AGENT_CHANCE_TO_CROSS_OVER 0.2f //0.33f Шанс скрещивания (кроссинговера)
+#define AGENT_CHANCE_TO_CROSS_OVER 0.1f //0.33f Шанс скрещивания (кроссинговера)
 
 extern bool UseNeuralNetwork;
 extern int InputValues;
