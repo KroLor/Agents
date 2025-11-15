@@ -196,7 +196,7 @@ void EvolutionSimulation::geneticAlgorithm() {
         }
         
         // Адаптивная регулировка силы мутации
-        if (population[0]->getEnergy() > 300) {
+        if (population[0]->getEnergy() > 600) {
             // Успешный агент - уменьшаем мутацию
             mutationPower = max(0.01f, mutationPower * 0.7f);
         } else {
