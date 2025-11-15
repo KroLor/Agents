@@ -30,7 +30,7 @@
 
 #define AGENT_MUTATION_CHANCE 0.05f //0.1 0.33 Шанс мутации гена
 #define AGENT_MUTATION_POWER 0.05f //0.02f Число-диапозон (+, -), которое суммируется с каждым весом
-#define AGENT_CHANCE_TO_CROSS_OVER 0.3f //0.2 0.3 Шанс скрещивания (кроссинговера)
+#define AGENT_CHANCE_TO_CROSS_OVER 0.2f //0.2 0.3 Шанс скрещивания (кроссинговера)
 
 extern bool UseNeuralNetwork;
 extern int InputValues;

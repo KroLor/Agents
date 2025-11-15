@@ -190,9 +190,12 @@ void EvolutionSimulation::geneticAlgorithm() {
         
         auto newAgent = population[parent1]->clone();
         
-        // if (random(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
-        //     newAgent->crossing(*population[i+1]);
-        // }
+        if (random(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
+            newAgent->crossing(*population[i+1]);
+        }
+        if (random(rng) < AGENT_MUTATION_CHANCE * 0.33f) {
+            newAgent->mutateGene(mutationPower);
+        }
 
         newPop.push_back(move(newAgent));
     }
@@ -207,12 +210,12 @@ void EvolutionSimulation::geneticAlgorithm() {
     }
         
     // Адаптивная регулировка силы мутации
-    if (population[0]->getEnergy() > 600) {
+    if (getSimulationData().averageEnergyLevel > INIT_ENERGY_AGENT * 1.35f) {
         // Успешный агент - уменьшаем мутацию
-        mutationPower = max(0.01f, mutationPower * 0.7f);
+        mutationPower = max(0.005f, mutationPower * 0.6f);
     } else {
         // Неуспешный агент - увеличиваем мутацию для исследования
-        mutationPower = min(0.2f, mutationPower * 1.1f);
+        mutationPower = min(0.3f, mutationPower * 1.1f);
     }
 
     generation++;
