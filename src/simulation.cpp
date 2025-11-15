@@ -210,7 +210,7 @@ void EvolutionSimulation::geneticAlgorithm() {
     }
         
     // Адаптивная регулировка силы мутации
-    if (getSimulationData().averageEnergyLevel > INIT_ENERGY_AGENT * 1.35f) {
+    if (getSimulationData().averageEnergyLevel > INIT_ENERGY_AGENT * 1.4f) {
         // Успешный агент - уменьшаем мутацию
         mutationPower = max(0.005f, mutationPower * 0.6f);
     } else {
