@@ -183,6 +183,7 @@ void _show(ProgramParameters param) {
     auto field = createField(FIELD_WIDTH, FIELD_HEIGHT);
     EvolutionSimulation sim(move(field), 0, 0);
     sim.tuneSimWithTrainedAgents(field, param);
+    sim.reloadGrid();
     
     while (true) {
         runARound(sim, true);
