@@ -156,8 +156,8 @@ void _train() {
             saveStatistic(statsFile, sim, 's');
 
             // Проверяем удачные ли гены
-            sim.sortPop();
-            if (sim.getSimulationData().averageEnergyLevel >= 1000) {
+            //sim.sortPop();
+            if (sim.getSimulationData().maxEnergyLevel >= 1000) {
                 saveStatistic(dataFile, sim, 'd');
 
                 sim.geneticAlgorithm();
