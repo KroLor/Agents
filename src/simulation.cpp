@@ -159,12 +159,12 @@ bool EvolutionSimulation::updateAgents() {
 void EvolutionSimulation::sortPop() {
     sort(population.begin(), population.end(),
     [](const unique_ptr<Agent>& a, const unique_ptr<Agent>& b) { 
-        return a->getEnergy() > b->getEnergy();
-    });
-    /*
         int A = (float)a->getSteps() * 0.8f + (float)a->getEnergy() * 0.2f;
         int B = (float)b->getSteps() * 0.8f + (float)b->getEnergy() * 0.2f;
         return A > B;
+    });
+    /*
+        return a->getEnergy() > b->getEnergy();
 
         return a->getSteps() > b->getSteps();
     */
