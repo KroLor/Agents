@@ -50,12 +50,12 @@ public:
     /**
      * @brief Возвращает веса слоя.
      */
-    const vector<vector<float>>& getWeights() const { return weights; }
+    vector<vector<float>>& getWeights() { return weights; }
     
     /**
      * @brief Возвращает bias.
      */
-    const vector<float>& getBiases() const { return biases; }
+    vector<float>& getBiases() { return biases; }
     
     /**
      * @brief Мутирует веса и bias.
@@ -98,7 +98,7 @@ public:
      */
     void mutate(float mutationPower);
 
-    unique_ptr<NeuralNetwork> crossing(const NeuralNetwork& otherNet) const;
+    void crossing(NeuralNetwork& otherNet);
     
     /**
      * @brief Создает полную копию нейронной сети.
@@ -119,11 +119,6 @@ private:
 public:
     NeuralGene();
     NeuralGene(unique_ptr<NeuralNetwork> network);
-    NeuralGene(const NeuralGene& other) {
-        if (other.neuralNet) {
-            this->neuralNet = other.neuralNet->clone();
-        }
-    }
     
     /**
      * @brief Определяет направление движения на основе окружения, энергии и направления к еде.
@@ -147,12 +142,9 @@ public:
      */
     unique_ptr<Gene> clone() const override;
 
-    /**
-     * @brief Скрещивает нейросети.
-     */
-    unique_ptr<Gene> crossing(const Gene& pairGene) const;
+    void crossing(Gene& otherGene) override;
 
-    const NeuralNetwork& getNeuralNet() const { return *neuralNet; }
+    NeuralNetwork& getNeuralNet() { return *neuralNet; }
 
     /**
      * 

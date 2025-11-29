@@ -18,6 +18,7 @@ using namespace std;
 class EvolutionSimulation {
 private:
     vector<vector<Cell>> grid;            // Двумерное поле клеток
+    vector<int> FoodValue;
     vector<unique_ptr<Agent>> population; // Популяция агентов
     float mutationPower;                  // Коэффициент мутации
     int generation;                       // Текущее поколение
@@ -40,7 +41,7 @@ private:
     /**
      * @brief Генерирует новую еду на поле.
      */
-    void spawnNewFood();
+    void spawnNewFood(uniform_int_distribution<int> foodV);
 
     unique_ptr<NeuralNetwork> createNetw(const ProgramParameters& param);
 

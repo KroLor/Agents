@@ -33,12 +33,17 @@ void EvolutionSimulation::initializePopulation(int initialPopulationSize)
     }
 }
 
-void EvolutionSimulation::initializeFood(int initialFoodCount)
-{
+
+void EvolutionSimulation::initializeFood(int initialFoodCount) {
+    uniform_int_distribution<int> random((int)ENERGY_FOOD_VALUE / 2, ENERGY_FOOD_VALUE);
+    for (int i = 0; i < initialFoodCount; i++) {
+        FoodValue.push_back(random(rng));
+    }
+
     for (int i = 0; i < initialFoodCount; i++) {
         int x, y;
         if (findRandomEmptyPosition(x, y)) {
-            addFood(x, y);
+            addFood(x, y, FoodValue[i]);
         }
     }
 }
@@ -79,8 +84,9 @@ bool EvolutionSimulation::simulateStep()
     currentTick++;
     // Добавляем новую еду FOOD_ADD_TIMES раз каждые FOOD_SPAWN_INTERVAL тиков
     if (currentTick % FOOD_SPAWN_INTERVAL == 0) {
+        uniform_int_distribution<int> random((int)(ENERGY_FOOD_VALUE / 3), (int)ENERGY_FOOD_VALUE);
         for (int times = 0; times < FOOD_ADD_TIMES; times++) {
-            spawnNewFood();
+            spawnNewFood(random);
         }
     }
     
@@ -118,6 +124,11 @@ bool EvolutionSimulation::updateAgents() {
             int oldY = agent->getY();
             
             // Агент думает и делает свой ход
+            // for (int i = 0; i < 16; i++) {
+            //     if (agent->decideAction(grid)) {
+            //         break;
+            //     }
+            // }
             agent->decideAction(grid);
             
             // Обновляем новую позицию
@@ -148,153 +159,78 @@ bool EvolutionSimulation::updateAgents() {
 void EvolutionSimulation::sortPop() {
     sort(population.begin(), population.end(),
     [](const unique_ptr<Agent>& a, const unique_ptr<Agent>& b) { 
-        return a->getSteps() > b->getSteps();
+        int A = (float)a->getSteps() * 0.2f + (float)a->getEnergy() * 0.8f;
+        int B = (float)b->getSteps() * 0.2f + (float)b->getEnergy() * 0.8f;
+        return A > B;
     });
     /*
-        int A = (float)a->getSteps() * 0.8f + (float)a->getEnergy() * 0.2f;
-        int B = (float)b->getSteps() * 0.8f + (float)b->getEnergy() * 0.2f;
-        return A > B;
+        return a->getEnergy() > b->getEnergy();
+
+        return a->getSteps() > b->getSteps();
 
         return a->getEnergy() > b->getEnergy();
     */
 }
 
 void EvolutionSimulation::geneticAlgorithm() {
-    // Сортируем агентов по эффективности
-    sortPop();
+    vector<unique_ptr<Agent>> newPop;
+    uniform_real_distribution<float> random(0.0f, 1.0f);
+    uniform_int_distribution<int> randomAg(2, population.size() - 1);
 
-    const int currentPopulationSize = population.size();
-    const int targetPopulationSize = INIT_POP_SIZE;
-    vector<unique_ptr<Agent>> newPopulation;
-    
-    uniform_real_distribution<float> chance(0.0f, 1.0f);
+    // 1. СОХРАНЯЕМ ЛУЧШИХ АГЕНТОВ
+    newPop.push_back(population[0]->clone()); // 1
+    newPop.push_back(population[1]->clone()); // 2
 
-    // 1. ЭЛИТИЗМ - СОХРАНЯЕМ ЛУЧШИХ (5% популяции, минимум 1)
-    const int eliteCount = 1;
-    for (int i = 0; i < min(eliteCount, currentPopulationSize); i++) {
-        newPopulation.push_back(population[i]->clone());
+    // // 2. ФОРМИРУЕМ ТОП ЛУЧШИХ И ХУДШИХ
+    // vector<unique_ptr<Agent>> goodPop;
+    // vector<unique_ptr<Agent>> badPop;
+
+    // 3. СКРЕЩИВАЕМ ПЕРВУЮ ПОЛОВИНУ
+    for (int i = 2; i < population.size() / 2; i++) {
+        int parent1 = randomAg(rng);
+        int parent2 = randomAg(rng);
+        
+        auto newAgent = population[parent1]->clone();
+        
+        if (random(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
+            newAgent->crossing(*population[i+1]);
+        }
+        if (random(rng) < AGENT_MUTATION_CHANCE * 0.33f) {
+            newAgent->mutateGene(mutationPower);
+        }
+
+        newPop.push_back(move(newAgent));
     }
 
-    // 2. РАЗМНОЖЕНИЕ ЛУЧШИХ АГЕНТОВ
-    int createdCount = newPopulation.size();
-    
-    // Топ-агенты создают основную массу потомков (60% популяции)
-    const int topBreedersCount = max(2, (int)(currentPopulationSize * 0.3f)); // Топ-30%
-    const int topChildrenTarget = (int)(targetPopulationSize * 0.6f);
-    
-    for (int parentRank = 0; parentRank < topBreedersCount && createdCount < targetPopulationSize; parentRank++) {
-        // Количество потомков зависит от ранга (лучшие = больше потомков)
-        int maxChildrenForThisRank = topChildrenTarget / (parentRank + 1);
-        int childrenForThisParent = min(maxChildrenForThisRank, targetPopulationSize - createdCount);
-        
-        for (int i = 0; i < childrenForThisParent && createdCount < targetPopulationSize; i++) {
-            auto child = population[parentRank]->clone();
-            
-            // Скрещивание с другим хорошим агентом
-            if (currentPopulationSize > 1 && chance(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
-                int partnerRank;
-                // Чем лучше родитель, тем более качественного партнера выбираем
-                if (parentRank < topBreedersCount / 2) {
-                    partnerRank = rand() % (topBreedersCount / 2); // Топ-15%
-                } else {
-                    partnerRank = rand() % topBreedersCount; // Топ-30%
-                }
-                
-                if (partnerRank != parentRank) {
-                    child->crossing(*population[partnerRank]);
-                }
-            }
-            
-            // Адаптивная мутация: чем лучше родитель, тем слабее мутация
-            float rankFactor = (float)parentRank / topBreedersCount;
-            float mutationChance = AGENT_MUTATION_CHANCE * (0.3f + 0.7f * rankFactor);
-            float mutationStrength = mutationPower * (0.2f + 0.8f * rankFactor);
-            
-            if (chance(rng) < mutationChance) {
-                child->mutateGene(mutationStrength);
-            }
-            
-            newPopulation.push_back(move(child));
-            createdCount++;
+    // 4. ПРИМЕНЯЕМ МУТАЦИИ КО ВТОРОЙ ПОЛОВИНЕ
+    for (int i = population.size() / 2; i < population.size(); i++) {
+        newPop.push_back(population[i]->clone());
+
+        if (random(rng) < AGENT_MUTATION_CHANCE) {
+            newPop[i]->mutateGene(mutationPower);
         }
     }
-
-    // 3. СЛУЧАЙНОЕ РАЗМНОЖЕНИЕ ДЛЯ РАЗНООБРАЗИЯ (35% популяции)
-    const int randomChildrenTarget = targetPopulationSize - createdCount;
-    
-    for (int i = 0; i < randomChildrenTarget && createdCount < targetPopulationSize; i++) {
-        // Турнирная селекция для выбора достойных родителей
-        auto tournamentSelect = [&](int tournamentSize) -> int {
-            int bestIndex = rand() % currentPopulationSize;
-            int bestScore = population[bestIndex]->getSteps();
-            
-            for (int t = 1; t < tournamentSize; t++) {
-                int candidate = rand() % currentPopulationSize;
-                int candidateScore = population[candidate]->getSteps();
-                if (candidateScore > bestScore) {
-                    bestIndex = candidate;
-                    bestScore = candidateScore;
-                }
-            }
-            return bestIndex;
-        };
         
-        int parent1 = tournamentSelect(3);
-        int parent2 = tournamentSelect(3);
-        
-        // Убеждаемся, что родители разные
-        while (parent1 == parent2 && currentPopulationSize > 1) {
-            parent2 = tournamentSelect(3);
-        }
-        
-        auto child = population[parent1]->clone();
-        child->crossing(*population[parent2]);
-        
-        // Сильная мутация для случайных потомков
-        if (chance(rng) < AGENT_MUTATION_CHANCE * 1.5f) {
-            child->mutateGene(mutationPower * 1.2f);
-        }
-        
-        newPopulation.push_back(move(child));
-        createdCount++;
+    // Адаптивная регулировка силы мутации
+    if (getSimulationData().averageEnergyLevel > INIT_ENERGY_AGENT * 2 * 1.2f) {
+        // Успешный агент - уменьшаем мутацию
+        mutationPower = max(0.0005f, mutationPower * 0.6f);
+    } else {
+        // Неуспешный агент - увеличиваем мутацию для исследования
+        mutationPower = min(0.3f, mutationPower * 1.1f);
     }
 
-    // 4. ГАРАНТИЯ ЗАПОЛНЕНИЯ (если что-то пошло не так)
-    while (createdCount < targetPopulationSize) {
-        // Просто клонируем случайных агентов из текущей популяции
-        int randomParent = rand() % currentPopulationSize;
-        newPopulation.push_back(population[randomParent]->clone());
-        createdCount++;
-    }
-
-    // 5. АДАПТИВНАЯ НАСТРОЙКА ПАРАМЕТРОВ
-    static int previousBestScore = 0;
-    int currentBestScore = currentPopulationSize > 0 ? population[0]->getSteps() : 0;
-    
-    // Обновляем каждые 5 поколений
-    if (generation % 5 == 0 && currentPopulationSize > 0) {
-        if (currentBestScore <= previousBestScore) {
-            // Застой - увеличиваем исследование
-            mutationPower = min(mutationPower * 1.15f, AGENT_MUTATION_POWER * 2.0f);
-        } else {
-            // Прогресс - стабилизируем
-            mutationPower = max(mutationPower * 0.9f, AGENT_MUTATION_POWER * 0.3f);
-        }
-        previousBestScore = currentBestScore;
-    }
-
-    // 6. ОБНОВЛЕНИЕ ПОПУЛЯЦИИ
-    population = move(newPopulation);
     generation++;
 }
 
-void EvolutionSimulation::spawnNewFood() {
+void EvolutionSimulation::spawnNewFood(uniform_int_distribution<int> foodV) {
     // Добавляем новую еду с вероятностью CHANCE_OF_FOOD_APPEARANCE%
     uniform_real_distribution<float> chance(0.0f, 1.0f);
+
     if (chance(rng) < CHANCE_OF_FOOD_APPEARANCE) {
         int x, y;
         if (findRandomEmptyPosition(x, y)) {
-            addFood(x, y);
+            addFood(x, y, FoodValue[foodV(rng)]);
         }
     }
 }
@@ -375,8 +311,6 @@ void EvolutionSimulation::tuneSimWithTrainedAgents(vector<vector<Cell>> field, c
             addAgent(x, y, INIT_ENERGY_AGENT, newNeuralGene->clone());
         }
     }
-
-    initializeFood(INIT_FOOD_COUNT);
     
     updateGrid();
 }
@@ -391,7 +325,7 @@ Agent* EvolutionSimulation::addAgent(int x, int y, int energy, unique_ptr<Gene> 
     }
     
     // Создаем агента
-    auto agent = make_unique<Agent>(x, y, energy, move(genome));
+    auto agent = make_unique<Agent>(x, y, energy, std::move(genome));
     Agent* agent_ptr = agent.get();
     population.push_back(move(agent));
     
@@ -523,6 +457,7 @@ void EvolutionSimulation::resetSim() {
     currentTick = 0;
     generation = 0;
     
+    // generateFixedFood(INIT_FOOD_COUNT);
     initializePopulation(INIT_POP_SIZE);
     initializeFood(INIT_FOOD_COUNT);
 }

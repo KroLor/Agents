@@ -41,10 +41,10 @@ public:
     virtual unique_ptr<Gene> clone() const = 0;
 
     /**
-     * @brief Скрещивает веса нейросетей.
-     * @param pair Пара.
+     * @brief Скрещивает гены с другим геном, изменяя оба
+     * @param otherGene Другой ген для скрещивания
      */
-    virtual unique_ptr<Gene> crossing(const Gene& pairGene) const = 0;
+    virtual void crossing(Gene& otherGene) = 0;
     
     // Методы для сохранения/загрузки гена
 

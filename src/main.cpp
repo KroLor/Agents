@@ -105,13 +105,13 @@ void settingConstants(ProgramParameters param) {
 void saveStatistic(std::ofstream& file, EvolutionSimulation& sim, char typeSave) {
     // Краткая информация
     if (typeSave == 's') {
-        file << sim.getGeneration() << ";" << sim.getSimulationData().maxEnergyLevel << ";" << sim.getPopulation()[0]->getSteps() << ";" << sim.getSimulationData().totalAlives << std::endl;
+        file << sim.getGeneration() << ";" << sim.getSimulationData().averageEnergyLevel << ";" << sim.getPopulation()[0]->getSteps() << ";" << sim.getSimulationData().totalAlives << std::endl;
         file.flush();
     }
     // Сохранение конфигурации и весов лучшей нейросети
     else if (typeSave == 'd') {
         string data = sim.getPopulation()[0]->getGene().saveDataCSV();
-        file << data << "               " << sim.getGeneration() << "               " << sim.getPopulation()[0]->getEnergy() << "\n";
+        file << data << "               " << sim.getGeneration() << "               " << sim.getSimulationData().averageEnergyLevel << "\n";
         file.flush();
     }
 }
@@ -134,60 +134,40 @@ void runARound(EvolutionSimulation& sim, bool visualize) {
     }
 }
 
-void visualBestAgent(EvolutionSimulation& sim) {
-    auto bestAgent = sim.getPopulation()[0]->clone();
-
-    auto field = createField(FIELD_WIDTH, FIELD_HEIGHT);
-    EvolutionSimulation visualSim(field, 0, 0);
-
-    // Добавляем только лучшего агента
-    int x, y;
-    for (int i = 0; i < 10; i++) {
-        visualSim.findRandomEmptyPosition(x, y);
-        visualSim.addAgent(x, y, INIT_ENERGY_AGENT, bestAgent->getGene().clone());
-    }
-    visualSim.reloadGrid();
-
-    runARound(visualSim, true);
-    sim.reloadGrid();
-}
-
 void _train() {
     std::ofstream statsFile("simulation_stats.csv", std::ios::app);
     std::ofstream dataFile("simulation_data.csv", std::ios::app);
-    statsFile << "Generation;MaxEnergy;TopSteps;AliveAgents" << std::endl;
+    statsFile << "Generation;AvgEnergy;TopSteps;AliveAgents" << std::endl;
 
     auto field = createField(FIELD_WIDTH, FIELD_HEIGHT);
     EvolutionSimulation sim(field);
 
     while (sim.getGeneration() < GENERATIONS) {
         runARound(sim, true);
+
         saveStatistic(statsFile, sim, 's');
-        
-        // Проверяем удачные ли гены
-        sim.sortPop();
-        if (sim.getPopulation()[0]->getEnergy() >= 1000) {
-            saveStatistic(dataFile, sim, 'd');
-            visualBestAgent(sim);
-        }
-        
         sim.geneticAlgorithm();
         sim.reloadGrid();
         
-        // Пропуск раундов без визуализации
+        // Пропуск раундов/поколений без визуализации
         for (int gen_skip = 1; gen_skip <= SKIP_GENERATIONS - 1; gen_skip++) {
             runARound(sim, false);
+
             saveStatistic(statsFile, sim, 's');
-            
+
             // Проверяем удачные ли гены
             sim.sortPop();
-            if (sim.getPopulation()[0]->getEnergy() >= 1000) {
+            if (sim.getSimulationData().averageEnergyLevel >= INIT_ENERGY_AGENT * 2.0f) {
                 saveStatistic(dataFile, sim, 'd');
-                visualBestAgent(sim);
+
+                sim.geneticAlgorithm();
+                sim.reloadGrid();
+
+                runARound(sim, true);
+            } else {
+                sim.geneticAlgorithm();
+                sim.reloadGrid();
             }
-            
-            sim.geneticAlgorithm();
-            sim.reloadGrid();
         }
     }
     updateField(sim.getGrid(), sim, GENERATIONS, SKIP_GENERATIONS, NUMBER_OF_STEPS, NUMBER_OF_STEPS);
@@ -201,12 +181,13 @@ void _show(ProgramParameters param) {
     settingConstants(param);
     
     auto field = createField(FIELD_WIDTH, FIELD_HEIGHT);
-    auto sim = make_unique<EvolutionSimulation>(move(field), 0, 0);
-    sim->tuneSimWithTrainedAgents(field, param);
+    EvolutionSimulation sim(move(field), 0, 0);
+    sim.tuneSimWithTrainedAgents(field, param);
+    sim.reloadGrid();
     
     while (true) {
-        runARound(*sim, true);
-        sim->reloadGrid();
+        runARound(sim, true);
+        sim.reloadGrid();
     }
 }
 
