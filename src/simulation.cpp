@@ -84,7 +84,7 @@ bool EvolutionSimulation::simulateStep()
     currentTick++;
     // Добавляем новую еду FOOD_ADD_TIMES раз каждые FOOD_SPAWN_INTERVAL тиков
     if (currentTick % FOOD_SPAWN_INTERVAL == 0) {
-        uniform_int_distribution<int> random((int)ENERGY_FOOD_VALUE / 2, ENERGY_FOOD_VALUE);
+        uniform_int_distribution<int> random((int)(ENERGY_FOOD_VALUE / 3), (int)ENERGY_FOOD_VALUE);
         for (int times = 0; times < FOOD_ADD_TIMES; times++) {
             spawnNewFood(random);
         }
@@ -167,6 +167,8 @@ void EvolutionSimulation::sortPop() {
         return a->getEnergy() > b->getEnergy();
 
         return a->getSteps() > b->getSteps();
+
+        return a->getEnergy() > b->getEnergy();
     */
 }
 

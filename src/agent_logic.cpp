@@ -105,13 +105,15 @@ bool Agent::randomMovement(const vector<vector<Cell>>& grid) {
 bool Agent::decideAction(const vector<vector<Cell>>& grid) {
     if (UseNeuralNetwork == 1) {
         // Использование гена для принятия решения
-        auto direction = gene->decideDirection(surroundings, energy, directionToFood);
-
-        // if (direction.first == 0 && direction.second == 0) {
-        //     return randomMovement(grid);
-        // }
-        return move(direction.first, direction.second, grid);
-
+        while (true) {
+            auto direction = gene->decideDirection(surroundings, energy, directionToFood);
+            
+            if (direction.first == 0 && direction.second == 0) {
+                return randomMovement(grid);
+            } else {
+                return move(direction.first, direction.second, grid);
+            }
+        }
     } else if (UseNeuralNetwork == 0) {
         // Случайное движение
         randomMovement(grid);
