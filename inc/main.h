@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#define FIELD_WIDTH 51 //36 51 Ширина поля
+#define FIELD_WIDTH 20 //36 51 Ширина поля
 #define FIELD_HEIGHT 20 //15 20 Высота поля
 
 #define GENERATIONS 100000 // Всего поколений
@@ -14,11 +14,11 @@
 #define ENERGY_LOSS_PER_STEP 1 //3 Потеря энергии за шаг //
 #define ENERGY_LOSS_DUE_TO_INACTION 1 //3 Потеря энергии за бездействие //
 
-#define INIT_FOOD_COUNT 150 //75 125 Кол-во еды, появляющейся в начале раунда
-#define FOOD_SPAWN_INTERVAL 75 // Каждый N-й тик появляется еда
+#define INIT_FOOD_COUNT 75 //75 Кол-во еды, появляющейся в начале раунда
+#define FOOD_SPAWN_INTERVAL 25 // Каждый N-й тик появляется еда
 #define FOOD_ADD_TIMES 50 // Кол-во появлений еды за раз
-#define CHANCE_OF_FOOD_APPEARANCE 0.5f // Шанс появления еды в клетке
-#define ENERGY_FOOD_VALUE 75 // Энергетическая ценность еды //
+#define CHANCE_OF_FOOD_APPEARANCE 0.4f // Шанс появления еды в клетке
+#define ENERGY_FOOD_VALUE 50 // Энергетическая ценность еды //
 
 #define TICK_MS 50 //150 Интервал между тиками (мс)
 
