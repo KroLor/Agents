@@ -157,7 +157,7 @@ void _train() {
 
             // Проверяем удачные ли гены
             sim.sortPop();
-            if (sim.getSimulationData().maxEnergyLevel >= 5000) {
+            if (sim.getSimulationData().averageEnergyLevel >= INIT_ENERGY_AGENT * 2.0f) {
                 saveStatistic(dataFile, sim, 'd');
 
                 sim.geneticAlgorithm();
@@ -183,6 +183,7 @@ void _show(ProgramParameters param) {
     auto field = createField(FIELD_WIDTH, FIELD_HEIGHT);
     EvolutionSimulation sim(move(field), 0, 0);
     sim.tuneSimWithTrainedAgents(field, param);
+    sim.reloadGrid();
     
     while (true) {
         runARound(sim, true);

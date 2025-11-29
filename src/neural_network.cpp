@@ -185,10 +185,10 @@ pair<int, int> NeuralGene::decideDirection(const vector<Cell>& surroundings, int
     // 4 клетки окружения
     for (int i = 0; i < 4; i++) {
         switch (surroundings[i].type) {
-            case EMPTY: inputs[i] = 0.0f; break;
-            case FOOD: inputs[i] = 1.0f; break;
-            case WALL: inputs[i] = -1.0f; break;
-            case AGENT: inputs[i] = -0.5f; break;
+            case EMPTY: inputs[i] = 0.0; break;
+            case FOOD: inputs[i] = 1.0; break;
+            case WALL: inputs[i] = -1.0; break;
+            case AGENT: inputs[i] = -1.0; break;
         }
     }
     

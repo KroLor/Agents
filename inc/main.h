@@ -6,10 +6,10 @@
 #define FIELD_HEIGHT 20 //15 20 Высота поля
 
 #define GENERATIONS 100000 // Всего поколений
-#define SKIP_GENERATIONS 1000 //1000 10000 Кол-во пропусков раундов/поколений
+#define SKIP_GENERATIONS 5000 //1000 10000 Кол-во пропусков раундов/поколений
 
-#define INIT_POP_SIZE 30 //2 5 10 35 Размер популяции
-#define NUMBER_OF_STEPS 200 //50 100 150 Кол-во шагов в раунде
+#define INIT_POP_SIZE 6 //5 35 Размер популяции
+#define NUMBER_OF_STEPS 100 //50 100 Кол-во шагов в раунде
 #define INIT_ENERGY_AGENT 125 //200 500 Кол-во энергии у агента
 #define ENERGY_LOSS_PER_STEP 1 //3 Потеря энергии за шаг //
 #define ENERGY_LOSS_DUE_TO_INACTION 1 //3 Потеря энергии за бездействие //
@@ -28,9 +28,9 @@
 #define NEURONS_IN_HIDDEN_LAYER 5 //5 Кол-во нейронов в скрытых(ом) слоях(е) // (одинаково)
 #define OUTPUT_VALUES 4 // Выходные значения
 
-#define AGENT_MUTATION_CHANCE 0.05f //0.1f Шанс мутации гена
-#define AGENT_MUTATION_POWER 0.03f //0.02f Число-диапозон (+, -), которое суммируется с каждым весом
-#define AGENT_CHANCE_TO_CROSS_OVER 0.1f //0.33f Шанс скрещивания (кроссинговера)
+#define AGENT_MUTATION_CHANCE 0.05f //0.1 0.33 Шанс мутации гена
+#define AGENT_MUTATION_POWER 0.05f //0.02f Число-диапозон (+, -), которое суммируется с каждым весом
+#define AGENT_CHANCE_TO_CROSS_OVER 0.2f //0.2 0.3 Шанс скрещивания (кроссинговера)
 
 extern bool UseNeuralNetwork;
 extern int InputValues;

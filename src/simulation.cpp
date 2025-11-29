@@ -159,11 +159,13 @@ bool EvolutionSimulation::updateAgents() {
 void EvolutionSimulation::sortPop() {
     sort(population.begin(), population.end(),
     [](const unique_ptr<Agent>& a, const unique_ptr<Agent>& b) { 
-        int A = (float)a->getSteps() * 0.3f + (float)a->getEnergy() * 0.7f;
-        int B = (float)b->getSteps() * 0.3f + (float)b->getEnergy() * 0.7f;
+        int A = (float)a->getSteps() * 0.2f + (float)a->getEnergy() * 0.8f;
+        int B = (float)b->getSteps() * 0.2f + (float)b->getEnergy() * 0.8f;
         return A > B;
     });
     /*
+        return a->getEnergy() > b->getEnergy();
+
         return a->getSteps() > b->getSteps();
 
         return a->getEnergy() > b->getEnergy();
@@ -171,11 +173,9 @@ void EvolutionSimulation::sortPop() {
 }
 
 void EvolutionSimulation::geneticAlgorithm() {
-    // Сортируем агентов по эффективности (лучшие - первые)
-    sortPop();
-    
     vector<unique_ptr<Agent>> newPop;
     uniform_real_distribution<float> random(0.0f, 1.0f);
+    uniform_int_distribution<int> randomAg(2, population.size() - 1);
 
     // 1. СОХРАНЯЕМ ЛУЧШИХ АГЕНТОВ
     newPop.push_back(population[0]->clone()); // 1
@@ -187,14 +187,19 @@ void EvolutionSimulation::geneticAlgorithm() {
 
     // 3. СКРЕЩИВАЕМ ПЕРВУЮ ПОЛОВИНУ
     for (int i = 2; i < population.size() / 2; i++) {
-        auto newAgent = population[i]->clone();
+        int parent1 = randomAg(rng);
+        int parent2 = randomAg(rng);
         
-        // if (random(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
-        //     newAgent->crossing(*population[i+1]);
-        // }
+        auto newAgent = population[parent1]->clone();
+        
+        if (random(rng) < AGENT_CHANCE_TO_CROSS_OVER) {
+            newAgent->crossing(*population[i+1]);
+        }
+        if (random(rng) < AGENT_MUTATION_CHANCE * 0.33f) {
+            newAgent->mutateGene(mutationPower);
+        }
 
         newPop.push_back(move(newAgent));
-        // newPop.push_back(population[i]->clone());
     }
 
     // 4. ПРИМЕНЯЕМ МУТАЦИИ КО ВТОРОЙ ПОЛОВИНЕ
@@ -205,26 +210,16 @@ void EvolutionSimulation::geneticAlgorithm() {
             newPop[i]->mutateGene(mutationPower);
         }
     }
-
-    // 3. ПОДГОНКА СИЛЫ МУТАЦИИ
-    if (newPop.size() >= 1) {
-        int bestEnergy = newPop[0]->getEnergy();
         
-        if (bestEnergy >= INIT_ENERGY_AGENT * 1.2f) {
-            // Успешные агенты - уменьшаем мутацию
-            mutationPower = max(AGENT_MUTATION_POWER * 0.25f, mutationPower * 0.95f);
-        } else if (bestEnergy < INIT_ENERGY_AGENT * 0.75f) {
-            // Неуспешные агенты - увеличиваем мутацию
-            mutationPower = min(AGENT_MUTATION_POWER * 2.0f, mutationPower * 1.1f);
-        }
-        
-        // Периодическое увеличение мутации
-        if (generation % 50 == 0 && bestEnergy < INIT_ENERGY_AGENT * 0.5f) {
-            mutationPower = min(AGENT_MUTATION_POWER, mutationPower * 1.5f);
-        }
+    // Адаптивная регулировка силы мутации
+    if (getSimulationData().averageEnergyLevel > INIT_ENERGY_AGENT * 2 * 1.2f) {
+        // Успешный агент - уменьшаем мутацию
+        mutationPower = max(0.0005f, mutationPower * 0.6f);
+    } else {
+        // Неуспешный агент - увеличиваем мутацию для исследования
+        mutationPower = min(0.3f, mutationPower * 1.1f);
     }
 
-    population = move(newPop);
     generation++;
 }
 
